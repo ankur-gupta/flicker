@@ -115,12 +115,21 @@ class FlickerDataFrame(object):
         )
 
     @classmethod
-    def from_shape(cls, spark, nrows, ncols, columns=None):
+    def from_shape(cls, spark, nrows, ncols, columns=None,
+                   fill='zero'):
         if not isinstance(spark, SparkSession):
             msg = 'spark of type "{}" is not a SparkSession object'
             raise TypeError(msg.format(str(type(spark))))
-        zeros = list(np.zeros((nrows, ncols)))
-        df = pd.DataFrame.from_records(zeros, columns=columns)
+        if fill == 'zero':
+            data = list(np.zeros((nrows, ncols)))
+        elif fill == 'rand':
+            data = list(np.random.rand(nrows, ncols))
+        elif fill == 'randn':
+            data = list(np.random.randn(nrows, ncols))
+        else:
+            msg = 'fill="{}" is not supported'
+            raise ValueError(msg.format(str(fill)))
+        df = pd.DataFrame.from_records(data, columns=columns)
         return cls.from_pandas(spark, df)
 
     def __repr__(self):
@@ -176,7 +185,11 @@ class FlickerDataFrame(object):
             item = list(self._df.columns)
         if isinstance(item, six.string_types):
             item = [item]
-        return self._df[item].limit(nrows).toPandas()
+        if nrows is None:
+            out = self._df[item].toPandas()
+        else:
+            out = self._df[item].limit(nrows).toPandas()
+        return out
 
     # Added by me to augment Pandas-like API
     def rename(self, mapper_or_list):
@@ -295,6 +308,33 @@ class FlickerDataFrame(object):
     def take(self, nrows=5):
         return self._df.take(nrows)
 
+    def describe(self, names=None):
+        if names is None:
+            names = list(self._df.columns)
+        elif isinstance(names, six.string_types):
+            names = [names]
+        else:
+            names = list(names)
+        for name in names:
+            if name not in self._df.columns:
+                msg = 'column "{}" not found'
+                raise KeyError(msg.format(name))
+
+        # This is always going to be a small dataframe of shape
+        # (5, number of columns in self._df).
+        out = self._df.describe(names).toPandas()
+
+        # If self._df has a column "summary", then we'll have duplicates.
+        # First column is always the true "summary" column. Make it an
+        # index and remove it.
+        out.index = out.iloc[:, 0]
+        out = out.iloc[:, 1:]
+
+        # Convert from string to numeric
+        for column in out.columns:
+            out[column] = pd.to_numeric(out[column])
+        return out
+
     # Pass through functions
     @property
     def dtypes(self):
@@ -328,3 +368,9 @@ class FlickerDataFrame(object):
 
     def count(self):
         return self._df.count()
+
+    def distinct(self):
+        out = self._df.distinct()
+        if isinstance(out, pyspark.sql.DataFrame):
+            out = self.__class__(out)
+        return out
