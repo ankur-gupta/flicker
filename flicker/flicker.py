@@ -7,6 +7,7 @@ import six
 import numpy as np
 import pandas as pd
 import pyspark
+from pyspark.sql import SparkSession
 from pyspark.sql import Column
 from pyspark.sql.functions import lit
 
@@ -35,10 +36,10 @@ class FlickerDataFrame(object):
     def from_pandas(cls, spark, df,
                     convert_nan_to_null_in_non_double=True,
                     convert_nan_to_null_in_double=False):
-        if isinstance(spark, pyspark.sql.SparkSession):
+        if not isinstance(spark, SparkSession):
             msg = 'spark of type "{}" is not a SparkSession object'
             raise TypeError(msg.format(str(type(spark))))
-        if not isinstance(df, pd.DataDrame):
+        if not isinstance(df, pd.DataFrame):
             msg = 'df of type "{}" is not a pandas DataFrame object'
             raise TypeError(msg.format(str(type(df))))
 
@@ -168,7 +169,9 @@ class FlickerDataFrame(object):
             raise KeyError(msg)
         self._reset(self._df.drop(name))
 
-    def __call__(self, item, nrows=5):
+    def __call__(self, item=None, nrows=5):
+        if item is None:
+            item = list(self._df.columns)
         if isinstance(item, six.string_types):
             item = [item]
         return self._df[item].limit(nrows).toPandas()
@@ -300,30 +303,3 @@ class FlickerDataFrame(object):
 
     def drop(self, *cols):
         return self.__class__(self._df.drop(*cols))
-
-#
-# import numpy as np
-#
-# df = pd.DataFrame({'a': [1, 2, 1, 3, 4], 'b': ['a', 'b', 'c', 'b', None]},
-#                   index=[0, 0, 1, 2, 3])
-#
-# df
-# df[df['a'].isin([1])]
-# df.loc[df['a'].isin([1]), :]
-# df.loc[df['a'].isin([1]), 'a'] = np.nan
-# df
-#
-# dfs = spark.createDataFrame(df)
-#
-# from pyspark.sql import DataFrame, Column
-# from pyspark.sql.functions import isnan
-#
-# isnan(df['a'])
-#
-# Column.isNotNull
-# DataFrame.replace(np.nan, None)
-# Column.replace()
-#
-# pd.DataFrame.from_items
-# pd.DataFrame.from_records
-# pd.Series.isna
