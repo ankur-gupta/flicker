@@ -9,7 +9,7 @@ import pandas as pd
 import pyspark
 from pyspark.sql import SparkSession
 from pyspark.sql import Column
-from pyspark.sql.functions import lit
+from pyspark.sql.functions import lit, isnan
 
 
 class FlickerDataFrame(object):
@@ -148,7 +148,9 @@ class FlickerDataFrame(object):
         return name in self._df.columns
 
     def __setitem__(self, name, value):
-        if (value is None) or \
+        if isinstance(value, Column):
+            pass
+        elif (value is None) or \
                 isinstance(value, (int, float, six.string_types)):
             value = lit(value)
         else:
@@ -166,7 +168,7 @@ class FlickerDataFrame(object):
             raise TypeError(msg.format(str(type(name))))
         if name not in self._df.columns:
             msg = 'column "{}" not found'
-            raise KeyError(msg)
+            raise KeyError(msg.format(name))
         self._reset(self._df.drop(name))
 
     def __call__(self, item=None, nrows=5):
@@ -211,7 +213,7 @@ class FlickerDataFrame(object):
                      drop_null=False, nrows=None):
         if name not in self._df.columns:
             msg = 'column "{}" not found'
-            raise KeyError(msg)
+            raise KeyError(msg.format(name))
         if 'count' in self._df.columns:
             msg = ('column "count" already exists in dataframe; '
                    'please rename it before calling value_counts()')
@@ -236,6 +238,14 @@ class FlickerDataFrame(object):
             out = out.withColumn('count', out['count'] / den)
         return self.__class__(out)
 
+    def count_value(self, name, value):
+        if name not in self._df.columns:
+            msg = 'column "{}" not found'
+            raise KeyError(msg.format(name))
+        # FIXME: the dtype is not respected here value = '1' or 1 returns the
+        #  same Column object when name points to a sting-type column.
+        return self._df[self._df[name].isin([value])].count()
+
     def sort_values(self, by=None, ascending=True):
         if by is None:
             by = list(self._df.columns)
@@ -245,8 +255,20 @@ class FlickerDataFrame(object):
         for name in by:
             if name not in self._df.columns:
                 msg = 'column "{}" not found'
-                raise KeyError(msg)
+                raise KeyError(msg.format(name))
         return self.__class__(self._df.orderBy(*by, ascending=ascending))
+
+    def isnan(self, name):
+        if name not in self._df.columns:
+            msg = 'column "{}" not found'
+            raise KeyError(msg.format(name))
+        return isnan(self._df[name])
+
+    def isnull(self, name):
+        if name not in self._df.columns:
+            msg = 'column "{}" not found'
+            raise KeyError(msg.format(name))
+        return self._df[name].isNull()
 
     # Modified to provide a Pandas-like API
     @property
@@ -286,7 +308,7 @@ class FlickerDataFrame(object):
         return self._df.__getattr__(name)
 
     def __getitem__(self, item):
-        out = self._df.__getattr__(item)
+        out = self._df.__getitem__(item)
         if isinstance(out, pyspark.sql.DataFrame):
             out = self.__class__(out)
         return out
@@ -303,3 +325,6 @@ class FlickerDataFrame(object):
 
     def drop(self, *cols):
         return self.__class__(self._df.drop(*cols))
+
+    def count(self):
+        return self._df.count()
