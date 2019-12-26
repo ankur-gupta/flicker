@@ -116,6 +116,9 @@ class FlickerDataFrame(object):
 
     @classmethod
     def from_shape(cls, spark, nrows, ncols, columns=None):
+        if not isinstance(spark, SparkSession):
+            msg = 'spark of type "{}" is not a SparkSession object'
+            raise TypeError(msg.format(str(type(spark))))
         zeros = list(np.zeros((nrows, ncols)))
         df = pd.DataFrame.from_records(zeros, columns=columns)
         return cls.from_pandas(spark, df)
@@ -145,9 +148,6 @@ class FlickerDataFrame(object):
         return name in self._df.columns
 
     def __setitem__(self, name, value):
-        if name in self._df.columns:
-            msg = 'column "{}" already exists'
-            raise ValueError(msg.format(name))
         if (value is None) or \
                 isinstance(value, (int, float, six.string_types)):
             value = lit(value)
