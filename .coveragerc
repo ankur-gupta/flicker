@@ -1,0 +1,5 @@
+[run]
+omit =
+    # Omit the tests. Path begin from package name and not repo name. In other
+    # words, $REPO_ROOT is not included in the path.
+    flicker/tests/*
