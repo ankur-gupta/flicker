@@ -1,7 +1,8 @@
 # Flicker
+![build-badge](https://github.com/ankur-gupta/flicker/workflows/build/badge.svg)
 
 This python package provides a `FlickerDataFrame` object. `FlickerDataFrame` 
 is a wrapper over `pyspark.sql.DataFrame`. The aim of `FlickerDataFrame` is to 
 provide a more Pandas-like dataframe API.
 
-Try [Koalas](https://github.com/databricks/koalas) instead.
+Flicker is like [Koalas](https://github.com/databricks/koalas) in that Flicker attempts to provide a pandas-like API. But there are strong differences in design. 
