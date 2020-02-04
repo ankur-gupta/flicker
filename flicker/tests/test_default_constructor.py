@@ -5,7 +5,6 @@ from builtins import range
 
 import pytest
 from pyspark.sql import SparkSession
-
 from flicker import FlickerDataFrame
 
 
