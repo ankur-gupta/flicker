@@ -1,4 +1,4 @@
-name: Run tests
+name: run-tests-and-create-package
 
 on: [push]
 
@@ -36,3 +36,6 @@ jobs:
       run: |
         pip install pytest
         python -m pytest flicker/tests
+    - name: Create a package but do not deploy anywhere
+      run: |
+        pip install ./
