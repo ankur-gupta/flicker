@@ -1,4 +1,4 @@
-name: run-tests-and-create-package
+name: build
 
 on: [push]
 

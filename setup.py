@@ -8,10 +8,10 @@ version_file = './{}/version.py'.format(PACKAGE_NAME)
 version = {}
 try:
     # Python 2
-    execfile(version_file, globals=version)
+    execfile(version_file, version)
 except NameError:
     # Python 3
-    exec(open(version_file).read(), globals=version)
+    exec(open(version_file).read(), version)
 
 # Read-in the README.md
 with open('README.md', 'r') as f:
