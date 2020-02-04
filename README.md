@@ -1,5 +1,6 @@
 # Flicker
 ![build-badge](https://github.com/ankur-gupta/flicker/workflows/build/badge.svg)
+[![codecov](https://codecov.io/gh/ankur-gupta/flicker/branch/master/graph/badge.svg)](https://codecov.io/gh/ankur-gupta/flicker)
 
 This python package provides a `FlickerDataFrame` object. `FlickerDataFrame` 
 is a wrapper over `pyspark.sql.DataFrame`. The aim of `FlickerDataFrame` is to 
