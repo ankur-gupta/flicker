@@ -35,6 +35,16 @@ df = FlickerDataFrame.from_shape(spark, nrows=100, ncols=3, columns=['a', 'b', '
 df
 # FlickerDataFrame[a: double, b: double, c: double]
 
+# You can get pandas-like API to inspect a FlickerDataFrame
+df.shape
+# (100, 3)
+
+df.columns
+# ['a', 'b', 'c']
+
+df.dtypes
+# [('a', 'double'), ('b', 'double'), ('c', 'double')]
+
 # One of the main features of flicker is the following handy shortcut to view the data.
 # Calling a FlickerDataFrame object, returns the first 5 rows as a pandas DataFrame.
 # See ?df for more examples on how you can use this to quickly and interactively perform analysis.
@@ -75,7 +85,7 @@ df[df['is_a_positive']](3)
 # 1  0.249755 -0.738754 -0.060325           True
 # 2  1.108189  1.657239 -0.114664           True
 
-# Example 3: Show first 5 rows that have positive values in both 'a' and 'b'
+# Example 3: Show first 5 rows that have a positive product of 'a' and 'b'
 df[(df['a'] * df['b']) > 0][['a', 'b']](2)
 #           a         b
 # 0 -0.488747 -0.378013
@@ -137,6 +147,32 @@ df[df['d_len'] > 0]()
 
 # Finally, you can always perform an operation on a dataframe and store it as a new dataframe
 new_df = df[df['d_len'] > 0]
+```
+
+## Use the underlying PySpark DataFrame
+If `flicker` isn't enough, you can always use the underlying PySpark DataFrame. Here are a few examples.
+```python
+# Continued from the above example.
+
+# `._df` contains the underlying PySpark DataFrame
+type(df._df)
+# pyspark.sql.dataframe.DataFrame
+
+# Use PySpark functions to compute the frequency table based on type of column 'd'
+df._df.groupBy(['d_type']).count().show()
+# +------+-----+
+# |d_type|count|
+# +------+-----+
+# |  dict|    2|
+# +------+-----+
+
+# You can always convert a PySpark DataFrame into a FlickerDataFrame
+# after you've performed the native PySpark operations. This way, you can 
+# continue to use the benefits of FlickerDataFrame.
+df_freq_table = FlickerDataFrame(df._df.groupBy(['d_type']).count())
+df_freq_table()
+#   d_type  count
+# 0   dict      2
 ```
  
  # Status
