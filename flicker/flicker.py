@@ -133,9 +133,10 @@ class FlickerDataFrame(object):
         return cls.from_pandas(spark, df)
 
     def __repr__(self):
-        dtypes_str = ['{}: {}'.format(name, dtype)
-                      for name, dtype in self._df.dtypes]
-        return '{}{}'.format(self.__class__.__name__, dtypes_str)
+        dtypes_str_list = ['{}: {}'.format(name, dtype)
+                           for name, dtype in self._df.dtypes]
+        dtypes_str = ', '.join(dtypes_str_list)
+        return '{}[{}]'.format(self.__class__.__name__, dtypes_str)
 
     def __str__(self):
         return repr(self)
@@ -180,7 +181,62 @@ class FlickerDataFrame(object):
             raise KeyError(msg.format(name))
         self._reset(self._df.drop(name))
 
-    def __call__(self, item=None, nrows=5):
+    def __call__(self, nrows=5, item=None):
+        """Calling a FlickerDataFrame converts the underlying pyspark
+        DataFrame into a pandas DataFrame and returns the result. This function
+        is a shorthand for .select(item).limit(nrows).toPandas(). See
+        Examples.
+
+        Parameters
+        ----------
+        nrows: int or None
+          Number of rows to select when before converting to pandas DataFrame.
+          When nrows=None, we select all rows. Be careful when using
+          nrows=None, because the pandas DataFrame may be too big to be stored
+          in memory.
+        item: str or list of str
+          A single column name or a list of column names to select before
+          converting to a pandas DataFrame.
+
+        Returns
+        -------
+            pandas.DataFrame
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: double]
+        >>> df()
+             a    b    c
+        0  0.0  0.0  0.0
+        1  0.0  0.0  0.0
+        2  0.0  0.0  0.0
+        3  0.0  0.0  0.0
+        4  0.0  0.0  0.0
+        >>> df(2)
+             a    b    c
+        0  0.0  0.0  0.0
+        1  0.0  0.0  0.0
+        >>> df[['a']](nrows=2)
+             a
+        0  0.0
+        1  0.0
+        >>> df[['a', 'b']](nrows=2)
+             a    b
+        0  0.0  0.0
+        1  0.0  0.0
+
+        >>> df = FlickerDataFrame.from_shape(
+                spark, 10, 3, columns=['a', 'b', 'c'], fill='randn')
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: double]
+        >>> df[df['a'] > 0](2)
+                a         b         c
+        0  0.975916 -0.977497 -0.033339
+        1  1.471300 -0.744226 -1.810772
+        """
+
         if item is None:
             item = list(self._df.columns)
         if isinstance(item, six.string_types):
