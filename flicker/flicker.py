@@ -391,6 +391,60 @@ class FlickerDataFrame(object):
             out[column] = pd.to_numeric(out[column])
         return out
 
+    def drop(self, cols=[]):
+        """ Returns a new FlickerDataFrame object with the specified list of
+        column names dropped. This function does not modify the dataframe
+        in-place. If an empty list is provided, this is a no-op. Similar to
+        pyspark.sql.DataFrame.drop, no error is raised if a non-existent
+        column is passed.
+
+        Note that this FlickerDataFrame.drop differs slightly from
+        pyspark.sql.DataFrame.drop in how it treats input arguments.
+        Flicker's `drop` accepts one argument that is a (possibly empty) list
+        of column names while pyspark's `drop` accepts a variable number of
+        arguments.
+
+        Parameters
+        ----------
+        cols: list of str
+            A list of column names that need to be dropped. This list can be
+            empty in which case no column is dropped. This list can contain a
+            column name that does not exist in the dataframe. Duplicate values
+            are also allowed.
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df.drop(['a'])
+        FlickerDataFrame[b: double, c: double]
+
+        >>> df.drop(['a', 'a'])
+        FlickerDataFrame[b: double, c: double]
+
+        >>> df.drop(['non-existent-column-name'])
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df.drop(['a', 'non-existent-column-name'])
+        FlickerDataFrame[b: double, c: double]
+
+        >>> df.drop(['a', 'a', 'non-existent-column-name'])
+        FlickerDataFrame[b: double, c: double]
+
+        >>> df.drop()
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df.drop([])
+        FlickerDataFrame[a: double, b: double, c: double]
+        """
+        return self.__class__(self._df.drop(*cols))
+
     # Pass through functions
     @property
     def dtypes(self):
@@ -418,9 +472,6 @@ class FlickerDataFrame(object):
 
     def collect(self):
         return self._df.collect()
-
-    def drop(self, *cols):
-        return self.__class__(self._df.drop(*cols))
 
     def count(self):
         return self._df.count()
