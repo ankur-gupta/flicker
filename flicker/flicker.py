@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
+
+import copy
 from builtins import range
 
 import six
@@ -10,6 +12,28 @@ import pyspark
 from pyspark.sql import SparkSession
 from pyspark.sql import Column
 from pyspark.sql.functions import lit, isnan
+
+PYSPARK_FLOAT_DTYPES = {'double', 'float'}
+
+
+def get_float_column_names(df):
+    if not isinstance(df, pd.DataFrame):
+        msg = 'df of type="{}" is not a pandas DataFrame'
+        raise TypeError(msg.format(str(type(df))))
+    if len(set(df.columns)) != len(df.columns):
+        msg = 'df contains duplicated column names which is not supported'
+        raise ValueError(msg)
+    return list(set(df.select_dtypes(include=[np.floating]).columns))
+
+
+def get_non_float_column_names(df):
+    if not isinstance(df, pd.DataFrame):
+        msg = 'df of type="{}" is not a pandas DataFrame'
+        raise TypeError(msg.format(str(type(df))))
+    if len(set(df.columns)) != len(df.columns):
+        msg = 'df contains duplicated column names which is not supported'
+        raise ValueError(msg)
+    return list(set(df.select_dtypes(exclude=[np.floating]).columns))
 
 
 class FlickerDataFrame(object):
@@ -34,8 +58,123 @@ class FlickerDataFrame(object):
 
     @classmethod
     def from_pandas(cls, spark, df,
-                    convert_nan_to_null_in_non_double=True,
-                    convert_nan_to_null_in_double=False):
+                    convert_nan_to_null_in_non_float=True,
+                    convert_nan_to_null_in_float=False,
+                    copy_df=False):
+        """
+        Construct a FlickerDataFrame from pandas.DataFrame. Note that this
+        method may modify the input pandas DataFrame; please make a copy of
+        the pandas DataFrame before calling this function if you want to
+        prevent that.
+
+        Parameters
+        ----------
+        spark: pyspark.sql.SparkSession
+            SparkSession object. This can be manually created by something
+            like: `spark = SparkSession.builder.appName('app').getOrCreate()`
+        df: pandas.DataFrame
+            Note that this dataframe may be modified in place; make a copy
+            first if you don't want that.
+        convert_nan_to_null_in_non_float: bool
+            If True (recommended), we convert np.nan (which has the
+            type 'float') into None in the non-float columns. Unlike a pandas
+            DataFrame, a pyspark DataFrame does not allow a np.nan in a
+            non-float/non-double column. Note that any 'object' type column
+            in `df` will be considered as a non-float column.
+        convert_nan_to_null_in_float: bool
+            If True, we convert np.nan (which has the type 'float') into None
+            in all float/double columns. A pyspark DataFrame allows both
+            np.nan and None to exist in a (nullable) float or double column.
+        copy_df: bool
+            If True, we deepcopy `df` if before modifying it.
+            This prevents original `df` value from modifying. If False,
+            we don't make a copy of `df`. `copy_df=True` is good for small
+            datasets but `copy_df=False` (default) should be useful for large
+            `df`.
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        Examples
+        --------
+        >>> pdf = pd.DataFrame({
+            'a': [1, 2, 3, 4],
+            'b': [1.2, None, np.nan, 4.5],
+            'c': ['spark', None, 'flicker', np.nan]
+        })
+
+        >>> pdf
+           a    b        c
+        0  1  1.2    spark
+        1  2  NaN     None
+        2  3  NaN  flicker
+        3  4  4.5      NaN
+
+        >>> pdf.dtypes
+        a      int64
+        b    float64
+        c     object
+        dtype: object
+
+        >>> # Example 1
+        >>> df = FlickerDataFrame.from_pandas(spark, pdf, copy_df=True)
+        >>> df
+        FlickerDataFrame[a: bigint, b: double, c: string]
+
+        >>> df.show()
+        +---+---+-------+
+        |  a|  b|      c|
+        +---+---+-------+
+        |  1|1.2|  spark|
+        |  2|NaN|   null|
+        |  3|NaN|flicker|
+        |  4|4.5|   null|
+        +---+---+-------+
+
+        >>> # Example 2
+        >>> df = FlickerDataFrame.from_pandas(
+                spark, pdf, convert_nan_to_null_in_non_float=False,
+                copy_df=True)
+        # Will fail expectedly because string-type column 'c' has a np.nan
+        # which is not allowed in a pyspark DataFrame (unless we convert np.nan
+        # to None).
+
+        >>> # Example 3  (complicated example that can be skipped)
+        >>> pdf_double_as_object = pd.DataFrame({
+            'a': [1, 2, 3, 4],
+            'b': [1.2, None, np.nan, 4.5]
+        }, dtype=object)
+        >>> pdf_double_as_object
+           a     b
+        0  1   1.2
+        1  2  None
+        2  3   NaN
+        3  4   4.5
+
+        >>> pdf_double_as_object.dtypes
+        a    object
+        b    object
+        dtype: object
+
+        >>> df = FlickerDataFrame.from_pandas(
+                spark, pdf_double_as_object,
+                convert_nan_to_null_in_non_float=False,
+                convert_nan_to_null_in_float=False, copy_df=True)
+        >>> df.show()
+        +---+----+
+        |  a|   b|
+        +---+----+
+        |  1| 1.2|
+        |  2|null|
+        |  3| NaN|
+        |  4| 4.5|
+        +---+----+
+
+        Note that we don't use `df()` here because converting a pyspark
+        DataFrame to a pandas DataFrame would convert all nulls to np.nan
+        in float columns.
+        """
         if not isinstance(spark, SparkSession):
             msg = 'spark of type "{}" is not a SparkSession object'
             raise TypeError(msg.format(str(type(spark))))
@@ -53,11 +192,14 @@ class FlickerDataFrame(object):
         # does not convert them to None(s) in float columns. But this
         # works for other types of columns!
         # An np.nan in a non-float column would make spark.createDataFrame()
-        # call fail. This is why convert_nan_to_null_in_non_double=True,
+        # call fail. This is why convert_nan_to_null_in_non_float=True,
         # by default.
-        if convert_nan_to_null_in_non_double:
-            # Note this will modify the pandas dataframe in-place.
-            for name in df.columns:
+        if convert_nan_to_null_in_non_float:
+            non_float_column_names = get_non_float_column_names(df)
+            if (len(non_float_column_names) > 0) and copy_df:
+                # We may modify df. Make a copy if needed.
+                df = copy.deepcopy(df)
+            for name in non_float_column_names:
                 # If we simply perform, df.loc[df[name].isnull(), name] = None
                 # we accidentally convert bool -> double even when we don't
                 # have any np.nan or None(s).
@@ -65,49 +207,49 @@ class FlickerDataFrame(object):
                 if any(nulls_logical):
                     df.loc[nulls_logical, name] = None
 
-        # We do this in pyspark because it's much easier than to do it
-        # in pandas (which would've required a float -> object dtype
-        # conversion).
+        # A pandas float column automatically converts None to np.nan.
+        # But, if a pandas column is of type 'object', None's remain as-is.
+        # Instead of trying to find them all, we'll let pyspark do this for us.
+        # pyspark will convert even 'object' type pandas columns to a 'double'
+        # type pyspark column.
         df_spark = spark.createDataFrame(df)
-        if convert_nan_to_null_in_double:
-            # We run it for double columns to be extra sure. A pyspark
+        if convert_nan_to_null_in_float:
+            # Typically, pandas will convert None -> np.nan by itself but
+            # we run it for double columns to be extra sure. A pyspark
             # dataframe won't contain np.nan in a non-double column anyway.
-            double_columns = [
-                name
-                for name, dtype in df_spark.dtypes
-                if dtype == 'double'
-            ]
-            df_spark = df_spark.replace(np.nan, None, double_columns)
+            float_column_names = [name for name, dtype in df_spark.dtypes
+                                  if dtype in PYSPARK_FLOAT_DTYPES]
+            df_spark = df_spark.replace(np.nan, None, float_column_names)
         return cls(df_spark)
 
     @classmethod
     def from_rows(cls, spark, rows, columns=None,
-                  convert_nan_to_null_in_non_double=True,
-                  convert_nan_to_null_in_double=False):
+                  convert_nan_to_null_in_non_float=True,
+                  convert_nan_to_null_in_float=False):
         df = pd.DataFrame.from_records(rows, columns=columns)
         return cls.from_pandas(
             spark, df,
-            convert_nan_to_null_in_non_double=convert_nan_to_null_in_non_double,
-            convert_nan_to_null_in_double=convert_nan_to_null_in_double
+            convert_nan_to_null_in_non_float=convert_nan_to_null_in_non_float,
+            convert_nan_to_null_in_float=convert_nan_to_null_in_float
         )
 
     from_records = from_rows
     from_items = from_rows
 
     @classmethod
-    def from_dict(cls, spark, data, convert_nan_to_null_in_non_double=True,
-                  convert_nan_to_null_in_double=False):
+    def from_dict(cls, spark, data, convert_nan_to_null_in_non_float=True,
+                  convert_nan_to_null_in_float=False):
         df = pd.DataFrame.from_dict(data)
         return cls.from_pandas(
             spark, df,
-            convert_nan_to_null_in_non_double=convert_nan_to_null_in_non_double,
-            convert_nan_to_null_in_double=convert_nan_to_null_in_double
+            convert_nan_to_null_in_non_float=convert_nan_to_null_in_non_float,
+            convert_nan_to_null_in_float=convert_nan_to_null_in_float
         )
 
     @classmethod
     def from_columns(cls, spark, data, columns=None,
-                     convert_nan_to_null_in_non_double=True,
-                     convert_nan_to_null_in_double=False):
+                     convert_nan_to_null_in_non_float=True,
+                     convert_nan_to_null_in_float=False):
         if columns is None:
             columns = [str(i) for i in list(range(len(data)))]
         if len(data) != len(columns):
@@ -116,8 +258,8 @@ class FlickerDataFrame(object):
         data_dict = {name: value for name, value in zip(columns, data)}
         return cls.from_dict(
             spark, data_dict,
-            convert_nan_to_null_in_non_double=convert_nan_to_null_in_non_double,
-            convert_nan_to_null_in_double=convert_nan_to_null_in_double
+            convert_nan_to_null_in_non_float=convert_nan_to_null_in_non_float,
+            convert_nan_to_null_in_float=convert_nan_to_null_in_float
         )
 
     @classmethod
