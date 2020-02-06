@@ -644,15 +644,141 @@ class FlickerDataFrame(object):
 
     # noinspection PyPep8Naming
     def toPandas(self):
+        """
+        Returns the contents as a pandas DataFrame. Note that resulting
+        pandas DataFrame may be too big to store in memory. This function
+        is simply a pass-through to pyspark.sql.DataFrame.toPandas.
+
+        Returns
+        -------
+            pandas.DataFrame
+
+        See Also
+        --------
+        FlickerDataFrame.to_pandas: alias of FlickerDataFrame.toPandas
+        FlickerDataFrame.collect: if you want a list of Row objects
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_dict(spark, {
+            'a': [True, False, True],
+            'b': [3.4, 6.7, 9.0],
+            'c': ['spark', 'pandas', 'flicker']
+        })
+
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: string]
+
+        >>> df(None)
+               a    b        c
+        0   True  3.4    spark
+        1  False  6.7   pandas
+        2   True  9.0  flicker
+
+        >>> df.toPandas()
+               a    b        c
+        0   True  3.4    spark
+        1  False  6.7   pandas
+        2   True  9.0  flicker
+        """
         return self._df.toPandas()
 
+    to_pandas = toPandas
+
     def collect(self):
+        """
+        Returns all the rows as a list of Row objects. Note that this
+        the returned list may be too big to store in memory. This function
+        is simply a pass-through to pyspark.sql.DataFrame.collect.
+
+        Returns
+        -------
+            List[Row]
+
+        See Also
+        --------
+        FlickerDataFrame.toPandas: if you want a pandas DataFrame instead
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_dict(spark, {
+            'a': [True, False, True],
+            'b': [3.4, 6.7, 9.0],
+            'c': ['spark', 'pandas', 'flicker']
+        })
+
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: string]
+
+        >>> df()
+               a    b        c
+        0   True  3.4    spark
+        1  False  6.7   pandas
+        2   True  9.0  flicker
+
+        >>> df.collect()
+        [Row(a=True, b=3.4, c='spark'),
+         Row(a=False, b=6.7, c='pandas'),
+         Row(a=True, b=9.0, c='flicker')]
+        """
         return self._df.collect()
 
     def count(self):
+        """
+        Returns the number of rows. Use .nrows instead. This function exists
+        only for convenience. It is a pass-through to
+        pyspark.sql.DataFrame.count.
+
+        Returns
+        -------
+            int
+
+        See Also
+        --------
+        FlickerDataFrame.nrows: recommended over FlickerDataFrame.count
+        FlickerDataFrame.shape
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df.count()
+        10
+        """
         return self._df.count()
 
     def distinct(self):
+        """
+        Returns a new FlickerDataFrame that contains only the distinct rows
+        of the dataframe.
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_dict(spark, {
+            'a': [1, 2, 1],
+            'b': [3.14, 2.89, 3.14],
+            'c': ['spark', 'pandas', 'spark']
+        })
+        >>> df
+        FlickerDataFrame[a: bigint, b: double, c: string]
+
+        >>> df()
+            a     b       c
+        0  1  3.14   spark
+        1  2  2.89  pandas
+        2  1  3.14   spark
+
+        >>> df.distinct()
+        FlickerDataFrame[a: bigint, b: double, c: string]
+
+        >>> df.distinct()()
+           a     b       c
+        0  1  3.14   spark
+        1  2  2.89  pandas
+        """
         out = self._df.distinct()
         if isinstance(out, pyspark.sql.DataFrame):
             out = self.__class__(out)
