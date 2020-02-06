@@ -150,12 +150,50 @@ class FlickerDataFrame(object):
     # Added by me to augment pythonic functionality
     @property
     def nrows(self):
+        """
+        Returns the number of rows.
+
+        Note that when called for the first time, this will require running
+        .count() on the underlying pyspark DataFrame, which can take a long
+        time.
+
+        Returns
+        -------
+            int
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df.nrows
+        10
+        """
         if self._nrows is None:
             self._nrows = self._df.count()
         return self._nrows
 
     @property
     def ncols(self):
+        """
+        Returns the number of columns
+
+        This should return the answer really fast.
+
+        Returns
+        -------
+            int
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df.ncols
+        3
+        """
         if self._ncols is None:
             self._ncols = len(self._df.columns)
         return self._ncols
@@ -348,6 +386,26 @@ class FlickerDataFrame(object):
     # Modified to provide a Pandas-like API
     @property
     def shape(self):
+        """
+        Returns a tuple (nrows, ncols).
+
+        Note that when called for the first time, this will require running
+        .count() on the underlying pyspark DataFrame, which can take a long
+        time.
+
+        Returns
+        -------
+            (int, int)
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df.shape
+        (10, 3)
+        """
         return self.nrows, self.ncols
 
     def head(self, nrows=5):
@@ -530,8 +588,59 @@ class FlickerDataFrame(object):
             out = self.__class__(out)
         return out
 
-    def limit(self, nrows):
-        return self.__class__(self._df.limit(nrows))
+    def limit(self, nrows=None):
+        """
+        Returns a new FlickerDataFrame with only the number of rows specified.
+
+        Parameters
+        ----------
+        nrows: int or None
+            If None, all rows are returned. All rows are returned if
+            nrows is more than the number of rows in the dataframe.
+            nrows=0 is a valid input which returns in a zero-row dataframe
+            that still retains the column names.
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df.nrows
+        10
+
+        >>> df.limit(5)
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df.limit(5).nrows
+        5
+
+        >>> df.limit().nrows
+        10
+
+        >>> df.limit() is df  # a new FlickerDataFrame is returned
+        False
+
+        >>> df.limit(0).nrows
+        0
+
+        >>> df.limit(0)()
+        Empty DataFrame
+        Columns: [a, b, c]
+        Index: []
+
+        >>> df.limit(100).nrows  # dataframe only has 10 rows
+        10
+        """
+        if nrows is None:
+            # Return a new FlickerDataFrame so id is different
+            return self.__class__(self._df)
+        else:
+            return self.__class__(self._df.limit(nrows))
 
     # noinspection PyPep8Naming
     def toPandas(self):
