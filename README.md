@@ -85,7 +85,7 @@ df[df['is_a_positive']](3)
 # 1  0.249755 -0.738754 -0.060325           True
 # 2  1.108189  1.657239 -0.114664           True
 
-# Example 3: Show first 5 rows that have a positive product of 'a' and 'b'
+# Example 3: Show first 2 rows that have a positive product of 'a' and 'b'
 df[(df['a'] * df['b']) > 0][['a', 'b']](2)
 #           a         b
 # 0 -0.488747 -0.378013
