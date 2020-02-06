@@ -27,7 +27,7 @@ class TestTypeUDF:
 
         # Check that everything is correct
         pdf = self.df.toPandas()
-        assert all(pdf['a_type'] == 'float')
+        assert all(pdf['a_type'] == 'int')
         assert all(pdf['b_type'].to_numpy() == ['str', 'str', 'NoneType'])
         assert all(pdf['c_type'] == 'dict')
 

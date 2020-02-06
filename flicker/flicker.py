@@ -56,8 +56,14 @@ class FlickerDataFrame(object):
         # call fail. This is why convert_nan_to_null_in_non_double=True,
         # by default.
         if convert_nan_to_null_in_non_double:
+            # Note this will modify the pandas dataframe in-place.
             for name in df.columns:
-                df.loc[df[name].isnull(), name] = None
+                # If we simply perform, df.loc[df[name].isnull(), name] = None
+                # we accidentally convert bool -> double even when we don't
+                # have any np.nan or None(s).
+                nulls_logical = df[name].isnull()
+                if any(nulls_logical):
+                    df.loc[nulls_logical, name] = None
 
         # We do this in pyspark because it's much easier than to do it
         # in pandas (which would've required a float -> object dtype
@@ -392,7 +398,8 @@ class FlickerDataFrame(object):
         return out
 
     def drop(self, cols=[]):
-        """ Returns a new FlickerDataFrame object with the specified list of
+        """
+        Returns a new FlickerDataFrame object with the specified list of
         column names dropped. This function does not modify the dataframe
         in-place. If an empty list is provided, this is a no-op. Similar to
         pyspark.sql.DataFrame.drop, no error is raised if a non-existent
@@ -448,10 +455,70 @@ class FlickerDataFrame(object):
     # Pass through functions
     @property
     def dtypes(self):
+        """
+        Returns list of (column name, dtype). This is simply a wrapper over
+        pyspark.sql.DataFrame.dtypes.
+
+        Returns
+        -------
+            List[(str, str)]
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_dict(spark, {
+            'a': [True, False, True],
+            'b': [3.4, 6.7, 9.0],
+            'c': ['spark', 'pandas', 'flicker']
+        })
+
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: string]
+
+        >>> df()
+               a    b        c
+        0   True  3.4    spark
+        1  False  6.7   pandas
+        2   True  9.0  flicker
+
+        >>> df.dtypes
+        [('a', 'boolean'), ('b', 'double'), ('c', 'string')]
+
+        >>> string_cols = [col for col, dtype in df.dtypes
+                           if dtype == 'string']
+        >>> string_cols
+        ['c']
+        """
         return self._df.dtypes
 
     @property
     def columns(self):
+        """
+        Returns list of all column names.
+
+        Returns
+        -------
+            List[str]
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_dict(spark, {
+            'a': [True, False, True],
+            'b': [3.4, 6.7, 9.0],
+            'c': ['spark', 'pandas', 'flicker']
+        })
+
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: string]
+
+        >>> df()
+               a    b        c
+        0   True  3.4    spark
+        1  False  6.7   pandas
+        2   True  9.0  flicker
+
+        >>> df.columns
+        ['a', 'b', 'c']
+        """
         return self._df.columns
 
     def __getattr__(self, name):
