@@ -118,8 +118,7 @@ df()
 # Get the type of column 'd' and store it in a new column 'd_type'
 df['d_type'] = type_udf(df['d'])
 
-# The new column 'd_type' gets added without you having to worry about
-# making a udf.
+# The new column 'd_type' gets added without you having to worry about making a udf.
 df
 # FlickerDataFrame[a: bigint, b: string, c: double, d: map<string,bigint>, d_type: string]
 
@@ -168,7 +167,9 @@ df._df.groupBy(['d_type']).count().show()
 
 # You can always convert a PySpark DataFrame into a FlickerDataFrame
 # after you've performed the native PySpark operations. This way, you can 
-# continue to use the benefits of FlickerDataFrame.
+# continue to enjoy the benefits of FlickerDataFrame. Converting a
+# PySpark DataFrame into a FlickerDataFrame is always fast irrespective of 
+# dataframe size. 
 df_freq_table = FlickerDataFrame(df._df.groupBy(['d_type']).count())
 df_freq_table()
 #   d_type  count
