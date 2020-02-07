@@ -349,6 +349,7 @@ class FlickerDataFrame(object):
         See Also
         --------
         FlickerDataFrame.from_records: alias of FlickerDataFrame.from_rows
+        FlickerDataFrame.from_items: alias of FlickerDataFrame.from_rows
         FlickerDataFrame.from_pandas
         FlickerDataFrame.from_columns
 
@@ -399,6 +400,56 @@ class FlickerDataFrame(object):
     @classmethod
     def from_dict(cls, spark, data, convert_nan_to_null_in_non_float=True,
                   convert_nan_to_null_in_float=False):
+        """
+        Construct a FlickerDataFrame from a dict. Each key in the dict must be
+        a string and is used as the column name. The values are used as
+        column contents. This function first uses
+        pandas.DataFrame.from_dict(data) to create a
+        pandas DataFrame and then converts it to a FlickerDataFrame.
+
+        Parameters
+        ----------
+        spark: pyspark.sql.SparkSession
+            SparkSession object. This can be manually created by something
+            like: `spark = SparkSession.builder.appName('app').getOrCreate()`
+        data: dict
+            Of the form {column-name : column-contents}
+        convert_nan_to_null_in_non_float: bool
+            If True (recommended), we convert np.nan (which has the
+            type 'float') into None in the non-float columns. Unlike a pandas
+            DataFrame, a pyspark DataFrame does not allow a np.nan in a
+            non-float/non-double column. Note that any 'object' type column
+            in `df` will be considered as a non-float column.
+        convert_nan_to_null_in_float: bool
+            If True, we convert np.nan (which has the type 'float') into None
+            in all float/double columns. A pyspark DataFrame allows both
+            np.nan and None to exist in a (nullable) float or double column.
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        See Also
+        --------
+        FlickerDataFrame.from_pandas
+        FlickerDataFrame.from_columns
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_dict(spark, {
+            'a': [1, 2, 3, 4],
+            'b': [1.2, None, np.nan, 4.5]
+        })
+        >>> df
+        FlickerDataFrame[a: bigint, b: double]
+
+        >>> df()
+           a    b
+        0  1  1.2
+        1  2  NaN
+        2  3  NaN
+        3  4  4.5
+        """
         df = pd.DataFrame.from_dict(data)
         return cls.from_pandas(
             spark, df,
