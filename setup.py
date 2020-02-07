@@ -26,6 +26,7 @@ setup(name=PACKAGE_NAME,
       description=('Provides FlickerDataFrame, a wrapper over '
                    'Pyspark DataFrame to provide a pandas-like API'),
       long_description=readme,
+      long_description_content_type="text/markdown",
       keywords='pyspark, pandas',
       packages=[PACKAGE_NAME],
       include_package_data=True,
