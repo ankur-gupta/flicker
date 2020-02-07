@@ -123,7 +123,51 @@ def get_non_float_column_names(df):
 
 
 class FlickerDataFrame(object):
+    """
+    A thin wrapper over pyspark.sql.DataFrame that provides a pandas-like
+    API over pyspark DataFrames without compromising performance.
+    """
+
     def __init__(self, df):
+        """
+        Default constructor for FlickerDataFrame. Returns a FlickerDataFrame
+        using a pyspark DataFrame as input.
+
+
+        Parameters
+        ----------
+        df: pyspark.sql.DataFrame
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        See Also
+        --------
+        FlickerDataFrame.from_pandas
+        FlickerDataFrame.from_dict
+        FlickerDataFrame.from_records
+        FlickerDataFrame.from_rows
+        FlickerDataFrame.from_items
+        FlickerDataFrame.from_columns
+        FlickerDataFrame.from_shape
+
+        Examples
+        --------
+        >>> spark_df = spark.createDataFrame([(x, x) for x in range(5)],
+                                             'a INT, b INT')
+        >>> df = FlickerDataFrame(spark_df)
+        >>> df
+        FlickerDataFrame[a: int, b: int]
+
+        >>> df()  # show first 5 rows
+           a  b
+        0  0  0
+        1  1  1
+        2  2  2
+        3  3  3
+        4  4  4
+        """
         if not isinstance(df, pyspark.sql.DataFrame):
             msg = 'df of type "{}" is not a pyspark DataFrame object'
             raise TypeError(msg.format(str(type(df))))
