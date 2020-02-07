@@ -461,6 +461,58 @@ class FlickerDataFrame(object):
     def from_columns(cls, spark, data, columns=None,
                      convert_nan_to_null_in_non_float=True,
                      convert_nan_to_null_in_float=False):
+        """
+        Construct a FlickerDataFrame from a list of columns and optionally
+        a list of column names. This function converts the input into a
+        dict and then uses FlickerDataFrame.from_dict().
+
+        Parameters
+        ----------
+        spark: pyspark.sql.SparkSession
+            SparkSession object. This can be manually created by something
+            like: `spark = SparkSession.builder.appName('app').getOrCreate()`
+        data: List[Iterable]
+            List of column contents.
+        columns: List[str]
+            Column names to use. If empty, column names are set to '0', '1',
+            '2', ... str(len(data) - 1). Duplicate column names are not
+            allowed.
+        convert_nan_to_null_in_non_float: bool
+            If True (recommended), we convert np.nan (which has the
+            type 'float') into None in the non-float columns. Unlike a pandas
+            DataFrame, a pyspark DataFrame does not allow a np.nan in a
+            non-float/non-double column. Note that any 'object' type column
+            in `df` will be considered as a non-float column.
+        convert_nan_to_null_in_float: bool
+            If True, we convert np.nan (which has the type 'float') into None
+            in all float/double columns. A pyspark DataFrame allows both
+            np.nan and None to exist in a (nullable) float or double column.
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        See Also
+        --------
+        FlickerDataFrame.from_pandas
+        FlickerDataFrame.from_dict
+
+        Examples
+        --------
+        >>> data = [[1, 2, 3],
+                    ['spark', 'flicker', 'pandas'],
+                    [2.3, np.nan, 4.5]]
+        >>> df = FlickerDataFrame.from_columns(spark, data,
+                                               columns=['a', 'b', 'c'])
+        >>> df
+        FlickerDataFrame[a: bigint, b: string, c: double]
+
+        >>> df()
+           a        b    c
+        0  1    spark  2.3
+        1  2  flicker  NaN
+        2  3   pandas  4.5
+        """
         if columns is None:
             columns = [str(i) for i in list(range(len(data)))]
         if len(data) != len(columns):
@@ -476,6 +528,49 @@ class FlickerDataFrame(object):
     @classmethod
     def from_shape(cls, spark, nrows, ncols, columns=None,
                    fill='zero'):
+        """
+        Construct a dataframe from only a shape and fill it with zeros or
+        random floats. Note that this function first creates a pandas
+        DataFrame and then converts it into a PySpark DataFrame. Don't use
+        this function to create a dataframe that is too big to fit in memory.
+
+        Parameters
+        ----------
+        spark: pyspark.sql.SparkSession
+            SparkSession object. This can be manually created by something
+            like: `spark = SparkSession.builder.appName('app').getOrCreate()`
+        nrows: int
+            Number of rows
+        ncols: int
+            Number of columns
+        columns: List[str]
+            List of column names. Duplicate column names are not allowed. If
+            empty, column names are set to '0', '1', '2', ... str(ncols - 1).
+        fill: str
+            One of 'zero', 'rand', 'randn'.
+            'zero': elements in the dataframe are zeros
+            'rand': elements in the dataframe are uniformly distributed
+            'randn': elements in the dataframe are normally distributed
+
+        Returns
+        -------
+        FlickerDataFrame
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3,
+                                             columns=['a', 'b', 'c'])
+        >>> df
+        FlickerDataFrame[a: double, b: double, c: double]
+
+        >>> df()
+            a    b    c
+        0  0.0  0.0  0.0
+        1  0.0  0.0  0.0
+        2  0.0  0.0  0.0
+        3  0.0  0.0  0.0
+        4  0.0  0.0  0.0
+        """
         if not isinstance(spark, SparkSession):
             msg = 'spark of type "{}" is not a SparkSession object'
             raise TypeError(msg.format(str(type(spark))))
