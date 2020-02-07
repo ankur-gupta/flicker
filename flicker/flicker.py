@@ -844,6 +844,78 @@ class FlickerDataFrame(object):
 
     def value_counts(self, name, normalize=False, sort=True, ascending=False,
                      drop_null=False, nrows=None):
+        """
+        Returns a FlickerDataFrame that contains a frequency table of the
+        selected column.
+
+        Parameters
+        ----------
+        name: str
+            Name of a column in the dataframe
+        normalize: bool
+            If True, the frequency counts are normalized by the number of
+            rows in the entire dataframe (even when nrows is set to a non-None
+            value).
+        sort: bool
+            If True (default), the output is sorted according to the
+            `ascending` argument.
+        ascending: bool
+            Used only when `sort=True`. If True, the output is sorted in
+            increasing order of frequency  counts. If False (default), the
+            output is sorted in decreasing order of frequency counts.
+        drop_null: bool
+            If True, we discard all null values in the pyspark DataFrame.
+        nrows: int or None:
+            If None, all rows of the dataframe are used. If an int, we use
+            that many rows to compute the output. Note that if nrows is more
+            than the actual number of rows in the dataframe, all rows are used.
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        Examples
+        --------
+        >>> data = {
+            'a': [1, 1, 2, 3, 4, 1],
+            'b': ['spark', 'flicker', None, None, 'spark', 'pandas']
+        }
+        >>> df = FlickerDataFrame.from_dict(spark, data)
+        >>> df()
+           a        b
+        0  1    spark
+        1  1  flicker
+        2  2     None
+        3  3     None
+        4  4    spark
+
+        >>> df.value_counts('a')(None)
+           a  count
+        0  1      3
+        1  3      1
+        2  2      1
+        3  4      1
+
+        >>> df.value_counts('b')(None)
+                 b  count
+        0     None      2
+        1    spark      2
+        2   pandas      1
+        3  flicker      1
+
+        >>> df.value_counts('b', normalize=True)(None)
+                 b     count
+        0     None  0.333333
+        1    spark  0.333333
+        2   pandas  0.166667
+        3  flicker  0.166667
+
+        >>> df.value_counts('b', drop_null=True)(None)
+                 b  count
+        0    spark      2
+        1   pandas      1
+        2  flicker      1
+        """
         if name not in self._df.columns:
             msg = 'column "{}" not found'
             raise KeyError(msg.format(name))
