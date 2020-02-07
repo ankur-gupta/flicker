@@ -665,6 +665,35 @@ class FlickerDataFrame(object):
         self._reset(self._df.withColumn(name, value))
 
     def __delitem__(self, name):
+        """ Delete a column from the dataframe in-place.
+
+        Parameters
+        ----------
+        name: str
+            A column name that exists in the dataframe
+
+        Returns
+        -------
+            None
+
+        See Also
+        --------
+        FlickerDataFrame.drop
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df(2)
+             a    b    c
+        0  0.0  0.0  0.0
+        1  0.0  0.0  0.0
+
+        >>> del df['a']
+        >>> df(2)
+             b    c
+        0  0.0  0.0
+        1  0.0  0.0
+        """
         if not isinstance(name, six.string_types):
             msg = 'type(name)="{}" is not a string'
             raise TypeError(msg.format(str(type(name))))
@@ -696,6 +725,10 @@ class FlickerDataFrame(object):
         Returns
         -------
             pandas.DataFrame
+
+        See Also
+        --------
+        FlickerDataFrame.head
 
         Examples
         --------
@@ -744,6 +777,42 @@ class FlickerDataFrame(object):
 
     # Added by me to augment Pandas-like API
     def rename(self, mapper_or_list):
+        """
+        Return a new FlickerDataFrame with column names renamed.
+        This does not edit the dataframe in place.
+
+        Parameters
+        ----------
+        mapper_or_list: List[str] or dict
+            If a List[str], the len(mapper_or_list) must have the same
+            number of elements as the number of columns in the dataframe.
+            Duplicate column names are not allowed.
+            If a dict, mapper_or_list must be of the form {old-name: new-name}.
+            FlickerDataFrame cannot have duplicate column names.
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3,
+                                             columns=['a', 'b', 'c'])
+
+        >>> # Example 1
+        >>> new_df = df.rename(['p', 'q', 'r'])
+        >>> new_df(2)
+             p    q    r
+        0  0.0  0.0  0.0
+        1  0.0  0.0  0.0
+
+        >>> # Example 2
+        >>> new_df = df.rename({'a': 'p'})
+        >>> new_df(2)
+             p    b    c
+        0  0.0  0.0  0.0
+        1  0.0  0.0  0.0
+        """
         if isinstance(mapper_or_list, list):
             names = list(mapper_or_list)
             if len(names) != len(self._df.columns):
@@ -860,23 +929,130 @@ class FlickerDataFrame(object):
         return self.nrows, self.ncols
 
     def head(self, nrows=5):
-        return self._df.limit(nrows).toPandas()
+        """
+        Return the first n rows as a Pandas DataFrame.
+
+        Parameters
+        ----------
+        nrows: int or None
+            Number of rows to use. If None, all rows are returned (which
+            can be bigger than can fit in memory).
+
+        Returns
+        -------
+            pandas.DataFrame
+
+        See Also
+        --------
+        FlickerDataFrame.__call__
+        FlickerDataFrame.head
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df.head(2)
+             a    b    c
+        0  0.0  0.0  0.0
+        1  0.0  0.0  0.0
+        """
+        if nrows is None:
+            out = self._df.toPandas()
+        else:
+            out = self._df.limit(nrows).toPandas()
+        return out
 
     def tail(self, nrows=5):
+        """
+        Not implemented. Calling this would give you an error. Use .head()
+        instead.
+        """
         msg = '.tail() is not well-defined. Use .head() instead'
         raise NotImplementedError(msg)
 
     def first(self):
+        """
+        Return the first row as a Pandas DataFrame.
+
+        Returns
+        -------
+            pandas.DataFrame
+
+        See Also
+        --------
+        FlickerDataFrame.head
+        FlickerDataFrame.__call__
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df.first()
+             a    b    c
+        0  0.0  0.0  0.0
+        """
         return self.head(1)
 
     def last(self):
+        """
+        Not implemented. Calling this would give you an error. Use .first()
+        instead.
+        """
         msg = '.last() is not well-defined. Use .first() instead'
         raise NotImplementedError(msg)
 
     def show(self, nrows=5):
+        """
+        Print the first n rows of the dataframe. This does not return
+        a string. This function simply calls pyspark.sql.DataFrame.show().
+
+        Parameters
+        ----------
+        nrows: int
+            Number of rows to print.
+
+        Returns
+        -------
+            None
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df.show()
+        +---+---+---+
+        |  a|  b|  c|
+        +---+---+---+
+        |0.0|0.0|0.0|
+        |0.0|0.0|0.0|
+        |0.0|0.0|0.0|
+        |0.0|0.0|0.0|
+        |0.0|0.0|0.0|
+        +---+---+---+
+        """
         return self._df.show(nrows)
 
     def take(self, nrows=5):
+        """
+        Returns the first n rows as a list of Row objects. This function
+        simply calls pyspark.sql.DataFrame.take().
+
+        Parameters
+        ----------
+        nrows: int
+            Number of rows to return
+
+        Returns
+        -------
+            List[Row]
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 3, ['a', 'b', 'c'])
+        >>> df.take()
+        [Row(a=0.0, b=0.0, c=0.0),
+         Row(a=0.0, b=0.0, c=0.0),
+         Row(a=0.0, b=0.0, c=0.0),
+         Row(a=0.0, b=0.0, c=0.0),
+         Row(a=0.0, b=0.0, c=0.0)]
+        """
         return self._df.take(nrows)
 
     def describe(self, names=None):
