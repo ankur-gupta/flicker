@@ -1056,12 +1056,67 @@ class FlickerDataFrame(object):
         return self._df.take(nrows)
 
     def describe(self, names=None):
+        """
+        Returns a pandas DataFrame containing basic statistics for numeric
+        and string columns. Note that other dtypes don't appear in the
+        output of this function.
+
+        Parameters
+        ----------
+        names: List[str] or str or None
+            If None, output contains all string and numeric columns.
+            If str, it should be a valid column name.
+            If List[str], each element should be a valid column name.
+            Duplicate column names are not allowed.
+
+        Returns
+        -------
+            pandas DataFrame
+
+        Examples
+        --------
+        >>> data = [(1, 'spark', 2.4, {}), (2, 'flicker', np.nan, {'key': 1})]
+        >>> column_names = ['a', 'b', 'c', 'd']
+        >>> df = FlickerDataFrame.from_rows(spark, rows=data,
+                                            columns=column_names)
+        >>> df()
+           a        b    c           d
+        0  1    spark  2.4          {}
+        1  2  flicker  NaN  {'key': 1}
+
+        >>> df.describe()  # Note how column 'd' doesn't appear
+                        a        b    c
+        summary
+        count    2.000000        2    2
+        mean     1.500000     None  NaN
+        stddev   0.707107     None  NaN
+        min      1.000000  flicker  2.4
+        max      2.000000    spark  NaN
+
+        >>> df.describe(['a'])
+                        a
+        summary
+        count    2.000000
+        mean     1.500000
+        stddev   0.707107
+        min      1.000000
+        max      2.000000
+
+        >>> df.describe(['a', 'c'])
+                    c         a
+        summary
+        count      2  2.000000
+        mean     NaN  1.500000
+        stddev   NaN  0.707107
+        min      2.4  1.000000
+        max      NaN  2.000000
+        """
         if names is None:
             names = list(self._df.columns)
         elif isinstance(names, six.string_types):
             names = [names]
         else:
-            names = list(names)
+            names = list(set(names))
         for name in names:
             if name not in self._df.columns:
                 msg = 'column "{}" not found'
@@ -1077,9 +1132,16 @@ class FlickerDataFrame(object):
         out.index = out.iloc[:, 0]
         out = out.iloc[:, 1:]
 
-        # Convert from string to numeric
+        # Convert from string to numeric, if possible. Output of
+        # pyspark.sql.DataFrame.describe() can contain string columns.
+        # It appears that min/max of strings get returned.
+        # Note that 'NaN' may sometimes be stored as a string.
         for column in out.columns:
-            out[column] = pd.to_numeric(out[column])
+            try:
+                out[column] = pd.to_numeric(out[column])
+            except ValueError:
+                # This often happens for strings.
+                pass
         return out
 
     def drop(self, cols=[]):
