@@ -301,9 +301,9 @@ class FlickerDataFrame(object):
         |  4| 4.5|
         +---+----+
 
-        Note that we don't use `df()` here because converting a pyspark
-        DataFrame to a pandas DataFrame would convert all nulls to np.nan
-        in float columns.
+        Note that we use `df.show()` instead of `df()` here because converting
+        a pyspark DataFrame to a pandas DataFrame would convert all nulls to
+        np.nan in float columns.
         """
         if not isinstance(spark, SparkSession):
             msg = 'spark of type "{}" is not a SparkSession object'
@@ -494,6 +494,8 @@ class FlickerDataFrame(object):
         2  3  NaN
         3  4  4.5
         """
+        # Note that converting to a pandas DataFrame would process and convert
+        # some None(s) to NaNs even before we call the cls.from_pandas().
         df = pd.DataFrame.from_dict(data)
         return cls.from_pandas(
             spark, df,
@@ -1019,6 +1021,54 @@ class FlickerDataFrame(object):
             raise KeyError(msg.format(name))
         return self._df[name].isNull()
 
+    def max(self, name, ignore_nan=True):
+        # Note that there is no need to ignore null(s) because pyspark
+        # already does that for you.
+        # Note that this is one of those places where NaN behaves differently
+        # than null.
+        if name not in self._df.columns:
+            msg = 'column "{}" not found'
+            raise KeyError(msg.format(name))
+        df = self._df
+        if ignore_nan:
+            df = df[~isnan(df[name])]
+
+        # Based on https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
+        return df.agg({name: 'max'}).collect()[0][0]
+
+    def min(self, name, ignore_nan=True):
+        # Note that there is no need to ignore null(s) because pyspark
+        # already does that for you.
+        # Note that this is one of those places where NaN behaves differently
+        # than null.
+        if name not in self._df.columns:
+            msg = 'column "{}" not found'
+            raise KeyError(msg.format(name))
+        df = self._df
+        if ignore_nan:
+            df = df[~isnan(df[name])]
+
+        # Based on https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
+        return df.agg({name: 'min'}).collect()[0][0]
+
+    def rows_with_max(self, name, ignore_nan=True):
+        # Note the plural. This is because a large number of rows can have
+        # the max value.
+        # Note that this is one of those places where NaN behaves differently
+        # than null.
+        max_value = self.max(name=name, ignore_nan=ignore_nan)
+        out = self._df[self._df[name].isin([max_value])]
+        return self.__class__(out)
+
+    def rows_with_min(self, name, ignore_nan=True):
+        # Note the plural. This is because a large number of rows can have
+        # the min value.
+        # Note that this is one of those places where NaN behaves differently
+        # than null.
+        min_value = self.min(name=name, ignore_nan=ignore_nan)
+        out = self._df[self._df[name].isin([min_value])]
+        return self.__class__(out)
+
     # Modified to provide a Pandas-like API
     @property
     def shape(self):
@@ -1352,6 +1402,10 @@ class FlickerDataFrame(object):
         ['c']
         """
         return self._df.dtypes
+
+    @property
+    def dtypes_only(self):
+        return [dtype for _, dtype in self._df.dtypes]
 
     @property
     def columns(self):
