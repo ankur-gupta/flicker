@@ -4,6 +4,7 @@ from __future__ import division
 
 import copy
 from builtins import range
+from collections import Iterable
 
 import six
 import numpy as np
@@ -1364,6 +1365,124 @@ class FlickerDataFrame(object):
         FlickerDataFrame[a: double, b: double, c: double]
         """
         return self.__class__(self._df.drop(*cols))
+
+    def join(self, other, how='inner', on=None,
+             lsuffix=None, rsuffix=None, lprefix=None, rprefix=None):
+        # Note that any None column value is not matched on. It's ignored.
+
+        def _validate_column_name(name, names, dataframe):
+            if not isinstance(name, six.string_types):
+                msg = ('column names must be of type str but you provided '
+                       'type = {}')
+                msg = msg.format(str(type(name)))
+                raise TypeError(msg)
+            if name not in names:
+                msg = ('column name "{}" not found in the {} dataframe')
+                msg = msg.format(name, dataframe)
+                raise KeyError(msg)
+
+        def _validate_prefix_suffix(value, name):
+            if (value is not None) and \
+                    (not isinstance(value, six.string_types)):
+                msg = ('{} must be None or of type str, you provided '
+                       'type({})={}')
+                msg = msg.format(name, name, str(type(value)))
+                raise TypeError(msg)
+
+        def _add_prefix_suffix(prefix, name, suffix):
+            if prefix is None:
+                prefix = ''
+            if suffix is None:
+                suffix = ''
+            return prefix + name + suffix
+
+        # Check other
+        if not isinstance(other, FlickerDataFrame):
+            msg = ('other must be of type FlickerDataFrame but you provided '
+                   'type(FlickerDataFrame)={}')
+            raise TypeError(msg.format(str(type(other))))
+
+        # Check types of prefix and suffix arguments
+        _validate_prefix_suffix(lsuffix, 'lsuffix')
+        _validate_prefix_suffix(rsuffix, 'rsuffix')
+        _validate_prefix_suffix(lprefix, 'lprefix')
+        _validate_prefix_suffix(rprefix, 'rprefix')
+
+        # Check `on`
+        # Convert from string to list so we can handle it in a more
+        # streamlined fashion.
+        if isinstance(on, six.string_types):
+            on = [on]
+        if on is None:
+            # We pass it into the pyspark.sql.DataFrame.join function
+            pass
+        elif isinstance(on, Iterable):
+            on = list(on)
+            for name in on:
+                _validate_column_name(name, self.columns, 'left (self)')
+                _validate_column_name(name, other.columns, 'right (other)')
+
+            # Convert `on` to a dict with renamed names
+            on = {
+                _add_prefix_suffix(lprefix, name, lsuffix):
+                    _add_prefix_suffix(rprefix, name, rsuffix)
+                for name in on
+            }
+        elif isinstance(on, dict):
+            # `on` must me a dict of the form
+            # {'col_name_in_left': 'col_name_in_right'}
+            for lname, rname in on.items():
+                _validate_column_name(lname, self.columns, 'left (self)')
+                _validate_column_name(rname, other.columns, 'right (other)')
+
+            # Create and replace `on` with a new dict that has updated names
+            on = {
+                _add_prefix_suffix(lprefix, lname, lsuffix):
+                    _add_prefix_suffix(rprefix, rname, rsuffix)
+                for lname, rname in on.items()
+            }
+        else:
+            msg = ('`on` must be a string, list of strings, or a dict; you '
+                   'provided type(on)={}')
+            raise TypeError(msg.format(str(type(on))))
+
+        # Rename left (aka self)
+        lnames_mapper = {
+            name: _add_prefix_suffix(lprefix, name, lsuffix)
+            for name in self.columns
+        }
+        left = self.rename(lnames_mapper)
+
+        # Rename right (aka other)
+        rnames_mapper = {
+            name: _add_prefix_suffix(rprefix, name, rsuffix)
+            for name in other.columns
+        }
+        right = other.rename(rnames_mapper)
+
+        # If `on` is a dict, convert it into a condition because that's the
+        # most general when you have different column names in left and right.
+        if isinstance(on, dict):
+            # Note that `on` can be an empty dict
+            conditions = [left._df[lname] == right._df[rname]
+                          for lname, rname in on.items()]
+            if len(conditions) == 0:
+                on = None
+            else:
+                on = conditions[0]
+                for condition in conditions[1:]:
+                    on = on & condition
+
+        # Join the (possibly) renamed columns
+        out = left._df.join(other=right._df, on=on, how=how)
+        if len(set(out.columns)) != len(out.columns):
+            msg = ('joined dataframee contains duplicated column names '
+                   'which is not supported. Did you forget to provide '
+                   'lprefix, rprefix, lsuffix, or rsuffix?')
+            raise ValueError(msg)
+        if isinstance(out, pyspark.sql.DataFrame):
+            out = self.__class__(out)
+        return out
 
     # Pass through functions
     @property
