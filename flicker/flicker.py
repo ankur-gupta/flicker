@@ -1535,6 +1535,10 @@ class FlickerDataFrame(object):
         -------
             List[str]
 
+        See Also
+        --------
+        FlickerDataFrame.names: alias of FlickerDataFrame.columns
+
         Examples
         --------
         >>> df = FlickerDataFrame.from_dict(spark, {
@@ -1554,8 +1558,13 @@ class FlickerDataFrame(object):
 
         >>> df.columns
         ['a', 'b', 'c']
+
+        >>> df.names
+        ['a', 'b', 'c']
         """
         return self._df.columns
+
+    names = columns
 
     def __getattr__(self, name):
         return self._df.__getattr__(name)
