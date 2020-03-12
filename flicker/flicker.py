@@ -1413,21 +1413,16 @@ class FlickerDataFrame(object):
         # streamlined fashion.
         if isinstance(on, six.string_types):
             on = [on]
-        if on is None:
-            # We pass it into the pyspark.sql.DataFrame.join function
-            pass
-        elif isinstance(on, Iterable):
-            on = list(on)
-            for name in on:
-                _validate_column_name(name, self.columns, 'left (self)')
-                _validate_column_name(name, other.columns, 'right (other)')
 
-            # Convert `on` to a dict with renamed names
-            on = {
-                _add_prefix_suffix(lprefix, name, lsuffix):
-                    _add_prefix_suffix(rprefix, name, rsuffix)
-                for name in on
-            }
+        # Convert list into a dict for streamlined handling
+        if isinstance(on, Iterable):
+            on = {name: name for name in on}
+
+        # Since we allow renaming of columns, we need to rename the keys in
+        # `on` as well.
+        if on is None:
+            # We pass it into the pyspark.sql.DataFrame.join()
+            pass
         elif isinstance(on, dict):
             # `on` must me a dict of the form
             # {'col_name_in_left': 'col_name_in_right'}
