@@ -6,7 +6,16 @@
 This python package provides a `FlickerDataFrame` object. `FlickerDataFrame` 
 is a thin wrapper over `pyspark.sql.DataFrame`. The aim of `FlickerDataFrame` is to 
 provide a more Pandas-like dataframe API. Flicker is like [Koalas](https://github.com/databricks/koalas) 
-in that Flicker attempts to provide a pandas-like API. But there are strong differences in design.
+in that Flicker attempts to provide a pandas-like API. But there are strong differences in design. We will release
+a Design Principles guide for `flicker` soon. 
+
+One way to understand `flicker`'s position is via the following analogy: 
+
+> _`keras` is to `CNTK` as `flicker` is to `pyspark`_
+
+`flicker` aims to provides a more intuitive, pythonic API over a `pyspark` backend. `flicker` relies completely 
+on `pyspark` for all distributed computing work. 
+
 
 # Getting Started
 ## Install
@@ -15,7 +24,9 @@ in that Flicker attempts to provide a pandas-like API. But there are strong diff
 pip install --user flicker
 ```
 
-If you need to run `flicker` on Python 2, try installing it with `pip`, it might work (though it has not been tested). Otherwise, compiling from source may also help for making `flicker` work in Python 2. However, Python 2 support would be removed from `flicker` in the future. 
+`flicker` does not use Python 3 features just yet. This means that `flicker` may work with Python 2 (though it has not been tested and is highly discouraged). For use with Python 2, try installing `flicker` with `pip2` or build from source. Please note that `flicker` would _very soon_ become incompatible with Python 2 as we start using Python 3 features.
+
+As of now, `flicker` is compatible with `pyspark 2.x`. Compatibility with `pyspark 3.x` is not supported just yet. 
 
 ## Quick Example
 `flicker` aims to simplify some of the common and tedious aspects of a PySpark dataframe without compromising performance. 
@@ -179,3 +190,5 @@ df_freq_table()
  # Status
  `flicker` is actively being developed. While `flicker` is immediately useful for data analysis, it may not be ready for production use just yet. It is very likely that you will need a function that has not yet written in `flicker`. In such cases, you can always use the underlying PySpark DataFrame to do every operation that PySpark supports. Please consider filing an issue for missing functions, bugs, or unintuitive API. Happy sparking!
  
+# License
+Apache License 2.0
