@@ -11,7 +11,7 @@ a Design Principles guide for `flicker` soon.
 
 One way to understand `flicker`'s position is via the following analogy: 
 
-> _`keras` is to `CNTK` as `flicker` is to `pyspark`_
+> _**keras** is to **CNTK** as **flicker** is to **pyspark**_
 
 `flicker` aims to provides a more intuitive, pythonic API over a `pyspark` backend. `flicker` relies completely 
 on `pyspark` for all distributed computing work. 
