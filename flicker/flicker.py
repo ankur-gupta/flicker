@@ -180,6 +180,7 @@ class FlickerDataFrame(object):
         self._ncols = None
 
     def _reset(self, df):
+        """ This function makes objects of this class mutable. """
         if not isinstance(df, pyspark.sql.DataFrame):
             msg = 'type(df)="{}" is not a pyspark DataFrame object'
             raise TypeError(msg.format(msg.format(str(type(df)))))
@@ -697,6 +698,7 @@ class FlickerDataFrame(object):
         return name in self._df.columns
 
     def __setitem__(self, name, value):
+        """ This function makes objects of this class mutable. """
         if isinstance(value, Column):
             pass
         elif (value is None) or \
@@ -712,7 +714,8 @@ class FlickerDataFrame(object):
         self._reset(self._df.withColumn(name, value))
 
     def __delitem__(self, name):
-        """ Delete a column from the dataframe in-place.
+        """ Delete a column from the dataframe in-place. This function makes
+        objects of this class mutable.
 
         Parameters
         ----------
@@ -1311,7 +1314,7 @@ class FlickerDataFrame(object):
                 pass
         return out
 
-    def drop(self, cols=[]):
+    def drop(self, names=[]):
         """
         Returns a new FlickerDataFrame object with the specified list of
         column names dropped. This function does not modify the dataframe
@@ -1327,7 +1330,7 @@ class FlickerDataFrame(object):
 
         Parameters
         ----------
-        cols: list of str
+        names: str or list of str
             A list of column names that need to be dropped. This list can be
             empty in which case no column is dropped. This list can contain a
             column name that does not exist in the dataframe. Duplicate values
@@ -1364,7 +1367,19 @@ class FlickerDataFrame(object):
         >>> df.drop([])
         FlickerDataFrame[a: double, b: double, c: double]
         """
-        return self.__class__(self._df.drop(*cols))
+        if isinstance(names, six.string_types):
+            names = [names]
+        for name in names:
+            if not isinstance(name, six.string_types):
+                msg = ('column names must be of type str but you provided '
+                       'type = {}')
+                msg = msg.format(str(type(name)))
+                raise TypeError(msg)
+            if name not in self._df.columns:
+                msg = ('column name "{}" not found in the dataframe')
+                msg = msg.format(name)
+                raise KeyError(msg)
+        return self.__class__(self._df.drop(*names))
 
     def join(self, other, how='inner', on=None,
              lsuffix=None, rsuffix=None, lprefix=None, rprefix=None):
@@ -1522,7 +1537,7 @@ class FlickerDataFrame(object):
         return [dtype for _, dtype in self._df.dtypes]
 
     @property
-    def columns(self):
+    def names(self):
         """
         Returns list of all column names.
 
@@ -1532,7 +1547,7 @@ class FlickerDataFrame(object):
 
         See Also
         --------
-        FlickerDataFrame.names: alias of FlickerDataFrame.columns
+        FlickerDataFrame.columns: alias of FlickerDataFrame.names
 
         Examples
         --------
@@ -1551,15 +1566,15 @@ class FlickerDataFrame(object):
         1  False  6.7   pandas
         2   True  9.0  flicker
 
-        >>> df.columns
+        >>> df.namess
         ['a', 'b', 'c']
 
-        >>> df.names
+        >>> df.columns
         ['a', 'b', 'c']
         """
         return self._df.columns
 
-    names = columns
+    columns = names
 
     def __getattr__(self, name):
         return self._df.__getattr__(name)
