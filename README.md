@@ -191,4 +191,11 @@ df_freq_table()
  `flicker` is actively being developed. While `flicker` is immediately useful for data analysis, it may not be ready for production use just yet. It is very likely that you will need a function that has not yet written in `flicker`. In such cases, you can always use the underlying PySpark DataFrame to do every operation that PySpark supports. Please consider filing an issue for missing functions, bugs, or unintuitive API. Happy sparking!
  
 # License
-Apache License 2.0
+[Apache License 2.0](https://github.com/ankur-gupta/flicker/blob/master/LICENSE)
+
+`flicker` depends on other python packages listed in 
+[requirements.txt](https://github.com/ankur-gupta/flicker/blob/master/requirements.txt)
+which have their own licenses. `flicker` releases do not bundle any code from 
+the dependencies directly. 
+
+
