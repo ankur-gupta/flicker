@@ -1585,6 +1585,19 @@ class FlickerDataFrame(object):
             out = self.__class__(out)
         return out
 
+    def _ipython_key_completions_(self):
+        """ Provide list of auto-completions for __getitem__ (not attributes)
+            that is completed by df["c"+tab. Note that attribute completion
+            is separate that happens automatically even when __dir__() is not
+            explicitly defined.
+
+            See https://ipython.readthedocs.io/en/stable/config/integrating.html
+
+            This function enables auto-completion in both jupyter notebook and
+            ipython terminal.
+        """
+        return list(self._df.columns)
+
     def limit(self, nrows=None):
         """
         Returns a new FlickerDataFrame with only the number of rows specified.
