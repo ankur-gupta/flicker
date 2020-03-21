@@ -29,11 +29,17 @@ def gensym(names=[], prefix='col_', suffix='', n_max_tries=100,
         all existing columns.
     """
     names = set(names)
-    for i in range(n_max_tries):
-        stub = ''.join([random.choice(CHARACTERS)
-                        for _ in range(n_random_chars)])
-        candidate = '{}{}{}'.format(prefix, stub, suffix)
-        if candidate not in names:
-            return candidate
+
+    # Try out without any randomness first
+    candidate = prefix + suffix
+    if candidate in names:
+        for i in range(n_max_tries):
+            stub = ''.join([random.choice(CHARACTERS)
+                            for _ in range(n_random_chars)])
+            candidate = '{}{}{}'.format(prefix, stub, suffix)
+            if candidate not in names:
+                return candidate
+    else:
+        return candidate
     msg = 'No unique name generated in {} tries with {} random characters'
     raise KeyError(msg.format(n_max_tries, n_random_chars))

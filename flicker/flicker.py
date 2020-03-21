@@ -1010,11 +1010,15 @@ class FlickerDataFrame(object):
         return self.__class__(out)
 
     def count_value(self, name, value):
+        """ Count the number of times a value appears in a column.
+            CAVEAT: spark ignores data types when doing this. See
+            https://www.perfectlyrandom.org/bites/2020/03/19/spark-ignores-data-types-when-filtering-on-equality
+            for more details. This is an issue with spark (and even SQL) not
+            with flicker.
+        """
         if name not in self._df.columns:
             msg = 'column "{}" not found'
             raise KeyError(msg.format(name))
-        # FIXME: the dtype is not respected here value = '1' or 1 returns the
-        #  same Column object when name points to a sting-type column.
         return self._df[self._df[name].isin([value])].count()
 
     def sort_values(self, by=None, ascending=True):
@@ -1397,7 +1401,7 @@ class FlickerDataFrame(object):
                 raise KeyError(msg)
         return self.__class__(self._df.drop(*names))
 
-    def join(self, other, how='inner', on=None,
+    def join(self, other, on=None, how='inner',
              lsuffix=None, rsuffix=None, lprefix=None, rprefix=None):
         # Note that any None column value is not matched on. It's ignored.
 
@@ -1446,7 +1450,7 @@ class FlickerDataFrame(object):
             on = [on]
 
         # Convert list into a dict for streamlined handling
-        if isinstance(on, Iterable):
+        if isinstance(on, (list, tuple)):
             on = {name: name for name in on}
 
         # Since we allow renaming of columns, we need to rename the keys in
@@ -1502,7 +1506,7 @@ class FlickerDataFrame(object):
         # Join the (possibly) renamed columns
         out = left._df.join(other=right._df, on=on, how=how)
         if len(set(out.columns)) != len(out.columns):
-            msg = ('joined dataframee contains duplicated column names '
+            msg = ('joined dataframe contains duplicated column names '
                    'which is not supported. Did you forget to provide '
                    'lprefix, rprefix, lsuffix, or rsuffix?')
             raise ValueError(msg)

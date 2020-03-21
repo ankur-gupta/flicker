@@ -69,6 +69,7 @@ def _keys(e):
         out = []
     else:
         out = list(e.keys())
+    return out
 
 
 def generate_extract_value_by_key(key):
