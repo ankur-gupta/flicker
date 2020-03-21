@@ -908,7 +908,7 @@ class FlickerDataFrame(object):
             raise TypeError(msg.format(str(type(mapper_or_list))))
         return self.__class__(out)
 
-    def value_counts(self, name, normalize=False, sort=True, ascending=False,
+    def value_counts(self, names, normalize=False, sort=True, ascending=False,
                      drop_null=False, nrows=None):
         """
         Returns a FlickerDataFrame that contains a frequency table of the
@@ -916,8 +916,8 @@ class FlickerDataFrame(object):
 
         Parameters
         ----------
-        name: str
-            Name of a column in the dataframe
+        names: str or list of str
+            Name of a column in the dataframe or a list of column names
         normalize: bool
             If True, the frequency counts are normalized by the number of
             rows in the entire dataframe (even when nrows is set to a non-None
@@ -982,9 +982,13 @@ class FlickerDataFrame(object):
         1   pandas      1
         2  flicker      1
         """
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        if isinstance(names, six.string_types):
+            names = [names]
+        for name in names:
+            # FIXME: check that name is of type str here as well
+            if name not in self._df.columns:
+                msg = 'column "{}" not found'
+                raise KeyError(msg.format(name))
         if 'count' in self._df.columns:
             msg = ('column "count" already exists in dataframe; '
                    'please rename it before calling value_counts()')
@@ -992,13 +996,13 @@ class FlickerDataFrame(object):
 
         out = self._df
         if drop_null:
-            out = out[out[name].isNotNull()]
+            out = out[out[names].isNotNull()]
         if nrows is not None:
             out = out.limit(nrows)
 
         # .count() is lazy when called on  pyspark.sql.group.GroupedData
         # creates a column called "count"
-        out = out.groupBy(name).count()
+        out = out.groupBy(names).count()
         if sort:
             out = out.orderBy('count', ascending=ascending)
         if normalize:
