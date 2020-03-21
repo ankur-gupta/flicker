@@ -13,4 +13,21 @@
 #    limitations under the License.
 #
 
-__version__ = '0.0.12'
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+from builtins import range
+
+import pytest
+from flicker import FlickerDataFrame
+from flicker.recipes import delete_extra_columns
+
+
+def test_basic_usage(spark):
+    df = FlickerDataFrame.from_shape(spark, 3, 2, ['a', 'b'])
+    assert set(df.names) == set(['a', 'b'])
+    with delete_extra_columns(df):
+        df['c'] = 1
+        df['d'] = None
+        assert set(df.names) == set(['a', 'b', 'c', 'd'])
+    assert set(df.names) == set(['a', 'b'])
