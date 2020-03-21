@@ -32,3 +32,15 @@ def test_join_on_dict(spark):
     assert z.shape == (4, 8)
     assert set(z.names) == set(["year", "age", "name", "case",
                                 "new_year", "new_age", "new_name", "new_case"])
+
+
+def test_join_with_lsuffix(spark):
+    x = FlickerDataFrame.from_shape(spark, 2, 3,
+                                    ["year", "balance", "account"])
+    with pytest.raises(Exception):
+        x.join(x, on='year', how='inner')
+
+    y = x.join(x, on='year', how='inner', lsuffix='_left')
+    assert y.shape == (4, 6)
+    expected_names = list(x.names) + [name + '_left' for name in x.names]
+    assert set(y.names) == set(expected_names)
