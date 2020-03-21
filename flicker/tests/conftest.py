@@ -13,4 +13,17 @@
 #    limitations under the License.
 #
 
-__version__ = '0.0.12'
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+from builtins import range
+
+import pytest
+from pyspark.sql import SparkSession
+
+SPARK_APP_NAME = 'flicker-test-app'
+
+
+@pytest.fixture(scope='session')
+def spark():
+    return SparkSession.builder.appName(SPARK_APP_NAME).getOrCreate()

@@ -13,4 +13,23 @@
 #    limitations under the License.
 #
 
-__version__ = '0.0.12'
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+from builtins import range
+
+import pytest
+from flicker import FlickerDataFrame
+from flicker.recipes import find_empty_columns
+
+
+def test_basic_usage(spark):
+    df = FlickerDataFrame.from_dict(spark, {
+        'a': [1, 2, None],
+        'b': ['q', None, 'w']
+    })
+    df['c'] = None
+    df['d'] = 1
+    df['e'] = 'abc'
+    empty_names = find_empty_columns(df, verbose=False)
+    assert set(empty_names) == set(['c'])
