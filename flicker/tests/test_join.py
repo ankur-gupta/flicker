@@ -29,6 +29,6 @@ def test_join_on_dict(spark):
                                     ["new_year", "new_age", "new_name",
                                      "new_case"])
     z = x.join(y, on={'year': 'new_year'}, how='inner')
-    assert z.shape[1] == 8
+    assert z.shape == (4, 8)
     assert set(z.names) == set(["year", "age", "name", "case",
                                 "new_year", "new_age", "new_name", "new_case"])
