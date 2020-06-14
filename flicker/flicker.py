@@ -1186,31 +1186,71 @@ class FlickerDataFrame(object):
         return self._df[self._df[name].isin([True])].count() > 0
 
     def max(self, name, ignore_nan=True):
-        # Note that there is no need to ignore null(s) because pyspark
-        # already does that for you.
-        # Note that this is one of those places where NaN behaves differently
-        # than null.
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        """
+        Return the maximum value in a column. Returns None when called on a
+        dataframe with zero rows.
+
+        CAVEAT: Note that there is no need to ignore null(s) because pyspark
+        already does that for you. This is one of those places where NaN
+        behaves differently than null.
+
+        If the column is float/double then max is unreliable -- you may
+        get a np.nan value as the min or you may get a non-nan value.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+        ignore_nan: bool
+            If True, np.nan is ignored. Note that null (or None) is
+            already automatically ignored by pyspark. This argument is only
+            useful when the column is double or float dtype. If the column is
+            not double or float, we ignore this argument.
+
+        Returns
+        -------
+            Any
+        """
+        self._validate_column_name(name)
         df = self._df
-        if ignore_nan:
-            df = df[~isnan(df[name])]
+        if self.get_dtype(name) in {'float', 'double'}:
+            if ignore_nan:
+                df = df[~isnan(df[name])]
 
         # Based on https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
         return df.agg({name: 'max'}).collect()[0][0]
 
     def min(self, name, ignore_nan=True):
-        # Note that there is no need to ignore null(s) because pyspark
-        # already does that for you.
-        # Note that this is one of those places where NaN behaves differently
-        # than null.
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        """
+        Return the minimum value in a column. Returns None when called on a
+        dataframe with zero rows.
+
+        CAVEAT: Note that there is no need to ignore null(s) because pyspark
+        already does that for you. This is one of those places where NaN
+        behaves differently than null.
+
+        If the column is float/double then min is unreliable -- you may
+        get a np.nan value as the min or you may get a non-nan value.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+        ignore_nan: bool
+            If True, np.nan is ignored. Note that null (or None) is
+            already automatically ignored by pyspark. This argument is only
+            useful when the column is double or float dtype. If the column is
+            not double or float, we ignore this argument.
+
+        Returns
+        -------
+            Any
+        """
+        self._validate_column_name(name)
         df = self._df
-        if ignore_nan:
-            df = df[~isnan(df[name])]
+        if self.get_dtype(name) in {'float', 'double'}:
+            if ignore_nan:
+                df = df[~isnan(df[name])]
 
         # Based on https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
         return df.agg({name: 'min'}).collect()[0][0]
@@ -1544,17 +1584,6 @@ class FlickerDataFrame(object):
     def join(self, other, on=None, how='inner',
              lsuffix=None, rsuffix=None, lprefix=None, rprefix=None):
         # Note that any None column value is not matched on. It's ignored.
-
-        # def _validate_column_name(name, names, dataframe):
-        #     if not isinstance(name, six.string_types):
-        #         msg = ('column names must be of type str but you provided '
-        #                'type = {}')
-        #         msg = msg.format(str(type(name)))
-        #         raise TypeError(msg)
-        #     if name not in names:
-        #         msg = ('column name "{}" not found in the {} dataframe')
-        #         msg = msg.format(name, dataframe)
-        #         raise KeyError(msg)
 
         def _validate_prefix_suffix(value, name):
             if (value is not None) and \
