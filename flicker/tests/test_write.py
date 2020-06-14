@@ -13,4 +13,21 @@
 #    limitations under the License.
 #
 
-__version__ = '0.0.13'
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+from builtins import range
+
+import pytest
+from flicker import FlickerDataFrame
+
+
+def test_basic_usage(spark):
+    df = FlickerDataFrame.from_dict(spark, {
+        'a': [1, 2, 3, 1, None],
+        'b': ['a', 'v', 'r', None, 't'],
+        'c': [1.0, 1.0, 1.0, 1.0, 1.0]
+    })
+    df.write.mode('overwrite').parquet('./data-as-parquet')
+    df_reread = FlickerDataFrame(spark.read.parquet('./data-as-parquet'))
+    assert df.shape == df_reread.shape

@@ -204,6 +204,40 @@ class FlickerDataFrame(object):
         self._nrows = None
         self._ncols = None
 
+    def _validate_column_name(self, name, names=None, dataframe_name=None):
+        """
+        Internal function to validate that a column name is a string and
+        exists. Not to be used by the end-user.
+
+        Parameters
+        ----------
+        name: str
+            Column name to be validated
+        names: list[str]
+            List of column names against which we want to validate. If None,
+            this is the list of columns in this dataframe.
+        dataframe_name: str or None
+            Optional name of a dataframe for error messages
+
+        Returns
+        -------
+            None
+        """
+        if not isinstance(name, six.string_types):
+            msg = ('column name must be of type str but you provided '
+                   'type = {}').format(str(type(name)))
+            raise TypeError(msg)
+        if names is None:
+            names = self._df.columns
+        if name not in names:
+            if dataframe_name is None:
+                msg = 'column name "{}" not found'
+                msg = msg.format(name)
+            else:
+                msg = ('column name "{}" not found in {} dataframe')
+                msg = msg.format(name, dataframe_name)
+            raise KeyError(msg)
+
     @classmethod
     def from_pandas(cls, spark, df,
                     convert_nan_to_null_in_non_float=True,
@@ -760,12 +794,7 @@ class FlickerDataFrame(object):
         0  0.0  0.0
         1  0.0  0.0
         """
-        if not isinstance(name, six.string_types):
-            msg = 'type(name)="{}" is not a string'
-            raise TypeError(msg.format(str(type(name))))
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        self._validate_column_name(name)
         self._reset(self._df.drop(name))
 
     def __call__(self, nrows=5, item=None):
@@ -985,10 +1014,7 @@ class FlickerDataFrame(object):
         if isinstance(names, six.string_types):
             names = [names]
         for name in names:
-            # FIXME: check that name is of type str here as well
-            if name not in self._df.columns:
-                msg = 'column "{}" not found'
-                raise KeyError(msg.format(name))
+            self._validate_column_name(name)
         if 'count' in self._df.columns:
             msg = ('column "count" already exists in dataframe; '
                    'please rename it before calling value_counts()')
@@ -996,6 +1022,7 @@ class FlickerDataFrame(object):
 
         out = self._df
         if drop_null:
+            # FIXME: This will fail when names = list[str].
             out = out[out[names].isNotNull()]
         if nrows is not None:
             out = out.limit(nrows)
@@ -1014,67 +1041,208 @@ class FlickerDataFrame(object):
         return self.__class__(out)
 
     def count_value(self, name, value):
-        """ Count the number of times a value appears in a column.
-            CAVEAT: spark ignores data types when doing this. See
-            https://www.perfectlyrandom.org/bites/2020/03/19/spark-ignores-data-types-when-filtering-on-equality
-            for more details. This is an issue with spark (and even SQL) not
-            with flicker.
         """
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        Count the number of times a value appears in a column.
+        CAVEAT: spark ignores data types when doing this. See
+        https://www.perfectlyrandom.org/bites/2020/03/19/spark-ignores-data-types-when-filtering-on-equality
+        for more details. This is an issue with spark (and even SQL) not
+        with flicker.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+        value: Any
+            The item that needs to be counted. This should match the
+            dtype of the column. See CAVEAT above.
+
+        Returns
+        -------
+            int
+        """
+        self._validate_column_name(name)
         return self._df[self._df[name].isin([value])].count()
 
     def sort_values(self, by=None, ascending=True):
         if by is None:
             by = list(self._df.columns)
         if not isinstance(by, list):
-            msg = 'type(by="{}" is not a list'
+            msg = 'type(by="{}") is not a list'
             raise TypeError(msg.format(str(type(by))))
         for name in by:
-            if name not in self._df.columns:
-                msg = 'column "{}" not found'
-                raise KeyError(msg.format(name))
+            self._validate_column_name(name)
         return self.__class__(self._df.orderBy(*by, ascending=ascending))
 
     def isnan(self, name):
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        """
+        Return a boolean pyspark.sql.Column indicating if the value in the
+        input column is np.nan or not. This is just a helper method
+        identical to pyspark.sql.functions.isnan.
+
+        CAVEAT: This does not count null (or None). See .isnull() method.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+
+        Returns
+        -------
+            pyspark.sql.Column
+
+        See Also
+        --------
+        FlickerDataFrame.isnull
+        """
+        self._validate_column_name(name)
         return isnan(self._df[name])
 
     def isnull(self, name):
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        """
+        Return a boolean pyspark.sql.Column indicating if the value in the
+        input column is null (=None) or not. This is just a helper method
+        identical to pyspark.sql.functions.isNull.
+
+
+        Parameters
+        ----------
+        name: str
+            Column name
+
+        Returns
+        -------
+            pyspark.sql.Column
+        """
+        self._validate_column_name(name)
         return self._df[name].isNull()
 
+    def all(self, name, ignore_null=False):
+        """Returns True if all elements of a boolean column are True.
+        See ignore_null argument to see how null (or None) is handled. Note
+        that a boolean column in a pyspark dataframe cannot contain np.nan
+        which is a float.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+        ignore_null: bool
+            If True, null (or None) are completely ignored
+
+        Returns
+        -------
+            bool
+        """
+        self._validate_column_name(name)
+
+        # We first need to check that the column is boolean type
+        # (with optional null/None values). A boolean column cannot have
+        # np.nan (a float dtype) in it.
+        dtype = self.get_dtype(name)
+        if dtype != 'boolean':
+            msg = ('all() can only be called on a boolean column; you '
+                   'provided column of dtype={}').format(dtype)
+            raise TypeError(msg)
+
+        # Number of distinct elements in the column. Since column is boolean
+        # there can be at most 3 distinct values {True, False, None}, which
+        # means we can run collect on it.
+        distincts = set([
+            row[name] for row in self._df[[name]].distinct().collect()
+        ])
+        if ignore_null:
+            distincts = distincts.difference({None})
+
+        # We choose to return True value when there are no rows,
+        # similar to pandas.
+        return (distincts == set()) or (distincts == {True})
+
+    def any(self, name):
+        """Returns True if any elements of a boolean column is True.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+
+        Returns
+        -------
+            bool
+        """
+        self._validate_column_name(name)
+        dtype = self.get_dtype(name)
+        if dtype != 'boolean':
+            msg = ('all() can only be called on a boolean column; you '
+                   'provided column of dtype={}').format(dtype)
+            raise TypeError(msg)
+        return self._df[self._df[name].isin([True])].count() > 0
+
     def max(self, name, ignore_nan=True):
-        # Note that there is no need to ignore null(s) because pyspark
-        # already does that for you.
-        # Note that this is one of those places where NaN behaves differently
-        # than null.
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        """
+        Return the maximum value in a column. Returns None when called on a
+        dataframe with zero rows.
+
+        CAVEAT: Note that there is no need to ignore null(s) because pyspark
+        already does that for you. This is one of those places where NaN
+        behaves differently than null.
+
+        If the column is float/double then max is unreliable -- you may
+        get a np.nan value as the min or you may get a non-nan value.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+        ignore_nan: bool
+            If True, np.nan is ignored. Note that null (or None) is
+            already automatically ignored by pyspark. This argument is only
+            useful when the column is double or float dtype. If the column is
+            not double or float, we ignore this argument.
+
+        Returns
+        -------
+            Any
+        """
+        self._validate_column_name(name)
         df = self._df
-        if ignore_nan:
-            df = df[~isnan(df[name])]
+        if self.get_dtype(name) in {'float', 'double'}:
+            if ignore_nan:
+                df = df[~isnan(df[name])]
 
         # Based on https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
         return df.agg({name: 'max'}).collect()[0][0]
 
     def min(self, name, ignore_nan=True):
-        # Note that there is no need to ignore null(s) because pyspark
-        # already does that for you.
-        # Note that this is one of those places where NaN behaves differently
-        # than null.
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        """
+        Return the minimum value in a column. Returns None when called on a
+        dataframe with zero rows.
+
+        CAVEAT: Note that there is no need to ignore null(s) because pyspark
+        already does that for you. This is one of those places where NaN
+        behaves differently than null.
+
+        If the column is float/double then min is unreliable -- you may
+        get a np.nan value as the min or you may get a non-nan value.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+        ignore_nan: bool
+            If True, np.nan is ignored. Note that null (or None) is
+            already automatically ignored by pyspark. This argument is only
+            useful when the column is double or float dtype. If the column is
+            not double or float, we ignore this argument.
+
+        Returns
+        -------
+            Any
+        """
+        self._validate_column_name(name)
         df = self._df
-        if ignore_nan:
-            df = df[~isnan(df[name])]
+        if self.get_dtype(name) in {'float', 'double'}:
+            if ignore_nan:
+                df = df[~isnan(df[name])]
 
         # Based on https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
         return df.agg({name: 'min'}).collect()[0][0]
@@ -1312,9 +1480,7 @@ class FlickerDataFrame(object):
         else:
             names = list(set(names))
         for name in names:
-            if name not in self._df.columns:
-                msg = 'column "{}" not found'
-                raise KeyError(msg.format(name))
+            self._validate_column_name(name)
 
         # This is always going to be a small dataframe of shape
         # (5, number of columns in self._df).
@@ -1409,17 +1575,6 @@ class FlickerDataFrame(object):
              lsuffix=None, rsuffix=None, lprefix=None, rprefix=None):
         # Note that any None column value is not matched on. It's ignored.
 
-        def _validate_column_name(name, names, dataframe):
-            if not isinstance(name, six.string_types):
-                msg = ('column names must be of type str but you provided '
-                       'type = {}')
-                msg = msg.format(str(type(name)))
-                raise TypeError(msg)
-            if name not in names:
-                msg = ('column name "{}" not found in the {} dataframe')
-                msg = msg.format(name, dataframe)
-                raise KeyError(msg)
-
         def _validate_prefix_suffix(value, name):
             if (value is not None) and \
                     (not isinstance(value, six.string_types)):
@@ -1466,8 +1621,10 @@ class FlickerDataFrame(object):
             # `on` must me a dict of the form
             # {'col_name_in_left': 'col_name_in_right'}
             for lname, rname in on.items():
-                _validate_column_name(lname, self.columns, 'left (self)')
-                _validate_column_name(rname, other.columns, 'right (other)')
+                self._validate_column_name(lname, self.columns,
+                                           'left (self)')
+                self._validate_column_name(rname, other.columns,
+                                           'right (other)')
 
             # Create and replace `on` with a new dict that has updated names
             on = {
@@ -1599,6 +1756,27 @@ class FlickerDataFrame(object):
         return self._df.columns
 
     columns = names
+
+    def get_dtype(self, name):
+        """
+        Get the dtype (as a string) of a column by name.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+
+        Returns
+        -------
+            str
+        """
+        self._validate_column_name(name)
+
+        # Note that the names can never be duplicated in a FlickerDataFrame.
+        for n, dtype in self._df.dtypes:
+            if name == n:
+                break
+        return dtype
 
     def __getattr__(self, name):
         return self._df.__getattr__(name)
@@ -1817,3 +1995,30 @@ class FlickerDataFrame(object):
         if isinstance(out, pyspark.sql.DataFrame):
             out = self.__class__(out)
         return out
+
+    def groupby(self, *items):
+        """
+        Groups the dataframe so we can run aggregation on the grouped data.
+        This is a direct pass-through to pyspark.sql.DataFrame.groupBy.
+
+        Parameters
+        ----------
+        items: list[str] or list[pyspark.sql.Column]
+            Either list of column names or list of column objects
+
+        Returns
+        -------
+            pyspark.sql.GroupedData
+        """
+        return self._df.groupBy(*items)
+
+    @property
+    def write(self):
+        """
+        Direct pass-through to pyspark.sql.DataFrame.write.
+
+        Returns
+        -------
+            pyspark.sql.DataFrameWriter
+        """
+        return self._df.write
