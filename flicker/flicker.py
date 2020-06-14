@@ -1020,14 +1020,7 @@ class FlickerDataFrame(object):
         if isinstance(names, six.string_types):
             names = [names]
         for name in names:
-            if not isinstance(name, six.string_types):
-                msg = ('column names must be of type str but you provided '
-                       'type = {}')
-                msg = msg.format(str(type(name)))
-                raise TypeError(msg)
-            if name not in self._df.columns:
-                msg = 'column "{}" not found'
-                raise KeyError(msg.format(name))
+            self._validate_column_name(name)
         if 'count' in self._df.columns:
             msg = ('column "count" already exists in dataframe; '
                    'please rename it before calling value_counts()')
@@ -1054,15 +1047,26 @@ class FlickerDataFrame(object):
         return self.__class__(out)
 
     def count_value(self, name, value):
-        """ Count the number of times a value appears in a column.
-            CAVEAT: spark ignores data types when doing this. See
-            https://www.perfectlyrandom.org/bites/2020/03/19/spark-ignores-data-types-when-filtering-on-equality
-            for more details. This is an issue with spark (and even SQL) not
-            with flicker.
         """
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        Count the number of times a value appears in a column.
+        CAVEAT: spark ignores data types when doing this. See
+        https://www.perfectlyrandom.org/bites/2020/03/19/spark-ignores-data-types-when-filtering-on-equality
+        for more details. This is an issue with spark (and even SQL) not
+        with flicker.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+        value: Any
+            The item that needs to be counted. This should match the
+            dtype of the column. See CAVEAT above.
+
+        Returns
+        -------
+            int
+        """
+        self._validate_column_name(name)
         return self._df[self._df[name].isin([value])].count()
 
     def sort_values(self, by=None, ascending=True):
@@ -1078,15 +1082,46 @@ class FlickerDataFrame(object):
         return self.__class__(self._df.orderBy(*by, ascending=ascending))
 
     def isnan(self, name):
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        """
+        Return a boolean pyspark.sql.Column indicating if the value in the
+        input column is np.nan or not. This is just a helper method
+        identical to pyspark.sql.functions.isnan.
+
+        CAVEAT: This does not count null (or None). See .isnull() method.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+
+        Returns
+        -------
+            pyspark.sql.Column
+
+        See Also
+        --------
+        FlickerDataFrame.isnull
+        """
+        self._validate_column_name(name)
         return isnan(self._df[name])
 
     def isnull(self, name):
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        """
+        Return a boolean pyspark.sql.Column indicating if the value in the
+        input column is null (=None) or not. This is just a helper method
+        identical to pyspark.sql.functions.isNull.
+
+
+        Parameters
+        ----------
+        name: str
+            Column name
+
+        Returns
+        -------
+            pyspark.sql.Column
+        """
+        self._validate_column_name(name)
         return self._df[name].isNull()
 
     def all(self, name, ignore_null=False):
