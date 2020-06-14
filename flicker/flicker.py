@@ -205,6 +205,25 @@ class FlickerDataFrame(object):
         self._ncols = None
 
     def _validate_column_name(self, name, names=None, dataframe_name=None):
+        """
+        Internal function to validate that a column name is a string and
+        exists. Not to be used by the end-user.
+
+
+        Parameters
+        ----------
+        name: str
+            Column name to be validated
+        names: list[str]
+            List of column names against which we want to validate. If None,
+            this is the list of columns in this dataframe.
+        dataframe_name: str or None
+            Optional name of a dataframe for error messages
+
+        Returns
+        -------
+            None
+        """
         if not isinstance(name, six.string_types):
             msg = ('column name must be of type str but you provided '
                    'type = {}').format(str(type(name)))
@@ -214,6 +233,7 @@ class FlickerDataFrame(object):
         if name not in names:
             if dataframe_name is None:
                 msg = 'column name "{}" not found'
+                msg = msg.format(name)
             else:
                 msg = ('column name "{}" not found in {} dataframe')
                 msg = msg.format(name, dataframe_name)
@@ -1684,6 +1704,18 @@ class FlickerDataFrame(object):
     columns = names
 
     def get_dtype(self, name):
+        """
+        Get the dtype (as a string) of a column by name.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+
+        Returns
+        -------
+            str
+        """
         self._validate_column_name(name)
 
         # Note that the names can never be duplicated in a FlickerDataFrame.
