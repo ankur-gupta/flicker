@@ -209,7 +209,6 @@ class FlickerDataFrame(object):
         Internal function to validate that a column name is a string and
         exists. Not to be used by the end-user.
 
-
         Parameters
         ----------
         name: str
