@@ -1481,9 +1481,7 @@ class FlickerDataFrame(object):
         else:
             names = list(set(names))
         for name in names:
-            if name not in self._df.columns:
-                msg = 'column "{}" not found'
-                raise KeyError(msg.format(name))
+            self._validate_column_name(name)
 
         # This is always going to be a small dataframe of shape
         # (5, number of columns in self._df).

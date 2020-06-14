@@ -19,7 +19,6 @@ from __future__ import division
 from builtins import range
 
 import pytest
-from pyspark.sql.functions import lit
 from flicker import FlickerDataFrame
 
 
