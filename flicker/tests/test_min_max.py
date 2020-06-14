@@ -70,20 +70,20 @@ def test_string_column(spark):
         'a': ['b', 'a', 'c', 'd'],
         'b': ['b', None, 'c', None]
     })
-    assert df.max('a') is 'd'
-    assert df.min('a') is 'a'
+    assert df.max('a') == 'd'
+    assert df.min('a') == 'a'
 
     # None(s) are ignored
-    assert df.max('b') is 'c'
-    assert df.min('b') is 'b'
+    assert df.max('b') == 'c'
+    assert df.min('b') == 'b'
 
 
 def test_int_column(spark):
     df = FlickerDataFrame.from_dict(spark, {
         'a': [5, 3, 2, 1, 8, -1]
     })
-    assert df.max('a') is 8
-    assert df.min('a') is -1
+    assert df.max('a') == 8
+    assert df.min('a') == -1
 
 
 def test_datetime_column(spark):

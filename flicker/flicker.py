@@ -795,12 +795,7 @@ class FlickerDataFrame(object):
         0  0.0  0.0
         1  0.0  0.0
         """
-        if not isinstance(name, six.string_types):
-            msg = 'type(name)="{}" is not a string'
-            raise TypeError(msg.format(str(type(name))))
-        if name not in self._df.columns:
-            msg = 'column "{}" not found'
-            raise KeyError(msg.format(name))
+        self._validate_column_name(name)
         self._reset(self._df.drop(name))
 
     def __call__(self, nrows=5, item=None):
@@ -1076,9 +1071,7 @@ class FlickerDataFrame(object):
             msg = 'type(by="{}") is not a list'
             raise TypeError(msg.format(str(type(by))))
         for name in by:
-            if name not in self._df.columns:
-                msg = 'column "{}" not found'
-                raise KeyError(msg.format(name))
+            self._validate_column_name(name)
         return self.__class__(self._df.orderBy(*by, ascending=ascending))
 
     def isnan(self, name):
