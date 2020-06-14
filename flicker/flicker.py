@@ -1070,6 +1070,22 @@ class FlickerDataFrame(object):
         return self._df[name].isNull()
 
     def all(self, name, ignore_null=False):
+        """Returns True if all elements of a boolean column are True.
+        See ignore_null argument to see how null (or None) is handled. Note
+        that a boolean column in a pyspark dataframe cannot contain np.nan
+        which is a float.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+        ignore_null: bool
+            If True, null (or None) are completely ignored
+
+        Returns
+        -------
+            bool
+        """
         self._validate_column_name(name)
 
         # We first need to check that the column is boolean type
@@ -1095,6 +1111,17 @@ class FlickerDataFrame(object):
         return (distincts == set()) or (distincts == {True})
 
     def any(self, name):
+        """Returns True if any elements of a boolean column is True.
+
+        Parameters
+        ----------
+        name: str
+            Column name
+
+        Returns
+        -------
+            bool
+        """
         self._validate_column_name(name)
         dtype = self.get_dtype(name)
         if dtype != 'boolean':
@@ -1883,7 +1910,7 @@ class FlickerDataFrame(object):
             out = self.__class__(out)
         return out
 
-    def groupby(self, items):
+    def groupby(self, *items):
         """
         Groups the dataframe so we can run aggregation on the grouped data.
         This is a direct pass-through to pyspark.sql.DataFrame.groupBy.
