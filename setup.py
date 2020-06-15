@@ -1,4 +1,4 @@
-# Copyright 2020 Ankur Gupta
+# Copyright 2020 Flicker Contributors
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ readme = ''.join(readme)
 setup(name=PACKAGE_NAME,
       version=version['__version__'],
       url='https://github.com/ankur-gupta/flicker',
-      author='Ankur Gupta',
+      author='Flicker Contributors',
       author_email='ankur@perfectlyrandom.org',
       description=('Provides FlickerDataFrame, a wrapper over '
                    'Pyspark DataFrame to provide a pandas-like API'),
@@ -50,4 +50,10 @@ setup(name=PACKAGE_NAME,
       setup_requires=['pytest-runner'],
       # pytest-cov needed for coverage only
       tests_require=['pytest', 'pytest-cov'],
-      zip_safe=True)
+      zip_safe=True,
+      classifiers=[
+          'License :: OSI Approved :: Apache Software License',
+          'Programming Language :: Python :: 3',
+          'Operating System :: OS Independent',
+          'Development Status :: 4 - Beta'
+      ])
