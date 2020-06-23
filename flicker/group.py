@@ -100,4 +100,4 @@ class FlickerGroupedData(object):
 
 # This is to avoid ImportError due to circular imports.
 # See https://github.com/ankur-gupta/rain#circular-imports-or-dependencies.
-from flicker.flicker import FlickerDataFrame
+from flicker.dataframe import FlickerDataFrame
