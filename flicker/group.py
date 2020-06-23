@@ -30,6 +30,30 @@ class FlickerGroupedData(object):
     """
 
     def __init__(self, grouped):
+        """
+        Default constructor for FlickerGroupedData.
+
+        Parameters
+        ----------
+        grouped: pyspark.sql.GroupedData
+
+        Returns
+        -------
+            FlickerGroupedData
+
+        Examples
+        --------
+        >>> df = FlickerDataFrame.from_dict(spark, {
+            'a': [1, 2, 3, 1],
+            'b': ['1', 'a', '2', 'b'],
+            'c': [True, None, True, True]
+        })
+        >>> df.groupby(['a']).count()()
+           a  count
+        0  1      2
+        1  3      1
+        2  2      1
+        """
         if not isinstance(grouped, GroupedData):
             msg = ('grouped must be of type pyspark.sql.GroupedData but you '
                    'provided type(grouped)="{}"')
@@ -44,54 +68,151 @@ class FlickerGroupedData(object):
         return repr(self)
 
     def agg(self, *exprs):
+        """Compute aggregates.
+
+        Parameters
+        ----------
+        exprs: Any
+            See pyspark.sql.GroupedData.agg.
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.agg(*exprs)
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)
         return out
 
     def count(self):
+        """Counts the number of records for each group.
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.count()
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)
         return out
 
     def mean(self, *cols):
+        """Computes average values for each numeric columns for each group.
+
+        Parameters
+        ----------
+        cols: Any
+            See pyspark.sql.GroupedData.mean
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.mean(*cols)
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)
         return out
 
     def avg(self, *cols):
+        """Computes average values for each numeric columns for each group.
+
+        Parameters
+        ----------
+        cols: Any
+            See pyspark.sql.GroupedData.avg
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.avg(*cols)
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)
         return out
 
     def max(self, *cols):
+        """Computes the max value for each numeric columns for each group.
+
+        Parameters
+        ----------
+        cols: Any
+            See pyspark.sql.GroupedData.max
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.max(*cols)
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)
         return out
 
     def min(self, *cols):
+        """Computes the min value for each numeric columns for each group.
+
+        Parameters
+        ----------
+        cols: Any
+            See pyspark.sql.GroupedData.min
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.min(*cols)
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)
         return out
 
     def sum(self, *cols):
+        """Compute the sum for each numeric columns for each group.
+
+        Parameters
+        ----------
+        cols: Any
+            See pyspark.sql.GroupedData.sum
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.sum(*cols)
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)
         return out
 
     def pivot(self, pivot_col, values=None):
+        """See pyspark.sql.GroupedData.pivot.
+
+        Parameters
+        ----------
+        pivot_col: str
+            Name of the column to pivot.
+        values: list of str
+            List of values that will be translated to columns in the output
+            DataFrame.
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.mean(pivot_col=pivot_col, values=values)
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)
         return out
 
     def apply(self, udf):
+        """See pyspark.sql.GroupedData.apply.
+
+        Parameters
+        ----------
+        udf: Any
+            See pyspark.sql.GroupedData.apply.
+
+        Returns
+        -------
+            FlickerDataFrame or Any
+        """
         out = self._grouped.apply(udf)
         if isinstance(out, DataFrame):
             out = FlickerDataFrame(out)

@@ -1902,7 +1902,7 @@ class FlickerDataFrame(object):
 
         Returns
         -------
-            pyspark.sql.GroupedData
+            FlickerGroupedData
         """
         return FlickerGroupedData(self._df.groupBy(*items))
 
