@@ -28,8 +28,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql import Column
 from pyspark.sql.functions import lit, isnan
 
-from flicker.compat import Iterable
-
 PYSPARK_FLOAT_DTYPES = {'double', 'float'}
 
 
@@ -2010,7 +2008,7 @@ class FlickerDataFrame(object):
         -------
             pyspark.sql.GroupedData
         """
-        return self._df.groupBy(*items)
+        return FlickerGroupedData(self._df.groupBy(*items))
 
     @property
     def write(self):
@@ -2022,3 +2020,8 @@ class FlickerDataFrame(object):
             pyspark.sql.DataFrameWriter
         """
         return self._df.write
+
+
+# This is to avoid ImportError due to circular imports.
+# See https://github.com/ankur-gupta/rain#circular-imports-or-dependencies.
+from flicker.group import FlickerGroupedData
