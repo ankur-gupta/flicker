@@ -28,115 +28,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql import Column
 from pyspark.sql.functions import lit, isnan
 
-from flicker.compat import Iterable
+from flicker.utils import get_non_float_column_names
 
 PYSPARK_FLOAT_DTYPES = {'double', 'float'}
-
-
-def get_float_column_names(df):
-    """
-    Returns a list of the column names in a pandas DataFrame that have the
-    dtype float (of any precision). Note that the pandas DataFrame cannot
-    have duplicate column names.
-
-    Parameters
-    ----------
-    df: pandas DataFrame
-        There can be no duplicate column names in the dataframe
-
-    Returns
-    -------
-        List[str]
-
-    Examples
-    --------
-    >>> # Example 1
-    >>> df = pd.DataFrame({
-        'a': [np.nan, 1.3, np.nan],
-        'b': [True, False, True],
-        'c': ['spark', np.nan, None],
-        'd': [1, 2, 3]
-    })
-
-    >>> df.dtypes
-    a    float64
-    b       bool
-    c     object
-    d      int64
-    dtype: object
-
-    >>> get_float_column_names(df)
-    ['a']
-
-    >>> # Example 2 - 'object' dtype is not considered float
-    >>> df = pd.DataFrame({'a': [np.nan, 1.3, np.nan, None]}, dtype='object')
-    >>> df.dtypes
-    a    object
-    dtype: object
-
-    >>> get_float_column_names(df)
-    []
-    """
-    if not isinstance(df, pd.DataFrame):
-        msg = 'df of type="{}" is not a pandas DataFrame'
-        raise TypeError(msg.format(str(type(df))))
-    if len(set(df.columns)) != len(df.columns):
-        msg = 'df contains duplicated column names which is not supported'
-        raise ValueError(msg)
-    return list(set(df.select_dtypes(include=[np.floating]).columns))
-
-
-def get_non_float_column_names(df):
-    """
-    Returns a list of the column names in a pandas DataFrame that don't have
-    the dtype float (of any precision). Note that the pandas DataFrame cannot
-    have duplicate column names.
-
-    Parameters
-    ----------
-    df: pandas DataFrame
-        There can be no duplicate column names in the dataframe
-
-    Returns
-    -------
-        List[str]
-
-    Examples
-    --------
-    >>> # Example 1
-    >>> df = pd.DataFrame({
-        'a': [np.nan, 1.3, np.nan],
-        'b': [True, False, True],
-        'c': ['spark', np.nan, None],
-        'd': [1, 2, 3]
-    })
-
-    >>> df.dtypes
-    a    float64
-    b       bool
-    c     object
-    d      int64
-    dtype: object
-
-    >>> get_non_float_column_names(df)
-    ['c', 'b', 'd']
-
-    >>> # Example 2 - 'object' dtype is not considered float
-    >>> df = pd.DataFrame({'a': [np.nan, 1.3, np.nan, None]}, dtype='object')
-    >>> df.dtypes
-    a    object
-    dtype: object
-
-    >>> get_non_float_column_names(df)
-    ['a']
-    """
-    if not isinstance(df, pd.DataFrame):
-        msg = 'df of type="{}" is not a pandas DataFrame'
-        raise TypeError(msg.format(str(type(df))))
-    if len(set(df.columns)) != len(df.columns):
-        msg = 'df contains duplicated column names which is not supported'
-        raise ValueError(msg)
-    return list(set(df.select_dtypes(exclude=[np.floating]).columns))
 
 
 class FlickerDataFrame(object):
@@ -2008,9 +1902,9 @@ class FlickerDataFrame(object):
 
         Returns
         -------
-            pyspark.sql.GroupedData
+            FlickerGroupedData
         """
-        return self._df.groupBy(*items)
+        return FlickerGroupedData(self._df.groupBy(*items))
 
     @property
     def write(self):
@@ -2022,3 +1916,8 @@ class FlickerDataFrame(object):
             pyspark.sql.DataFrameWriter
         """
         return self._df.write
+
+
+# This is to avoid ImportError due to circular imports.
+# See https://github.com/ankur-gupta/rain#circular-imports-or-dependencies.
+from flicker.group import FlickerGroupedData

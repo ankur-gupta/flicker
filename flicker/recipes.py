@@ -20,7 +20,7 @@ from builtins import range
 
 from contextlib import contextmanager
 
-from flicker.flicker import FlickerDataFrame
+from flicker.dataframe import FlickerDataFrame
 from flicker.udf import len_udf
 from flicker.utils import gensym
 
