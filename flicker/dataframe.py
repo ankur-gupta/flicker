@@ -1142,19 +1142,57 @@ class FlickerDataFrame(object):
         return df.agg({name: 'min'}).collect()[0][0]
 
     def rows_with_max(self, name, ignore_nan=True):
-        # Note the plural. This is because a large number of rows can have
-        # the max value.
-        # Note that this is one of those places where NaN behaves differently
-        # than null.
+        """Return a dataframe containing only the rows that correspond to the
+        maximum value of the specified column name.
+
+        CAVEATS:
+        (1) Note the plural. This is because a large number of rows can have
+            the max value.
+        (2) Note that this is one of those places where NaN behaves differently
+            than null.
+
+        Parameters
+        ----------
+        name: str
+            Column name whose maximum values are needed
+        ignore_nan: bool
+            If True, np.nan is ignored. Note that null (or None) is
+            already automatically ignored by pyspark. This argument is only
+            useful when the column is double or float dtype. If the column is
+            not double or float, we ignore this argument.
+
+        Returns
+        -------
+            FlickerDataFrame
+        """
         max_value = self.max(name=name, ignore_nan=ignore_nan)
         out = self._df[self._df[name].isin([max_value])]
         return self.__class__(out)
 
     def rows_with_min(self, name, ignore_nan=True):
-        # Note the plural. This is because a large number of rows can have
-        # the min value.
-        # Note that this is one of those places where NaN behaves differently
-        # than null.
+        """Return a dataframe containing only the rows that correspond to the
+        minimum value of the specified column name.
+
+        CAVEATS:
+        (1) Note the plural. This is because a large number of rows can have
+            the max value.
+        (2) Note that this is one of those places where NaN behaves differently
+            than null.
+
+        Parameters
+        ----------
+        name: str
+            Column name whose minimum values are needed
+        ignore_nan: bool
+            If True, np.nan is ignored. Note that null (or None) is
+            already automatically ignored by pyspark. This argument is only
+            useful when the column is double or float dtype. If the column is
+            not double or float, we ignore this argument.
+
+        Returns
+        -------
+            FlickerDataFrame
+        """
         min_value = self.min(name=name, ignore_nan=ignore_nan)
         out = self._df[self._df[name].isin([min_value])]
         return self.__class__(out)
@@ -1467,8 +1505,49 @@ class FlickerDataFrame(object):
 
     def join(self, other, on=None, how='inner',
              lsuffix=None, rsuffix=None, lprefix=None, rprefix=None):
-        # Note that any None column value is not matched on. It's ignored.
+        """Join with another FlickerDataFrame. This function provides a new
+        and arguably better API than pyspark.sql.DataFrame.join.
 
+        In x.join(y), x is considered the left dataframe and y is the right
+        dataframe.
+
+        The suffix and prefix arguments to this function are useful to prevent
+        duplicate column names in the joined dataframe.
+
+        Note that any None column value is not matched on. It's ignored.
+
+        Parameters
+        ----------
+        other: FlickerDataFrame
+        on: None or str or list of str or dict[str, str]
+            The join condition. If this is None, we pass it as-is to the
+            underlying pyspark.sql.DataFrame.join. If this is a str or list
+            of str, we interpret this as the column name(s) to join on. These
+            column names must exist in both dataframes. If this is a
+            dict (recommended), then the keys are considered the column names
+            in the left dataframe and values are considered the column names
+            in the right dataframe.
+        how: str
+            Default is "inner". Must be one of: "inner", "cross", "outer",
+            "full", "full_outer", "left", "left_outer", "right", "right_outer",
+            "left_semi", and "left_anti".
+        lsuffix: str or None
+            If non-None, this suffix is affixed to all the column names of the
+            left dataframe before joining.
+        rsuffix: str or None
+            If non-None, this suffix is affixed to all the column names of the
+            right dataframe before joining.
+        lprefix: str or None
+            If non-None, this prefix is affixed to all the column names of the
+            left dataframe before joining.
+        rprefix: str or None
+            If non-None, this prefix is affixed to all the column names of the
+            right dataframe before joining.
+
+        Returns
+        -------
+            FlickerDataFrame
+        """
         def _validate_prefix_suffix(value, name):
             if (value is not None) and \
                     (not isinstance(value, six.string_types)):
@@ -1905,6 +1984,41 @@ class FlickerDataFrame(object):
             FlickerGroupedData
         """
         return FlickerGroupedData(self._df.groupBy(*items))
+
+    def union(self, other):
+        """Return a new dataframe that is a union of the current and other
+        dataframes. This function is a wrapper over
+        pyspark.sql.DataFrame.union.
+
+        This function is also similar to pandas.concat but is a poorer version
+        that resolved columns by position only.
+
+        This is equivalent to `UNION ALL` in SQL. As is standard in SQL, this
+        function resolves columns by position (not by name).
+
+        Parameters
+        ----------
+        other: FlickerDataFrame
+
+        Returns
+        -------
+            FlickerDataFrame
+
+        See Also
+        --------
+        FlickerDataFrame.concat
+        """
+        if not isinstance(other, FlickerDataFrame):
+            msg = ('other must be a FlickerDataFrame but you provided '
+                   'type(other)={}')
+            raise TypeError(msg.format(str(type(other))))
+
+        out = self._df.union(other._df)
+        if isinstance(out, pyspark.sql.DataFrame):
+            out = self.__class__(out)
+        return out
+
+    concat = union
 
     @property
     def write(self):

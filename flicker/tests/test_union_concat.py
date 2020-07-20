@@ -13,4 +13,17 @@
 #    limitations under the License.
 #
 
-__version__ = '0.0.15'
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+from builtins import range
+
+import pytest
+from flicker import FlickerDataFrame
+
+
+def test_union_and_concat(spark):
+    x = FlickerDataFrame.from_shape(spark, 2, 4,
+                                    ["year", "age", "name", "case"])
+    assert isinstance(x.union(x), FlickerDataFrame)
+    assert isinstance(x.concat(x), FlickerDataFrame)
