@@ -1,0 +1,55 @@
+site_name: flicker
+site_description: >-
+    A better API to handle PySpark dataframes.
+repo_name: ankur-gupta/flicker
+repo_url: https://github.com/ankur-gupta/flicker
+edit_uri: edit/master/docs/
+theme:
+    name: material
+    language: en
+    features:
+        - tabs
+    palette:
+        scheme: preference
+        primary: deep orange
+        accent: orange
+    icon:
+        logo: material/fire
+    favicon: assets/images/favicon.svg
+extra_css:
+    - stylesheets/extra.css
+plugins:
+    - search:
+        lang: en
+    - git-revision-date-localized:
+        type: timeago
+        fallback_to_build_date: true
+markdown_extensions:
+    - toc:
+        permalink: true
+    - admonition
+    - pymdownx.details
+    - pymdownx.superfences
+    - attr_list
+    - pymdownx.highlight:
+        use_pygments: true
+        linenums: true
+        linenums_style: pymdownx.inline
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    - pymdownx.tabbed
+    - footnotes
+    - pymdownx.betterem:
+        smart_enable: all
+    - pymdownx.smartsymbols
+    - pymdownx.emoji:
+        emoji_index: !!python/name:materialx.emoji.twemoji
+        emoji_generator: !!python/name:materialx.emoji.to_svg
+    - def_list
+    - pymdownx.tasklist:
+        custom_checkbox: true
+    - meta
+nav:
+    - Home: index.md
+    - Getting Started:
+        - Installation: getting-started/installation.md
