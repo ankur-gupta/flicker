@@ -299,13 +299,13 @@ class FlickerDataFrame(object):
         return cls(df_spark)
 
     @classmethod
-    def from_rows(cls, spark, rows, columns=None,
+    def from_rows(cls, spark, rows, names=None,
                   convert_nan_to_null_in_non_float=True,
                   convert_nan_to_null_in_float=False):
         """
         Construct a FlickerDataFrame from a list of rows. Each row can be
         a dict or a tuple or something similar. This function first uses
-        pandas.DataFrame.from_records(rows, columns=columns) to create a
+        pandas.DataFrame.from_records(rows, columns=names) to create a
         pandas DataFrame and then converts it to a FlickerDataFrame.
 
         Parameters
@@ -315,7 +315,7 @@ class FlickerDataFrame(object):
             like: `spark = SparkSession.builder.appName('app').getOrCreate()`
         rows: List[Any]
             A list of rows. For example, list of dicts.
-        columns: List[str]
+        names: List[str]
             Column names to use. If `rows` does not have names
             associated with them, this argument provides names for the
             columns. Otherwise this argument indicates the order of the columns
@@ -357,7 +357,7 @@ class FlickerDataFrame(object):
 
         >>> # Example 2
         >>> df = FlickerDataFrame.from_rows(spark, [(1, 'a'), (2, 'b')],
-                                            columns=['a', 'b'])
+                                            names=['a', 'b'])
         >>> df
         FlickerDataFrame[a: bigint, b: string]
 
@@ -377,7 +377,7 @@ class FlickerDataFrame(object):
         0  1  4.5
         1  2  6.7
         """
-        df = pd.DataFrame.from_records(rows, columns=columns)
+        df = pd.DataFrame.from_records(rows, columns=names)
         return cls.from_pandas(
             spark, df,
             convert_nan_to_null_in_non_float=convert_nan_to_null_in_non_float,
@@ -450,7 +450,7 @@ class FlickerDataFrame(object):
         )
 
     @classmethod
-    def from_columns(cls, spark, data, columns=None,
+    def from_columns(cls, spark, data, names=None,
                      convert_nan_to_null_in_non_float=True,
                      convert_nan_to_null_in_float=False):
         """
@@ -465,7 +465,7 @@ class FlickerDataFrame(object):
             like: `spark = SparkSession.builder.appName('app').getOrCreate()`
         data: List[Iterable]
             List of column contents.
-        columns: List[str]
+        names: List[str]
             Column names to use. If empty, column names are set to '0', '1',
             '2', ... str(len(data) - 1). Duplicate column names are not
             allowed.
@@ -495,7 +495,7 @@ class FlickerDataFrame(object):
                     ['spark', 'flicker', 'pandas'],
                     [2.3, np.nan, 4.5]]
         >>> df = FlickerDataFrame.from_columns(spark, data,
-                                               columns=['a', 'b', 'c'])
+                                               names=['a', 'b', 'c'])
         >>> df
         FlickerDataFrame[a: bigint, b: string, c: double]
 
@@ -505,12 +505,18 @@ class FlickerDataFrame(object):
         1  2  flicker  NaN
         2  3   pandas  4.5
         """
-        if columns is None:
-            columns = [str(i) for i in list(range(len(data)))]
-        if len(data) != len(columns):
-            msg = 'len(data)={} and len(columns)={} do not match'
-            raise ValueError(msg.format(len(data), len(columns)))
-        data_dict = {name: value for name, value in zip(columns, data)}
+        if names is None:
+            names = [str(i) for i in list(range(len(data)))]
+        if len(data) != len(names):
+            msg = 'len(data)={} and len(names)={} do not match'
+            raise ValueError(msg.format(len(data), len(names)))
+        if len(names) != len(set(names)):
+            msg = 'duplicated column names are not supported'
+            raise ValueError(msg)
+
+        # This line will overwrite if `names` contain duplicates which is
+        # why we check it beforehand.
+        data_dict = {name: value for name, value in zip(names, data)}
         return cls.from_dict(
             spark, data_dict,
             convert_nan_to_null_in_non_float=convert_nan_to_null_in_non_float,
@@ -518,7 +524,7 @@ class FlickerDataFrame(object):
         )
 
     @classmethod
-    def from_shape(cls, spark, nrows, ncols, columns=None,
+    def from_shape(cls, spark, nrows, ncols, names=None,
                    fill='zero'):
         """
         Construct a dataframe from only a shape and fill it with zeros or
@@ -535,7 +541,7 @@ class FlickerDataFrame(object):
             Number of rows
         ncols: int
             Number of columns
-        columns: List[str]
+        names: List[str]
             List of column names. Duplicate column names are not allowed. If
             empty, column names are set to '0', '1', '2', ... str(ncols - 1).
         fill: str
@@ -551,7 +557,7 @@ class FlickerDataFrame(object):
         Examples
         --------
         >>> df = FlickerDataFrame.from_shape(spark, 10, 3,
-                                             columns=['a', 'b', 'c'])
+                                             names=['a', 'b', 'c'])
         >>> df
         FlickerDataFrame[a: double, b: double, c: double]
 
@@ -575,7 +581,7 @@ class FlickerDataFrame(object):
         else:
             msg = 'fill="{}" is not supported'
             raise ValueError(msg.format(str(fill)))
-        df = pd.DataFrame.from_records(data, columns=columns)
+        df = pd.DataFrame.from_records(data, columns=names)
         return cls.from_pandas(spark, df)
 
     def __repr__(self):
@@ -745,7 +751,7 @@ class FlickerDataFrame(object):
         1  0.0  0.0
 
         >>> df = FlickerDataFrame.from_shape(
-                spark, 10, 3, columns=['a', 'b', 'c'], fill='randn')
+                spark, 10, 3, names=['a', 'b', 'c'], fill='randn')
         >>> df
         FlickerDataFrame[a: double, b: double, c: double]
         >>> df[df['a'] > 0](2)
@@ -786,7 +792,7 @@ class FlickerDataFrame(object):
         Examples
         --------
         >>> df = FlickerDataFrame.from_shape(spark, 10, 3,
-                                             columns=['a', 'b', 'c'])
+                                             names=['a', 'b', 'c'])
 
         >>> # Example 1
         >>> new_df = df.rename(['p', 'q', 'r'])
@@ -1372,7 +1378,7 @@ class FlickerDataFrame(object):
         >>> data = [(1, 'spark', 2.4, {}), (2, 'flicker', np.nan, {'key': 1})]
         >>> column_names = ['a', 'b', 'c', 'd']
         >>> df = FlickerDataFrame.from_rows(spark, rows=data,
-                                            columns=column_names)
+                                            names=column_names)
         >>> df()
            a        b    c           d
         0  1    spark  2.4          {}
@@ -1699,10 +1705,6 @@ class FlickerDataFrame(object):
         -------
             List[str]
 
-        See Also
-        --------
-        FlickerDataFrame.columns: alias of FlickerDataFrame.names
-
         Examples
         --------
         >>> df = FlickerDataFrame.from_dict(spark, {
@@ -1720,10 +1722,7 @@ class FlickerDataFrame(object):
         1  False  6.7   pandas
         2   True  9.0  flicker
 
-        >>> df.namess
-        ['a', 'b', 'c']
-
-        >>> df.columns
+        >>> df.names
         ['a', 'b', 'c']
         """
         return self._df.columns
@@ -1748,8 +1747,8 @@ class FlickerDataFrame(object):
         # Note that the names can never be duplicated in a FlickerDataFrame.
         for n, dtype in self._df.dtypes:
             if name == n:
-                break
-        return dtype
+                return dtype
+        # We should never be able to reach here.
 
     def __getattr__(self, name):
         return self._df.__getattr__(name)

@@ -8,3 +8,9 @@ coverage.xml
 .coverage
 .coverage.*
 .vscode
+.eggs
+.pytest_cache
+*.avro
+*.parquet
+*.crc
+_SUCCESS
