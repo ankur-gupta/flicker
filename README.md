@@ -64,7 +64,7 @@ df
 df.shape
 # (100, 3)
 
-df.columns
+df.names
 # ['a', 'b', 'c']
 
 df.dtypes
@@ -212,7 +212,7 @@ every operation that PySpark supports. Please consider filing an issue for
 missing functions, bugs, or unintuitive API. Happy sparking!
 
 # License
-`flicker` has the [Apache License 2.0](https://github.com/ankur-gupta/flicker/blob/master/LICENSE).
+`flicker` is available under [Apache License 2.0](https://github.com/ankur-gupta/flicker/blob/master/LICENSE).
 
 `flicker` depends on other python packages listed in
 [requirements.txt](https://github.com/ankur-gupta/flicker/blob/master/requirements.txt)
