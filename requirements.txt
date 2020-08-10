@@ -6,3 +6,8 @@ pyspark
 # For tests
 pytest
 pytest-cov
+
+# For docs
+wheel
+mkdocs-material
+mkdocs-git-revision-date-localized-plugin

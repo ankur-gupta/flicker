@@ -1,4 +1,4 @@
-# 🕯️ flicker
+# 🔥flicker
 [![PyPI Latest Release](https://img.shields.io/pypi/v/flicker.svg)](https://pypi.org/project/flicker/)
 ![build](https://github.com/ankur-gupta/flicker/workflows/build/badge.svg)
 [![codecov](https://codecov.io/gh/ankur-gupta/flicker/branch/master/graph/badge.svg)](https://codecov.io/gh/ankur-gupta/flicker)
@@ -13,7 +13,7 @@ soon.
 
 One way to understand `flicker`'s position is via the following analogy:
 
-> _**keras** is to **CNTK** as **flicker** is to **pyspark**_
+> _**keras** is to **tensorflow** as **flicker** is to **pyspark**_
 
 `flicker` aims to provides a more intuitive, pythonic API over a `pyspark`
 backend. `flicker` relies completely on `pyspark` for all distributed
@@ -54,7 +54,7 @@ spark = SparkSession.builder.appName('PySparkShell').getOrCreate()
 spark.conf.set('spark.sql.caseSensitive', True)
 
 # Create a dummy Flicker DataFrame using normally distributed random data of shape (100, 3)
-df = FlickerDataFrame.from_shape(spark, nrows=100, ncols=3, columns=['a', 'b', 'c'], fill='randn')
+df = FlickerDataFrame.from_shape(spark, nrows=100, ncols=3, names=['a', 'b', 'c'], fill='randn')
 
 # Print the object to see the column names and types
 df
@@ -99,7 +99,7 @@ df()
 # 4  1.768242 -2.422804 -1.012876           True
 
 # These features can intermixed in nearly every imaginable way. Here are some quick examples.
-# Example 1: show the first 5 rows of the dataframe that has only 'a' and 'c' columns selected.
+# Example 1: show the first 5 rows of the dataframe that has only 'a' and 'c' names selected.
 df[['a', 'c']]()
 
 # Example 2: Filter the data to select only the rows that have a positive value in column 'a' and
@@ -132,7 +132,7 @@ spark = SparkSession.builder.appName('PySparkShell').getOrCreate()
 # Create a more complicated dataframe using one of the factory constructor
 data = [(1, 'spark', 2.4, {}), (2, 'flicker', np.nan, {'key': 1})]
 column_names = ['a', 'b', 'c', 'd']
-df = FlickerDataFrame.from_rows(spark, rows=data, columns=column_names)
+df = FlickerDataFrame.from_rows(spark, rows=data, names=column_names)
 df
 # FlickerDataFrame[a: bigint, b: string, c: double, d: map<string,bigint>]
 
@@ -154,7 +154,7 @@ df()
 # 0  1    spark  2.4          {}   dict
 # 1  2  flicker  NaN  {'key': 1}   dict
 
-# Get the lengths of columns 'a' and 'd'
+# Get the lengths of elements in the columns 'a' and 'd'
 df['a_len'] = len_udf(df['a'])
 df['d_len'] = len_udf(df['d'])
 df
@@ -212,7 +212,7 @@ every operation that PySpark supports. Please consider filing an issue for
 missing functions, bugs, or unintuitive API. Happy sparking!
 
 # License
-[Apache License 2.0](https://github.com/ankur-gupta/flicker/blob/master/LICENSE)
+`flicker` has the [Apache License 2.0](https://github.com/ankur-gupta/flicker/blob/master/LICENSE).
 
 `flicker` depends on other python packages listed in
 [requirements.txt](https://github.com/ankur-gupta/flicker/blob/master/requirements.txt)
