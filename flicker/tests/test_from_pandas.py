@@ -24,7 +24,6 @@ import pytest
 from flicker import FlickerDataFrame
 
 
-@pytest.mark.new
 def test_duplicated_names_failure(spark):
     pdf = pd.DataFrame({'a': [0, 1], 'b': [3.4, 5.6]})
     pdf_duplicate_names = pd.concat([pdf, pdf], axis=1)
@@ -32,7 +31,6 @@ def test_duplicated_names_failure(spark):
         FlickerDataFrame.from_pandas(spark, pdf_duplicate_names)
 
 
-@pytest.mark.new
 def test_basic_usage(spark):
     pdf = pd.DataFrame({'a': [0, 1], 'b': [3.4, 5.6], 'c': ['a', 'b']})
     df = FlickerDataFrame.from_pandas(spark, pdf)
@@ -41,4 +39,3 @@ def test_basic_usage(spark):
     for name in df.names:
         assert np.all(df[[name]].to_pandas()[name].to_numpy() == \
                       pdf[name].to_numpy())
-

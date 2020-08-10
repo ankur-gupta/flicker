@@ -510,6 +510,12 @@ class FlickerDataFrame(object):
         if len(data) != len(names):
             msg = 'len(data)={} and len(names)={} do not match'
             raise ValueError(msg.format(len(data), len(names)))
+        if len(names) != len(set(names)):
+            msg = 'duplicated column names are not supported'
+            raise ValueError(msg)
+
+        # This line will overwrite if `names` contain duplicates which is
+        # why we check it beforehand.
         data_dict = {name: value for name, value in zip(names, data)}
         return cls.from_dict(
             spark, data_dict,

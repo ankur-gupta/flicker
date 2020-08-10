@@ -23,52 +23,48 @@ import pandas as pd
 import pytest
 from flicker import FlickerDataFrame
 
-@pytest.mark.new
-def test_duplicated_names_failure(spark):
-    rows = [(1, 'spark'), (2, 'b'), (3, 'hello')]
-    names = ['a', 'a']
-    with pytest.raises(Exception):
-        FlickerDataFrame.from_rows(spark, rows, names)
 
 @pytest.mark.new
-def test_rows_names_mismatch(spark):
-    rows = [(1, 'spark'), (2, 'b'), (3, 'hello')]
+def test_duplicated_names_failure(spark):
+    columns = [[1, 2, 3], ['hello', 'spark', 'flicker']]
+    names = ['a', 'a']
+    with pytest.raises(Exception):
+        FlickerDataFrame.from_columns(spark, columns, names)
+
+
+@pytest.mark.new
+def test_columns_names_mismatch(spark):
+    columns = [[1, 2, 3], ['hello', 'spark', 'flicker']]
     names = ['a', 'b', 'c']
     with pytest.raises(Exception):
-        FlickerDataFrame.from_rows(spark, rows, names)
+        FlickerDataFrame.from_columns(spark, columns, names)
+
 
 @pytest.mark.new
 def test_typical_usage(spark):
-    rows = [(1, 'spark'), (2, 'b'), (3, 'hello')]
-    expected_first_column = np.array([value[0] for value in rows])
-    expected_second_column = np.array([value[1] for value in rows])
+    columns = [[1, 2, 3], ['hello', 'spark', 'flicker']]
 
-    df = FlickerDataFrame.from_rows(spark, rows)
+    df = FlickerDataFrame.from_columns(spark, columns)
     assert df.shape == (3, 2)
 
     first_name = df.names[0]
     first_column = df[[first_name]].to_pandas()[first_name].to_numpy()
-    assert np.all(first_column == expected_first_column)
+    assert np.all(first_column == np.array(columns[0]))
 
     second_name = df.names[1]
     second_column = df[[second_name]].to_pandas()[second_name].to_numpy()
-    assert np.all(second_column == expected_second_column)
+    assert np.all(second_column == np.array(columns[1]))
 
-
+@pytest.mark.new
 def test_usage_with_names(spark):
-    rows = [(1, 'spark'), (2, 'b'), (3, 'hello')]
+    columns = [[1, 2, 3], ['hello', 'spark', 'flicker']]
     names = ['a', 'b']
-    expected_first_column = np.array([value[0] for value in rows])
-    expected_second_column = np.array([value[1] for value in rows])
 
-    df = FlickerDataFrame.from_rows(spark, rows, names)
+    df = FlickerDataFrame.from_columns(spark, columns, names)
     assert df.shape == (3, 2)
     assert list(df.names) == list(names)
 
-    first_name = df.names[0]
-    first_column = df[[first_name]].to_pandas()[first_name].to_numpy()
-    assert np.all(first_column == expected_first_column)
-
-    second_name = df.names[1]
-    second_column = df[[second_name]].to_pandas()[second_name].to_numpy()
-    assert np.all(second_column == expected_second_column)
+    for i, name in enumerate(df.names):
+        column = df[[name]].to_pandas()[name].to_numpy()
+        expected_column = np.array(columns[i])
+        assert np.all(column == expected_column)
