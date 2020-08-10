@@ -1748,7 +1748,7 @@ class FlickerDataFrame(object):
         for n, dtype in self._df.dtypes:
             if name == n:
                 return dtype
-        raise KeyError('column "{}" not found'.format(name))
+        # We should never be able to reach here.
 
     def __getattr__(self, name):
         return self._df.__getattr__(name)
