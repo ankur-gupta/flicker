@@ -19,12 +19,10 @@ from __future__ import division
 from builtins import range
 
 import numpy as np
-import pandas as pd
 import pytest
 from flicker import FlickerDataFrame
 
 
-@pytest.mark.new
 def test_duplicated_names_failure(spark):
     columns = [[1, 2, 3], ['hello', 'spark', 'flicker']]
     names = ['a', 'a']
@@ -32,7 +30,6 @@ def test_duplicated_names_failure(spark):
         FlickerDataFrame.from_columns(spark, columns, names)
 
 
-@pytest.mark.new
 def test_columns_names_mismatch(spark):
     columns = [[1, 2, 3], ['hello', 'spark', 'flicker']]
     names = ['a', 'b', 'c']
@@ -40,7 +37,6 @@ def test_columns_names_mismatch(spark):
         FlickerDataFrame.from_columns(spark, columns, names)
 
 
-@pytest.mark.new
 def test_typical_usage(spark):
     columns = [[1, 2, 3], ['hello', 'spark', 'flicker']]
 
@@ -55,7 +51,7 @@ def test_typical_usage(spark):
     second_column = df[[second_name]].to_pandas()[second_name].to_numpy()
     assert np.all(second_column == np.array(columns[1]))
 
-@pytest.mark.new
+
 def test_usage_with_names(spark):
     columns = [[1, 2, 3], ['hello', 'spark', 'flicker']]
     names = ['a', 'b']

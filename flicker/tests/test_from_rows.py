@@ -19,25 +19,24 @@ from __future__ import division
 from builtins import range
 
 import numpy as np
-import pandas as pd
 import pytest
 from flicker import FlickerDataFrame
 
-@pytest.mark.new
+
 def test_duplicated_names_failure(spark):
     rows = [(1, 'spark'), (2, 'b'), (3, 'hello')]
     names = ['a', 'a']
     with pytest.raises(Exception):
         FlickerDataFrame.from_rows(spark, rows, names)
 
-@pytest.mark.new
+
 def test_rows_names_mismatch(spark):
     rows = [(1, 'spark'), (2, 'b'), (3, 'hello')]
     names = ['a', 'b', 'c']
     with pytest.raises(Exception):
         FlickerDataFrame.from_rows(spark, rows, names)
 
-@pytest.mark.new
+
 def test_typical_usage(spark):
     rows = [(1, 'spark'), (2, 'b'), (3, 'hello')]
     expected_first_column = np.array([value[0] for value in rows])
