@@ -50,6 +50,6 @@ markdown_extensions:
         custom_checkbox: true
     - meta
 nav:
-    - Home: index.md
+    - Overview: index.md
     - Getting Started:
         - Installation: getting-started/installation.md

@@ -923,6 +923,7 @@ class FlickerDataFrame(object):
         out = self._df
         if drop_null:
             # FIXME: This will fail when names = list[str].
+            # FIXME: isNotNull may have been removed in Spark 3.0.0
             out = out[out[names].isNotNull()]
         if nrows is not None:
             out = out.limit(nrows)
