@@ -15,7 +15,7 @@ spark = SparkSession.builder.appName('PySparkShell').getOrCreate()
 
 # Create a dummy Flicker DataFrame using normally distributed random data of shape (100, 3)
 df = FlickerDataFrame.from_shape(spark, nrows=100, ncols=3,
-                                 columns=['a', 'b', 'c'], fill='randn')
+                                 names=['a', 'b', 'c'], fill='randn')
 
 # See the nice printed dataframe in ipython/jupyter
 df
