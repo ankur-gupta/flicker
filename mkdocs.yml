@@ -51,5 +51,10 @@ markdown_extensions:
     - meta
 nav:
     - Overview: index.md
+    - Quick Example: quick-example.md
+    - Design: design.md
+    - License: license.md
     - Getting Started:
         - Installation: getting-started/installation.md
+    - Tutorial:
+          - Data Analysis: tutorial/data-analysis.md

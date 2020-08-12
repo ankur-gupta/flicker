@@ -110,15 +110,12 @@ instructions; we use `ankurio/flicker-playground`.
 ```bash
 # From $REPO_ROOT/docker in the host machine
 docker run -it \
--p 8888:8888 \  # For Jupyter Notebook  
--p 8080:8080 \  # For Spark Master WebUI  
+-p 8888:8888 \
+-p 8080:8080 \
+-p 4040:4040 \
 --volume $PWD/notebooks:/home/neo/notebooks \
 ankurio/flicker-playground
 ```
-```bash
-# From $REPO_ROOT/docker in the host machine
-docker run -it -p 8888:8888 -p 4040:4040 --volume $PWD/notebooks:/home/neo/notebooks ankurio/flicker-playground
-```  
 
 ### Run IPython with a data mount
 ```bash
