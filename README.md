@@ -19,6 +19,8 @@ One way to understand `flicker`'s position is via the following analogy:
 backend. `flicker` relies completely on `pyspark` for all distributed
 computing work.
 
+See the [documentation](https://flicker.perfectlyrandom.org/) for details.
+
 
 # Getting Started
 ## Install
