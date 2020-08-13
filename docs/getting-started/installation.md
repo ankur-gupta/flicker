@@ -29,7 +29,7 @@ The corresponding Dockerfile is available inside the repository
 [here](https://github.com/ankur-gupta/flicker/blob/master/docker/Dockerfile),
 if you choose to build it yourself. The instructions to build the
 Docker image are available
-[here](https://github.com/ankur-gupta/flicker/blob/master/docker/Dockerfile).
+[here](https://github.com/ankur-gupta/flicker/blob/master/docker).
 
 After pulling (or building) the Docker image, you can mount data and
 run a Jupyter notebook or IPython from it.
@@ -61,9 +61,10 @@ The ports `8080` and `4040`
 below are for Spark's Web UI. In the following commands, we bind the Docker
 container's ports to host machine's ports. We will still need to setup the
 Spark session inside the container to use these ports. Typically, the
-Spark's Web UI can be accessed at http://localhost:8080 for
-Spark Master Web UI (which may not always be available) and at
-http://localhost:4040 (for a particular Spark app).
+Spark's Web UI can be accessed at 
+[http://localhost:8080](http://localhost:8080) for Spark Master Web UI 
+(which may not always be available) and at
+[http://localhost:4040](http://localhost:4040) (for a particular Spark app).
 
 
 ## Building from source
