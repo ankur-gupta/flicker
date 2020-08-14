@@ -15,13 +15,17 @@ Consider the following snippet that adds a new column to a PySpark dataframe.
 ```python
 pyspark_df = pyspark_df.withColumn('new_column', lit(1))
 ```
-In contrast, the same operation can be done for a pandas dataframe like this
+In contrast, the same operation can be done for a pandas dataframe like this:
 ```python
 pandas_df['new_column'] = 1
 ```
+Flicker lets you write the same syntax for PySpark dataframes:
+```python
+flicker_df['new_column'] = 1
+```
 
 The difference PySpark and pandas dataframe APIs may not seem significant
-based on the simple example above. In real-life, the verbosity and lack of
+based on the simple example above. But, in real-life, the verbosity and lack of
 pythonic patterns makes working with PySpark unappealing. This is especially
 true when performing ad-hoc, interactive data analysis (instead of writing
 durable, well-tested production code). For example, it is tiring to type out
