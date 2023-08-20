@@ -1,0 +1,1174 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A better API to handle PySpark dataframes.">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../design/">
+      
+      <link rel="icon" href="../assets/images/favicon.svg">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
+    
+    
+      
+        <title>Quick Example - flicker</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.eebd395e.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ecc896b0.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/timeago.css">
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="preference" data-md-color-primary="deep-orange" data-md-color-accent="orange">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quick-example" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="flicker" class="md-header__button md-logo" aria-label="flicker" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32-2.59 2.08-3.61 5.75-2.39 8.9.04.1.08.2.08.33 0 .22-.15.42-.35.5-.23.1-.47.04-.66-.12a.58.58 0 0 1-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5.14.6.41 1.2.71 1.73 1.08 1.73 2.95 2.97 4.96 3.22 2.14.27 4.43-.12 6.07-1.6 1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26m-3.16 6.3c-.28.24-.74.5-1.1.6-1.12.4-2.24-.16-2.9-.82 1.19-.28 1.9-1.16 2.11-2.05.17-.8-.15-1.46-.28-2.23-.12-.74-.1-1.37.17-2.06.19.38.39.76.63 1.06.77 1 1.98 1.44 2.24 2.8.04.14.06.28.06.43.03.82-.33 1.72-.93 2.27Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            flicker
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Quick Example
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ankur-gupta/flicker" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ankur-gupta/flicker
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="flicker" class="md-nav__button md-logo" aria-label="flicker" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32-2.59 2.08-3.61 5.75-2.39 8.9.04.1.08.2.08.33 0 .22-.15.42-.35.5-.23.1-.47.04-.66-.12a.58.58 0 0 1-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5.14.6.41 1.2.71 1.73 1.08 1.73 2.95 2.97 4.96 3.22 2.14.27 4.43-.12 6.07-1.6 1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26m-3.16 6.3c-.28.24-.74.5-1.1.6-1.12.4-2.24-.16-2.9-.82 1.19-.28 1.9-1.16 2.11-2.05.17-.8-.15-1.46-.28-2.23-.12-.74-.1-1.37.17-2.06.19.38.39.76.63 1.06.77 1 1.98 1.44 2.24 2.8.04.14.06.28.06.43.03.82-.33 1.72-.93 2.27Z"/></svg>
+
+    </a>
+    flicker
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ankur-gupta/flicker" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ankur-gupta/flicker
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Quick Example
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Quick Example
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#create-the-dataframe" class="md-nav__link">
+    Create the DataFrame
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#print-the-dataframe" class="md-nav__link">
+    Print the DataFrame
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inspect-shape-and-columns" class="md-nav__link">
+    Inspect shape and columns
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extracting-a-column" class="md-nav__link">
+    Extracting a column
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extracting-multiple-columns" class="md-nav__link">
+    Extracting multiple columns
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-new-column" class="md-nav__link">
+    Creating a new column
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    Filtering
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-operations" class="md-nav__link">
+    Common operations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chain-everything-together" class="md-nav__link">
+    Chain everything together
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-the-pyspark-dataframe" class="md-nav__link">
+    Get the PySpark dataframe
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#there-is-more" class="md-nav__link">
+    There is more
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../design/" class="md-nav__link">
+        Design
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../releases/" class="md-nav__link">
+        Releases
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        License
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          Getting Started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/installation/" class="md-nav__link">
+        Installation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          Tutorial
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorial
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/data-analysis/" class="md-nav__link">
+        Data Analysis
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#create-the-dataframe" class="md-nav__link">
+    Create the DataFrame
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#print-the-dataframe" class="md-nav__link">
+    Print the DataFrame
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inspect-shape-and-columns" class="md-nav__link">
+    Inspect shape and columns
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extracting-a-column" class="md-nav__link">
+    Extracting a column
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extracting-multiple-columns" class="md-nav__link">
+    Extracting multiple columns
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-new-column" class="md-nav__link">
+    Creating a new column
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#filtering" class="md-nav__link">
+    Filtering
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-operations" class="md-nav__link">
+    Common operations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chain-everything-together" class="md-nav__link">
+    Chain everything together
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#get-the-pyspark-dataframe" class="md-nav__link">
+    Get the PySpark dataframe
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#there-is-more" class="md-nav__link">
+    There is more
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="quick-example">Quick Example<a class="headerlink" href="#quick-example" title="Permanent link">&para;</a></h1>
+<p>This example describes how to use <code>flicker</code>. This also provides a good
+comparison between <code>flicker</code> and <code>pyspark</code> dataframe APIs.</p>
+<!-- [FIXME: tutorial, flicker vs pyspark] -->
+<!-- [FIXME: link to this example in jupyter notebook] -->
+
+<p>The example assumes that you have already installed <code>flicker</code>. Please see
+<a href="/getting-started/installation/">Getting Started</a>
+for installation instructions. This example uses <code>flicker 0.0.16</code> and
+<code>pyspark 2.4.5</code>.</p>
+<p>You can follow along without having to install or setup a spark environment
+by using the <code>flicker-playground</code>
+<a href="https://hub.docker.com/r/ankurio/flicker-playground">docker image</a>,
+as described in <a href="/getting-started/installation/">Getting Started</a>.</p>
+<p>The entire code is available as 
+<a href="https://github.com/ankur-gupta/flicker/blob/master/docker/notebooks/example.py">example.py</a>
+or 
+<a href="https://github.com/ankur-gupta/flicker/blob/master/docker/notebooks/example.ipynb">example.ipynb</a>.</p>
+<h2 id="create-the-dataframe">Create the DataFrame<a class="headerlink" href="#create-the-dataframe" title="Permanent link">&para;</a></h2>
+<p>Let's create a Spark session and a PySpark dataframe to begin. This is the
+same as with PySpark. In some cases, you may already have a
+<code>spark: SparkSession</code> object defined for you (such as when running the
+<code>pyspark</code> executable or on <a href="https://aws.amazon.com/emr/">AWS EMR</a>).</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="kn">import</span> <span class="n">SparkSession</span>
+<span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">appName</span><span class="p">(</span><span class="s1">&#39;PySparkShell&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="n">pyspark_df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span>
+    <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Turing&#39;</span><span class="p">,</span> <span class="mi">41</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Laplace&#39;</span><span class="p">,</span> <span class="mi">77</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Kolmogorov&#39;</span><span class="p">,</span> <span class="mi">84</span><span class="p">)],</span>
+    <span class="s1">&#39;id INT, name STRING, age INT&#39;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>To use the benefits of <code>flicker</code>, let's create <code>FlickerDataFrame</code> from
+the PySpark dataframe. This is easy &ndash; just call the default constructor.
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">flicker</span> <span class="kn">import</span> <span class="n">FlickerDataFrame</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="p">(</span><span class="n">pyspark_df</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+If you're following along this example in your own interactive python terminal,
+you'll notice that the above step is pretty fast. A <code>FlickerDataFrame</code> simply
+wraps the PySpark dataframe within itself<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> (you can access it at <code>df._df</code>).
+Flicker does not copy any data from <code>pyspark_df</code> to <code>df</code> in the above
+code snippet. This means that no matter how big your PySpark dataframe is,
+creating a Flicker dataframe is always quick.</p>
+<p>In the rest of this example, we show code for both Flicker and PySpark
+side-by-side.</p>
+<h2 id="print-the-dataframe">Print the DataFrame<a class="headerlink" href="#print-the-dataframe" title="Permanent link">&para;</a></h2>
+<p>Printing a distributed dataframe may require pulling data
+in from worker nodes, which in turn, may need to perform any un-executed
+operations before they can send the data. This makes printing PySpark
+or Flicker dataframes slow operations, unlike pandas. This is why neither
+PySpark nor Flicker shows you the contents when you print <code>df</code> or <code>pyspark_df</code>.</p>
+<div class="tabbed-set" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><label for="__tabbed_1_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span>
+<span class="c1"># FlickerDataFrame[id: int, name: string, age: int]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><label for="__tabbed_1_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span>
+<span class="c1"># DataFrame[id: int, name: string, age: int]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>In order to see the contents (actually, just the first few rows) of the
+dataframe, we can invoke the <code>.show()</code> method. Since we have to print
+dataframes very often (such as when performing interactive analysis), Flicker
+lets you "print" the first few rows by just calling the dataframe.</p>
+<div class="tabbed-set" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><label for="__tabbed_2_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="p">()</span>
+<span class="c1">#    id        name  age</span>
+<span class="c1"># 0   1      Turing   41</span>
+<span class="c1"># 1   2     Laplace   77</span>
+<span class="c1"># 2   3  Kolmogorov   84</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><label for="__tabbed_2_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +---+----------+---+</span>
+<span class="c1"># | id|      name|age|</span>
+<span class="c1"># +---+----------+---+</span>
+<span class="c1"># |  1|    Turing| 41|</span>
+<span class="c1"># |  2|   Laplace| 77|</span>
+<span class="c1"># |  3|Kolmogorov| 84|</span>
+<span class="c1"># +---+----------+---+</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>If you're running the commands in a terminal, you will see the output like
+the one shown above. For this small example, the Flicker version of printed
+content looks unimpressive against the PySpark version but Flicker-printed
+content looks much better for bigger dataframes. If you're running the same
+commands in a Jupyter notebook, the Flicker-printed content you appear as
+a pretty, mildly-interactive HTML dataframe but the PySpark-printed content
+would just be text.</p>
+<p>Under the hood, Flicker and PySpark have very different behaviors.
+PySpark's <code>pyspark_df.show()</code> uses side-effects &ndash; it truly prints the
+formatted string to <code>stdout</code> and then returns <code>None</code>. Flicker's <code>df()</code>, on the
+other hand, returns a small pandas dataframe which then gets printed
+appropriately depending on the interactive tool
+(such as Jupyter or IPython)<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>. This also means that if you wanted to
+inspect the printed dataframe, you could simply do this:</p>
+<div class="tabbed-set" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><label for="__tabbed_3_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pandas_df_sample</span> <span class="o">=</span> <span class="n">df</span><span class="p">()</span>
+<span class="n">pandas_df_sample</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="c1"># array([&#39;Turing&#39;, &#39;Laplace&#39;, &#39;Kolmogorov&#39;], dtype=object)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><label for="__tabbed_3_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pandas_df_sample</span> <span class="o">=</span> <span class="n">pyspark_df</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
+<span class="n">pandas_df_sample</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+<span class="c1"># array([&#39;Turing&#39;, &#39;Laplace&#39;, &#39;Kolmogorov&#39;], dtype=object)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>Obviously, PySpark lets you do this too but with more verbosity.</p>
+<h2 id="inspect-shape-and-columns">Inspect shape and columns<a class="headerlink" href="#inspect-shape-and-columns" title="Permanent link">&para;</a></h2>
+<p>Flicker provides a pandas-like API. The same result may be obtained using
+PySpark with a little bit more verbosity.</p>
+<div class="tabbed-set" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><label for="__tabbed_4_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+<span class="c1"># (3, 3)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><label for="__tabbed_4_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">(</span><span class="n">pyspark_df</span><span class="o">.</span><span class="n">count</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="n">pyspark_df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+<span class="c1"># (3, 3)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>Note that Flicker still uses PySpark's <code>.count()</code> method under the hood to get
+the number of rows. This means that both Flicker and PySpark snippets above
+may be slow the first time we run them. However, <code>FlickerDataFrame</code> "stores"
+the row count which means that invoking <code>df.shape</code> the second time should be
+instantaneous, as long as <code>df</code> is not modified since the first invocation.</p>
+<p>Getting the column names is also easy. Flicker differentiates between
+a column (<code>pyspark.sql.Column</code> object) and a column name (a <code>str</code> object).
+This is why we named the property <code>df.names</code> instead of <code>df.columns</code>.
+Similar to PySpark dataframe, we can get the data types for all the columns.</p>
+<div class="tabbed-set" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><label for="__tabbed_5_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">names</span>
+<span class="c1"># [&#39;id&#39;, &#39;name&#39;, &#39;age&#39;]</span>
+<span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="c1"># [(&#39;id&#39;, &#39;int&#39;), (&#39;name&#39;, &#39;string&#39;), (&#39;age&#39;, &#39;int&#39;)]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><label for="__tabbed_5_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span><span class="o">.</span><span class="n">columns</span>
+<span class="c1"># [&#39;id&#39;, &#39;name&#39;, &#39;age&#39;]</span>
+<span class="n">pyspark_df</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="c1"># [(&#39;id&#39;, &#39;int&#39;), (&#39;name&#39;, &#39;string&#39;), (&#39;age&#39;, &#39;int&#39;)]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<h2 id="extracting-a-column">Extracting a column<a class="headerlink" href="#extracting-a-column" title="Permanent link">&para;</a></h2>
+<p>Unlike a <code>pandas.Series</code> object, the <code>pyspark.sql.Column</code> object does not
+materialize the column for us. Since Flicker is just an API over PySpark,
+Flicker does not materialize the column either.</p>
+<div class="tabbed-set" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><label for="__tabbed_6_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>  <span class="c1"># not a FickerDataFrame object</span>
+<span class="c1"># Column&lt;b&#39;name&#39;&gt;</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><label for="__tabbed_6_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>  <span class="c1"># not a pyspark.sql.DataFrame objecy</span>
+<span class="c1"># Column&lt;b&#39;name&#39;&gt;</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>PySpark does not provide a proper equivalent to the pandas' Series object.
+If we wanted to perform an operation on a column, we may still be able to it
+albeit in a round-about way. For example, we can count the number of
+distinct <code>name</code>s like this:</p>
+<div class="tabbed-set" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><label for="__tabbed_7_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span><span class="o">.</span><span class="n">nrows</span>
+<span class="c1"># 3</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><label for="__tabbed_7_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span><span class="p">[[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">distinct</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="c1"># 3</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<h2 id="extracting-multiple-columns">Extracting multiple columns<a class="headerlink" href="#extracting-multiple-columns" title="Permanent link">&para;</a></h2>
+<p>Luckily, this is the same in Flicker, PySpark, and pandas.
+As previously mentioned, the contents don't get printed unless we specifically
+ask for it.</p>
+<div class="tabbed-set" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><label for="__tabbed_8_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="p">[[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">]]</span>
+<span class="c1"># FlickerDataFrame[name: string, age: int]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><label for="__tabbed_8_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span><span class="p">[[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">]]</span>
+<span class="c1"># DataFrame[name: string, age: int]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<h2 id="creating-a-new-column">Creating a new column<a class="headerlink" href="#creating-a-new-column" title="Permanent link">&para;</a></h2>
+<p>This is where Flicker shines &ndash; you can use pandas-like assignment API.
+Observant readers may notice that the following makes <code>FlickerDataFrame</code>
+objects mutable, unlike a <code>pyspark.sql.DataFrame</code> object which is immutable.
+This is by design.</p>
+<div class="tabbed-set" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><label for="__tabbed_9_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="p">[</span><span class="s1">&#39;is_age_more_than_fifty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">50</span>
+<span class="n">df</span><span class="p">()</span>  <span class="c1"># Must print to see the output</span>
+<span class="c1">#    id        name  age  is_age_more_than_fifty</span>
+<span class="c1"># 0   1      Turing   41                   False</span>
+<span class="c1"># 1   2     Laplace   77                    True</span>
+<span class="c1"># 2   3  Kolmogorov   84                    True</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><label for="__tabbed_9_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span> <span class="o">=</span> <span class="n">pyspark_df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s1">&#39;is_age_more_than_fifty&#39;</span><span class="p">,</span> <span class="n">pyspark_df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">pyspark_df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>  <span class="c1"># Must print to see the output</span>
+<span class="c1"># +---+----------+---+----------------------+</span>
+<span class="c1"># | id|      name|age|is_age_more_than_fifty|</span>
+<span class="c1"># +---+----------+---+----------------------+</span>
+<span class="c1"># |  1|    Turing| 41|                 false|</span>
+<span class="c1"># |  2|   Laplace| 77|                  true|</span>
+<span class="c1"># |  3|Kolmogorov| 84|                  true|</span>
+<span class="c1"># +---+----------+---+----------------------+</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>The above combination of <em>perform an operation</em> and then <em>print</em> is a common
+pattern when performing interactive analysis. This is because simply
+executing <code>df['is_age_more_than_fifty'] = df['age'] &gt; 50</code> does not actually
+perform the computation. It's only when you print (or count or take any other
+<a href="https://spark.apache.org/docs/latest/rdd-programming-guide.html#actions">action</a>),
+that the previously specified computation is actually performed. By printing
+immediately after specifying an operation helps catch errors early.</p>
+<h2 id="filtering">Filtering<a class="headerlink" href="#filtering" title="Permanent link">&para;</a></h2>
+<p>This is also the same in Flicker, PySpark, and pandas.</p>
+<div class="tabbed-set" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><label for="__tabbed_10_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Use boolean column to filter</span>
+<span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;is_age_more_than_fifty&#39;</span><span class="p">]]</span>
+<span class="c1"># FlickerDataFrame[id: int, name: string, age: int, is_age_more_than_fifty: boolean]</span>
+
+<span class="c1"># Filter and print in one-line</span>
+<span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">]()</span>
+<span class="c1">#    id    name  age  is_age_more_than_fifty</span>
+<span class="c1"># 0   1  Turing   41                   False</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><label for="__tabbed_10_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Use boolean column to filter</span>
+<span class="n">pyspark_df</span><span class="p">[</span><span class="n">pyspark_df</span><span class="p">[</span><span class="s1">&#39;is_age_more_than_fifty&#39;</span><span class="p">]]</span>
+<span class="c1"># DataFrame[id: int, name: string, age: int, is_age_more_than_fifty: boolean]</span>
+
+<span class="c1"># Filter and print in one-line</span>
+<span class="n">pyspark_df</span><span class="p">[</span><span class="n">pyspark_df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +---+------+---+----------------------+</span>
+<span class="c1"># | id|  name|age|is_age_more_than_fifty|</span>
+<span class="c1"># +---+------+---+----------------------+</span>
+<span class="c1"># |  1|Turing| 41|                 false|</span>
+<span class="c1"># +---+------+---+----------------------+</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<h2 id="common-operations">Common operations<a class="headerlink" href="#common-operations" title="Permanent link">&para;</a></h2>
+<p>Flicker comes loaded with methods that perform common operations. A prime
+example is generating value counts, typically done in pandas via
+<code>.value_counts()</code> method. Flicker also provides this method with only
+minor (but sensible) modifications to the method arguments.</p>
+<div class="tabbed-set" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><label for="__tabbed_11_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+<span class="c1"># FlickerDataFrame[name: string, count: bigint]</span>
+
+<span class="n">df</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)()</span>
+<span class="c1">#          name  count</span>
+<span class="c1"># 0      Turing      1</span>
+<span class="c1"># 1     Laplace      1</span>
+<span class="c1"># 2  Kolmogorov      1</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><label for="__tabbed_11_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="c1"># DataFrame[name: string, count: bigint]</span>
+
+<span class="n">pyspark_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +----------+-----+</span>
+<span class="c1"># |      name|count|</span>
+<span class="c1"># +----------+-----+</span>
+<span class="c1"># |    Turing|    1|</span>
+<span class="c1"># |Kolmogorov|    1|</span>
+<span class="c1"># |   Laplace|    1|</span>
+<span class="c1"># +----------+-----+</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>Even though the PySpark snippet above looks simple enough, it requires the
+programmer to know that they have to use <code>.groupby()</code> method to generate
+value counts (much like in SQL). This additional cognitive load on the
+programmer is a hallmark of PySpark dataframe API. But, Flicker can do more
+than that.</p>
+<div class="tabbed-set" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><label for="__tabbed_12_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="s1">&#39;is_age_more_than_fifty&#39;</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)()</span>
+<span class="c1">#    is_age_more_than_fifty     count</span>
+<span class="c1"># 0                   False  0.333333</span>
+<span class="c1"># 1                    True  0.666667</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><label for="__tabbed_12_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">nrows</span> <span class="o">=</span> <span class="n">pyspark_df</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">count_df</span> <span class="o">=</span> <span class="p">(</span><span class="n">pyspark_df</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s1">&#39;is_age_more_than_fifty&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">count</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">orderBy</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="n">count_df</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">count_df</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">nrows</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># +----------------------+------------------+</span>
+<span class="c1"># |is_age_more_than_fifty|             count|</span>
+<span class="c1"># +----------------------+------------------+</span>
+<span class="c1"># |                 false|0.3333333333333333|</span>
+<span class="c1"># |                  true|0.6666666666666666|</span>
+<span class="c1"># +----------------------+------------------+</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>PySpark requires defining more variables to normalize the counts. We need to
+generate value counts for a lot of dataframes in order to simply inspect the
+data. The obvious solution is to wrap the PySpark code snippet into a function
+and then re-use it. That's exactly what Flicker does!</p>
+<p>Generating value counts is only one such example. See other methods such as
+<code>any</code>, <code>all</code>, <code>min</code>, <code>rows_with_max</code> for other common examples. Even more
+useful are methods <code>rename</code> and <code>join</code> which do a lot more than the
+corresponding PySpark methods.</p>
+<h2 id="chain-everything-together">Chain everything together<a class="headerlink" href="#chain-everything-together" title="Permanent link">&para;</a></h2>
+<p>You can chain everything together into complex operations. Flicker can
+often do a sequence of operations in one line without having to define any
+temporary variables.</p>
+<div class="tabbed-set" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><label for="__tabbed_13_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">rows_with_max</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">)[[</span><span class="s1">&#39;name&#39;</span><span class="p">]]()[</span><span class="s1">&#39;name&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># &#39;Turing&#39;</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><label for="__tabbed_13_2">PySpark</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">filtered_df</span> <span class="o">=</span> <span class="n">pyspark_df</span><span class="p">[</span><span class="n">pyspark_df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">]</span>
+<span class="n">age_max</span> <span class="o">=</span> <span class="n">filtered_df</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;age&#39;</span><span class="p">:</span> <span class="s1">&#39;max&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">collect</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">filtered_df</span><span class="p">[</span><span class="n">filtered_df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="n">age_max</span><span class="p">])][[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()[</span><span class="s1">&#39;name&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># &#39;Turing&#39;</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<p>It may appear that the Flicker expression above is too complicated to be
+meaningful. However, while performing interactive analysis, the above
+expression naturally arises as your mind sequentially searches for
+increasingly specific information. This is better experienced than can be
+described.</p>
+<h2 id="get-the-pyspark-dataframe">Get the PySpark dataframe<a class="headerlink" href="#get-the-pyspark-dataframe" title="Permanent link">&para;</a></h2>
+<p>If you have to use PySpark dataframe for some operations, you can easily
+get the underlying PySpark dataframe stored in the <code>._df</code> attribute.
+This may be useful when there is no Flicker method available to perform
+an operation that can easily be performed with PySpark<sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>. You can also
+mix and match &ndash; perform some computation with Flicker and the rest with
+PySpark.</p>
+<div class="tabbed-set" data-tabs="14:1"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><label for="__tabbed_14_1">Flicker</label><div class="tabbed-content">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">pyspark_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">_df</span>
+<span class="n">processed_pyspark_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">]</span><span class="o">.</span><span class="n">rows_with_max</span><span class="p">(</span><span class="s1">&#39;age&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">_df</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+<h2 id="there-is-more">There is more<a class="headerlink" href="#there-is-more" title="Permanent link">&para;</a></h2>
+<p>This example only describes the basic Flicker dataframe API. We note some
+advantages in this section:</p>
+<ul>
+<li><code>FlickerDataFrame</code> does not allow duplicate column names and does not create
+duplicate column names (which PySpark dataframe does and then fails awkwardly).</li>
+<li><code>FlickerDataFrame.rename</code> method lets you rename multiple columns at once</li>
+<li><code>FlickerDataFrame.join</code> lets you specify the join condition using a <code>dict</code>
+and lets you add a suffix/prefix in one line of code.</li>
+<li><code>FlickerDataFrame</code> comes with many factory constructors such as
+<code>from_rows</code>, <code>from_columns</code>, and even a <code>from_shape</code> that lets you create
+<code>FlickerDataFrame</code> quickly.</li>
+<li><code>flicker.udf</code> contains some commonly needed UDF functions such as <code>type_udf</code>
+and <code>len_udf</code></li>
+<li><code>flicker.recipes</code> contains some more useful tools that are needed for
+real-world data analysis</li>
+</ul>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p><a href="https://en.wikipedia.org/wiki/Object_composition">Composition</a> is the fancy term for it.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>Conversion to a pandas dataframe can sometimes convert <code>np.nan</code> into <code>None</code>.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p>If possible, please contribute by <a href="https://github.com/ankur-gupta/flicker/issues/new">filing a GitHub issue</a> and/or sending a PR.&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-08-20T01:41:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-08-20</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["tabs"], "search": "../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.220ee61c.min.js"></script>
+      
+        
+          <script src="../js/timeago.min.js"></script>
+        
+      
+        
+          <script src="../js/timeago_mkdocs_material.js"></script>
+        
+      
+    
+  </body>
+</html>
