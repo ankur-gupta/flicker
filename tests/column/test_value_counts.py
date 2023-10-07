@@ -89,27 +89,33 @@ def test_correct_counts_with_dropnull_inactive(spark):
     assert isinstance(counts, FlickerDataFrame)
     assert set(counts.names) == {'x', 'count'}
     counts_as_rows = counts.take(None, convert_to_dict=True)
-    option_1 = counts_as_rows == [
+    option1 = counts_as_rows == [
         {'x': 2, 'count': 5},
         {'x': 1, 'count': 2},
         {'x': None, 'count': 2}
     ]
-    option_2 = counts_as_rows == [
+    option2 = counts_as_rows == [
         {'x': 2, 'count': 5},
         {'x': None, 'count': 2},
         {'x': 1, 'count': 2}
     ]
-    assert option_1 or option_2
+    assert option1 or option2
 
     norm_counts = df['x'].value_counts(sort=True, ascending=False, drop_null=False, normalize=True, n=None)
     assert isinstance(norm_counts, FlickerDataFrame)
     assert set(norm_counts.names) == {'x', 'count'}
     norm_counts_as_rows = norm_counts.take(None, convert_to_dict=True)
-    assert norm_counts_as_rows == [
+    option1 = norm_counts_as_rows == [
         {'x': 2, 'count': 5 / 9},
         {'x': 1, 'count': 2 / 9},
         {'x': None, 'count': 2 / 9}
     ]
+    option2 = norm_counts_as_rows == [
+        {'x': 2, 'count': 5 / 9},
+        {'x': None, 'count': 2 / 9},
+        {'x': 1, 'count': 2 / 9}
+    ]
+    assert option1 or option2
 
 
 def test_correct_counts_with_large_n(spark):
