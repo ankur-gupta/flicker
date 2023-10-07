@@ -1,7 +1,6 @@
 # 🔥flicker
-[![PyPI Latest Release](https://img.shields.io/pypi/v/flicker.svg)](https://pypi.org/project/flicker/)
-![build](https://github.com/ankur-gupta/flicker/workflows/build/badge.svg)
-[![codecov](https://codecov.io/gh/ankur-gupta/flicker/branch/master/graph/badge.svg)](https://codecov.io/gh/ankur-gupta/flicker)
+![GitHub](https://img.shields.io/github/license/ankur-gupta/flicker?link=https%3A%2F%2Fgithub.com%2Fankur-gupta%2Fflicker%2Fblob%2Fmain%2FLICENSE)
+![build](https://img.shields.io/github/actions/workflow/status/ankur-gupta/flicker/build.yml)
 
 This python package provides a `FlickerDataFrame` object. `FlickerDataFrame`
 is a thin wrapper over `pyspark.sql.DataFrame`. The aim of `FlickerDataFrame`
