@@ -1,0 +1,98 @@
+# Copyright 2023 Flicker Contributors
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "flicker"
+dynamic = ["version"]
+authors = [
+    { name = "Flicker Contributors", email = "7110058+ankur-gupta@users.noreply.github.com" },
+]
+description = "Provides FlickerDataFrame, a wrapper over Pyspark DataFrame to provide a pandas-like API"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+keywords = ["spark", "pyspark", "pandas", "dataframe", "wrapper", "API"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta"
+]
+dependencies = [
+    "pyspark>=3.4.1",
+    "pandas",
+    "numpy",
+    "pyarrow>=4.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/ankur-gupta/flicker"
+Repository = "https://github.com/ankur-gupta/flicker.git"
+
+[tool.hatch.version]
+path = "src/flicker/version.py"
+
+[tool.hatch.envs.test]
+dependencies = [
+    "coverage",
+    "codecov",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+]
+
+# Run using `hatch run test:with-coverage`, `hatch run test:no-coverage`, `hatch run test:not-slow`, ...
+[tool.hatch.envs.test.scripts]
+with-coverage = "pytest --cov-config=pyproject.toml --cov=flicker --cov=tests"
+no-coverage = "with-coverage --no-cov"
+not-slow = "with-coverage -m \"not slow\""
+not-random = "with-coverage -m \"not random\""
+coverage-json = "coverage json"
+coverage-xml = "coverage xml"
+coverage-html = "coverage html"
+
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.9", "3.11"]
+
+[tool.coverage.run]
+omit = [
+    "src/flicker/resources/",
+    "tests/*/*/*.py",
+    "tests/*/*.py",
+    "tests/*.py"
+]
+
+# From https://docs.pytest.org/en/latest/how-to/mark.html and PEP 621
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow",  # deselect with `pytest -m "not sleepy" ...`
+    "random: tests using randomness; may not always pass"
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+]
+exclude = [
+    "/.github",
+]

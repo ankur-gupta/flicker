@@ -1,0 +1,44 @@
+# Copyright 2023 Flicker Contributors
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+import pytest
+from flicker import FlickerDataFrame, delete_extra_columns
+
+
+def test_failure(spark):
+    df = FlickerDataFrame.from_shape(spark, 3, 2, ['a', 'b'])
+    with pytest.raises(Exception):
+        with delete_extra_columns(df._df):
+            pass
+
+
+def test_basic_usage(spark):
+    df = FlickerDataFrame.from_shape(spark, 3, 2, ['a', 'b'])
+    assert set(df.names) == {'a', 'b'}
+    with delete_extra_columns(df):
+        df['c'] = 1
+        df['d'] = None
+        assert set(df.names) == {'a', 'b', 'c', 'd'}
+    assert set(df.names) == {'a', 'b'}
+
+
+def test_named_usage(spark):
+    df = FlickerDataFrame.from_shape(spark, 3, 2, ['a', 'b'])
+    assert set(df.names) == {'a', 'b'}
+    with delete_extra_columns(df) as names_to_keep:
+        print(f'Only these columns will be kept: {names_to_keep}')
+        df['c'] = 1
+        df['d'] = None
+        assert set(df.names) == {'a', 'b', 'c', 'd'}
+    assert set(df.names) == {'a', 'b'}

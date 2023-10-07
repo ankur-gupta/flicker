@@ -1,7 +1,12 @@
-six
-pandas
+# Basic requirements
+pyspark>=3.4.1
 numpy
-pyspark
+pandas
+pyarrow>=4.0.0  # for pandas_udf
+
+# For plotting utilities
+matplotlib
+seaborn
 
 # For tests
 pytest
@@ -11,3 +16,8 @@ pytest-cov
 wheel
 mkdocs-material
 mkdocs-git-revision-date-localized-plugin
+
+# For development only
+ipython
+jupyter
+ipdb
