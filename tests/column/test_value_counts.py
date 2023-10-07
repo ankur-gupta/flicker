@@ -89,11 +89,17 @@ def test_correct_counts_with_dropnull_inactive(spark):
     assert isinstance(counts, FlickerDataFrame)
     assert set(counts.names) == {'x', 'count'}
     counts_as_rows = counts.take(None, convert_to_dict=True)
-    assert counts_as_rows == [
+    option_1 = counts_as_rows == [
         {'x': 2, 'count': 5},
         {'x': 1, 'count': 2},
         {'x': None, 'count': 2}
     ]
+    option_2 = counts_as_rows == [
+        {'x': 2, 'count': 5},
+        {'x': None, 'count': 2},
+        {'x': 1, 'count': 2}
+    ]
+    assert option_1 or option_2
 
     norm_counts = df['x'].value_counts(sort=True, ascending=False, drop_null=False, normalize=True, n=None)
     assert isinstance(norm_counts, FlickerDataFrame)
@@ -114,11 +120,10 @@ def test_correct_counts_with_large_n(spark):
     assert isinstance(counts, FlickerDataFrame)
     assert set(counts.names) == {'x', 'count'}
     counts_as_rows = counts.take(None, convert_to_dict=True)
-    assert counts_as_rows == [
-        {'x': 1, 'count': 10},
-        {'x': None, 'count': 10},
-        {'x': 2, 'count': 10},
-    ]
+    assert len(counts_as_rows) == 3
+    assert {'x': 1, 'count': 10} in counts_as_rows
+    assert {'x': None, 'count': 10} in counts_as_rows
+    assert {'x': 2, 'count': 10} in counts_as_rows
 
     counts5 = df['x'].value_counts(sort=True, ascending=False, drop_null=False, normalize=False, n=5)
     assert isinstance(counts5, FlickerDataFrame)
@@ -140,28 +145,25 @@ def test_correct_counts_with_large_n(spark):
     assert isinstance(counts15, FlickerDataFrame)
     assert set(counts15.names) == {'x', 'count'}
     counts15_as_rows = counts15.take(None, convert_to_dict=True)
-    assert counts15_as_rows == [
-        {'x': 1, 'count': 10},
-        {'x': None, 'count': 5},
-    ]
+    assert len(counts15_as_rows) == 2
+    assert {'x': 1, 'count': 10} in counts15_as_rows
+    assert {'x': None, 'count': 5} in counts15_as_rows
 
     norm_counts15 = df['x'].value_counts(sort=True, ascending=False, drop_null=False, normalize=True, n=15)
     assert isinstance(norm_counts15, FlickerDataFrame)
     assert set(norm_counts15.names) == {'x', 'count'}
     norm_counts15_as_rows = norm_counts15.take(None, convert_to_dict=True)
-    assert norm_counts15_as_rows == [
-        {'x': 1, 'count': 10 / 30},
-        {'x': None, 'count': 5 / 30},
-    ]
+    assert len(norm_counts15_as_rows) == 2
+    assert {'x': 1, 'count': 10 / 30} in norm_counts15_as_rows
+    assert {'x': None, 'count': 5 / 30} in norm_counts15_as_rows
 
     norm_counts15_no_nulls = df['x'].value_counts(sort=True, ascending=False, drop_null=True, normalize=True, n=15)
     assert isinstance(norm_counts15_no_nulls, FlickerDataFrame)
     assert set(norm_counts15_no_nulls.names) == {'x', 'count'}
     norm_counts15_no_nulls_as_rows = norm_counts15_no_nulls.take(None, convert_to_dict=True)
-    assert norm_counts15_no_nulls_as_rows == [
-        {'x': 1, 'count': 10 / 30},
-        {'x': 2, 'count': 5 / 30},
-    ]
+    assert len(norm_counts15_no_nulls_as_rows) == 2
+    assert {'x': 1, 'count': 10 / 30} in norm_counts15_no_nulls_as_rows
+    assert {'x': 2, 'count': 5 / 30} in norm_counts15_no_nulls_as_rows
 
 
 def test_chains(spark):

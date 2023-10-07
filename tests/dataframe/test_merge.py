@@ -67,13 +67,17 @@ def test_single_column_merge(spark):
     assert set(left_df.names) == {'name'}
     assert left_df.nrows == df1.nrows
     assert left_df.ncols == 1
-    assert left_df.to_dict(None) == {'name': ['a', 'b', 'c']}
+    left_df_as_rows = left_df.take(None, convert_to_dict=True)
+    left_df_as_rows.sort(key=lambda row: row['name'])
+    assert left_df_as_rows == [{'name': 'a'}, {'name': 'b'}, {'name': 'c'}]
 
     right_df = df1.merge(df2, on=['name'], how='right')
     assert set(right_df.names) == {'name'}
     assert right_df.nrows == df2.nrows
     assert right_df.ncols == 1
-    assert right_df.to_dict(None) == {'name': ['a', 'd', 'e']}
+    right_df_as_rows = right_df.take(None, convert_to_dict=True)
+    right_df_as_rows.sort(key=lambda row: row['name'])
+    assert right_df_as_rows == [{'name': 'a'}, {'name': 'd'}, {'name': 'e'}]
 
     outer_df = df1.merge(df2, on=['name'], how='outer')
     assert set(outer_df.names) == {'name'}
@@ -112,10 +116,13 @@ def test_single_column_merge_with_extra_common_columns(spark):
     assert set(left_df.names) == {'name', 'l_number', 'r_number'}
     assert left_df.nrows == 3
     assert left_df.ncols == 3
-    left_dict = left_df.to_dict(None)
-    assert left_dict['name'] == ['a', 'b', 'c']
-    assert left_dict['l_number'] == [1, 2, 3]
-    assert left_dict['r_number'] == [4, None, None]
+    left_df_as_rows = left_df.take(None, convert_to_dict=True)
+    left_df_as_rows.sort(key=lambda row: row['name'])
+    assert left_df_as_rows == [
+        {'name': 'a', 'l_number': 1, 'r_number': 4},
+        {'name': 'b', 'l_number': 2, 'r_number': None},
+        {'name': 'c', 'l_number': 3, 'r_number': None}
+    ]
 
 
 def test_single_column_merge_with_extra_uncommon_columns(spark):

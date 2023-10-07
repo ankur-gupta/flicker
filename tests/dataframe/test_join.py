@@ -66,13 +66,25 @@ def test_basic_join(spark):
     assert set(inner_df.names) == {'name1', 'name2'}
     assert left_df.nrows == df1.nrows
     assert left_df.ncols == 2
-    assert left_df.to_dict(None) == {'name1': ['a', 'b', 'c'], 'name2': ['a', None, None]}
+    left_df_as_rows = left_df.take(None, convert_to_dict=True)
+    left_df_as_rows.sort(key=lambda row: row['name1'])
+    assert left_df_as_rows == [
+        {'name1': 'a', 'name2': 'a'},
+        {'name1': 'b', 'name2': None},
+        {'name1': 'c', 'name2': None}
+    ]
 
     right_df = df1.join(df2, on={'name1': 'name2'}, how='right')
     assert set(inner_df.names) == {'name1', 'name2'}
     assert right_df.nrows == df2.nrows
     assert right_df.ncols == 2
-    assert right_df.to_dict(None) == {'name1': ['a', None, None], 'name2': ['a', 'd', 'e']}
+    right_df_as_rows = right_df.take(None, convert_to_dict=True)
+    right_df_as_rows.sort(key=lambda row: row['name2'])
+    assert right_df_as_rows == [
+        {'name1': 'a', 'name2': 'a'},
+        {'name1': None, 'name2': 'd'},
+        {'name1': None, 'name2': 'e'}
+    ]
 
     outer_df = df1.join(df2, on={'name1': 'name2'}, how='outer')
     assert set(outer_df.names) == {'name1', 'name2'}
