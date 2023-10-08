@@ -12,4 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-__version__ = '1.0.1'
+from flicker import FlickerDataFrame
+
+
+def test_basic_usage(spark):
+    df = FlickerDataFrame.from_shape(spark, 5, 3, names=['a', 'b', 'c'], fill='rand')
+    assert set(df._ipython_key_completions_()) == {'a', 'b', 'c'}

@@ -134,6 +134,20 @@ class FlickerDataFrame:
         self._check_names([name])
         self._mutate(self._df.drop(name))
 
+    def _ipython_key_completions_(self):
+        """
+        Provide list of auto-completions for __getitem__ (not attributes)
+        that is completed by df["c"+tab. Note that attribute completion
+        is separate that happens automatically even when __dir__() is not
+        explicitly defined.
+
+        See https://ipython.readthedocs.io/en/stable/config/integrating.html
+
+        This function enables auto-completion in both jupyter notebook and
+        ipython terminal.
+        """
+        return self._df.columns
+
     def __call__(self, n: int | None = 5, use_pandas_dtypes: bool = False) -> pd.DataFrame:
         if n is None:
             n = self._df.count()
