@@ -13,10 +13,13 @@
 #    limitations under the License.
 #
 from __future__ import annotations
-from typing import Iterable
+from typing import Iterable, Callable
 from pyspark.sql import DataFrame, Column
 from pyspark.sql.functions import isnan
+import pandas as pd
 from .variables import PYTHON_TO_SPARK_DTYPES
+from .summary import (get_column_mean, get_column_stddev, get_column_min, get_column_max, get_timestamp_column_stddev,
+                      get_timestamp_column_mean, get_summary, get_columns_as_dict)
 
 
 class FlickerColumn:
@@ -199,6 +202,16 @@ class FlickerColumn:
             other = other._column  # pragma: no cover
         return self.__class__(self._df, self._column.__rmod__(other))
 
+    def __call__(self, n: int | None = 5, use_pandas_dtypes: bool = False) -> pd.DataFrame:
+        df = self._df[[self._column]]
+        if n is None:
+            n = df.count()
+        if use_pandas_dtypes:
+            return df.limit(n).toPandas()
+        else:
+            data = get_columns_as_dict(df, n)
+            return pd.DataFrame.from_dict(data, dtype=object)[df.columns]
+
     def astype(self, type_: type | str) -> FlickerColumn:
         if isinstance(type_, type):
             if type_ not in PYTHON_TO_SPARK_DTYPES:
@@ -246,8 +259,10 @@ class FlickerColumn:
             df = self._df[~isnan(self._column)][[self._column]]
         else:
             df = self._df[[self._column]]
-        # https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
-        return df.agg({df.columns[0]: 'min'}).collect()[0][0]
+        return get_column_min(df, df.columns[0])
+
+        # # https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
+        # return df.agg({df.columns[0]: 'min'}).collect()[0][0]
 
     def max(self, ignore_nan: bool = True):
         # Nulls are automatically ignored
@@ -255,8 +270,34 @@ class FlickerColumn:
             df = self._df[~isnan(self._column)][[self._column]]
         else:
             df = self._df[[self._column]]
-        # https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
-        return df.agg({df.columns[0]: 'max'}).collect()[0][0]
+        return get_column_max(df, df.columns[0])
+
+        # # https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
+        # return df.agg({df.columns[0]: 'max'}).collect()[0][0]
+
+    def mean(self, ignore_nan: bool = True):
+        # Nulls are automatically ignored
+        if ignore_nan:
+            df = self._df[~isnan(self._column)][[self._column]]
+        else:
+            df = self._df[[self._column]]
+        dtype = df.dtypes[0][1]
+        if dtype == 'timestamp':
+            return get_timestamp_column_mean(df, df.columns[0])
+        else:
+            return get_column_mean(df, df.columns[0])
+
+    def stddev(self, ignore_nan: bool = True):
+        # Nulls are automatically ignored
+        if ignore_nan:
+            df = self._df[~isnan(self._column)][[self._column]]
+        else:
+            df = self._df[[self._column]]
+        dtype = df.dtypes[0][1]
+        if dtype == 'timestamp':
+            return get_timestamp_column_stddev(df, df.columns[0])
+        else:
+            return get_column_stddev(df, df.columns[0])
 
     def value_counts(self, sort: bool = True, ascending: bool = False, drop_null: bool = False, normalize: bool = False,
                      n: int | None = None) -> FlickerDataFrame:
@@ -279,6 +320,14 @@ class FlickerColumn:
             den = float(self._df.count())
             counts = counts.withColumn('count', counts['count'] / den)
         return FlickerDataFrame(counts)
+
+    def describe(self) -> pd.DataFrame:
+        return get_summary(self._df[[self._column]])
+
+    def apply(self, udf: Callable) -> FlickerColumn:
+        column = udf(self._column)
+        df = self._df[[self._column, column]]
+        return FlickerColumn(df, column)
 
 
 # Import here to avoid circular imports

@@ -22,7 +22,7 @@ from pyspark.sql import DataFrame, SparkSession, Row, Column
 from pyspark.sql.functions import lit
 
 from .utils import get_length, is_nan_scalar
-from .summary import get_columns_as_dict, get_summary_non_boolean, get_summary_boolean_only
+from .summary import get_columns_as_dict, get_summary
 
 
 class FlickerDataFrame:
@@ -361,11 +361,7 @@ class FlickerDataFrame:
         return self.__class__(self._df.distinct())
 
     def describe(self) -> pd.DataFrame:
-        non_boolean_summary = get_summary_non_boolean(self._df)
-        boolean_summary = get_summary_boolean_only(self._df)
-        summary = pd.merge(non_boolean_summary, boolean_summary, how='outer', left_index=True, right_index=True)
-        ordered_names = [name for name in self._df.columns if name in summary.columns]
-        return summary[ordered_names]
+        return get_summary(self._df)
 
     def concat(self, other: FlickerDataFrame | DataFrame, ignore_names: bool = False) -> FlickerDataFrame:
         if isinstance(other, FlickerDataFrame):

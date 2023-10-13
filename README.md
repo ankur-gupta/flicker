@@ -12,6 +12,7 @@
   * [Installation](#installation)
   * [Quick Example](#quick-example)
   * [Use the underlying PySpark DataFrame or Column](#use-the-underlying-pyspark-dataframe-or-column)
+  * [Use UDFs](#use-udfs-)
   * [Why not use `pyspark.pandas` (formerly `koalas`)?](#why-not-use-pysparkpandas-formerly-koalas)
   * [Status](#status)
   * [License](#license)
@@ -163,6 +164,8 @@ df[(df['a'] * df['b']) > 0][['a', 'b']](2)
 df['a']  # returns immediately
 # FlickerColumn<'a'>
 
+# FIXME: FILL ME
+
 # Show first 2 values of column 'a'
 df[['a']](2)
 #           a
@@ -250,36 +253,71 @@ type(d)  # flicker.column.FlickerColumn
 d._column  # Column<'d'>
 type(d._column)  # pyspark.sql.column.Column
 
-# You can call UDFs on the underlying pyspark.sql.Column
-# For example, you can use the built-in flicker.udf.type_udf
-df['d_type'] = type_udf(d._column)
+# You can always convert a PySpark DataFrame into a FlickerDataFrame
+# after you've performed the native PySpark operations. This way, you can
+# continue to enjoy the benefits of FlickerDataFrame. Converting a
+# PySpark DataFrame into a FlickerDataFrame is always fast irrespective of
+# dataframe size.
+df['d_type'] = type_udf(df['d']._column)
+df_freq_table = FlickerDataFrame(df._df.groupBy(['d_type']).count())
+df_freq_table()
+#   d_type  count
+# 0   dict      2
+```
+
+## Use UDFs 
+`flicker.udf` comes with some useful UDFs. You easily use UDFs with `FlickerColumn` as shown below.
+
+```python
+from pyspark.sql import SparkSession
+from flicker import FlickerDataFrame
+from flicker.udf import type_udf, len_udf
+
+# Get a spark session, if needed.
+spark = SparkSession.builder.appName('PySparkShell').getOrCreate()
+spark.conf.set('spark.sql.caseSensitive', True)
+
+# Create a more complicated dataframe using one of the factory methods
+data = [(1, 'spark', 2.4, {}), (2, 'flicker', None, {'key': 1})]
+column_names = ['a', 'b', 'c', 'd']
+df = FlickerDataFrame.from_rows(spark, rows=data, names=column_names)
+# FlickerDataFrame[a: bigint, b: string, c: double, d: map<string,bigint>]
+
+# FlickerColumn is quite powerful too
+type(df['d'])  # flicker.column.FlickerColumn
+
+# You can apply a UDF to a FlickerColumn
+df['d_type'] = df['d'].apply(type_udf)
 
 # Note the new column 'd_type'
 df
 # FlickerDataFrame[a: bigint, b: string, c: double, d: map<string,bigint>, d_type: string]
 
 # Use PySpark functions to compute the frequency table based on type of column 'd'
-df._df.groupBy(['d_type']).count().show()
-# +------+-----+
-# |d_type|count|
-# +------+-----+
-# |  dict|    2|
-# +------+-----+
+df.groupby(['d_type']).count()()
+#   d_type count
+# 0   dict     2
 
 # You can, of course, just use the value_counts method.
 df['d_type'].value_counts()()
 #   d_type count
 # 0   dict     2
 
-# You can always convert a PySpark DataFrame into a FlickerDataFrame
-# after you've performed the native PySpark operations. This way, you can
-# continue to enjoy the benefits of FlickerDataFrame. Converting a
-# PySpark DataFrame into a FlickerDataFrame is always fast irrespective of
-# dataframe size.
-df_freq_table = FlickerDataFrame(df._df.groupBy(['d_type']).count())
-df_freq_table()
-#   d_type  count
-# 0   dict      2
+# You don't have to assign the result of .apply() method. Result of .apply() method is still a FlickerColumn 
+# object, which lets you use any FlickerColumn method.
+df['d'].apply(len_udf)()
+#   _len(d)
+# 0       0
+# 1       1
+
+df['d'].apply(len_udf).describe()
+#           _len(d)
+# summary
+# count           2
+# mean          0.5
+# stddev   0.707107
+# min             0
+# max             1
 ```
 
 ## Why not use `pyspark.pandas` (formerly `koalas`)?

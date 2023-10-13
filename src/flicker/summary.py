@@ -15,11 +15,62 @@
 from __future__ import annotations
 import pandas as pd
 from pyspark.sql import DataFrame
+import pyspark.sql.functions as F
+from datetime import datetime, timedelta
 
+from .mkname import mkname
 from .utils import get_names_by_dtype
 
 
+def get_column_min(df: DataFrame, name: str):
+    return df.select(F.min(df[name])).collect()[0][f'min({name})']
+
+
+def get_column_max(df: DataFrame, name: str):
+    return df.select(F.max(df[name])).collect()[0][f'max({name})']
+
+
+def get_column_mean(df: DataFrame, name: str):
+    return df.select(F.mean(df[name])).collect()[0][f'avg({name})']
+
+
+def get_column_stddev(df: DataFrame, name: str):
+    return df.select(F.stddev(df[name])).collect()[0][f'stddev({name})']
+
+
+def get_timestamp_column_mean(df: DataFrame, name: str):
+    name_seconds = mkname(df.columns, prefix=f'{name}_as_seconds_', suffix='')
+    df_with_column_as_seconds = df.withColumn(name_seconds, df[name].astype('double'))[[name_seconds]]
+    mean_in_seconds = get_column_mean(df_with_column_as_seconds, name_seconds)
+    return datetime.fromtimestamp(mean_in_seconds)
+
+
+def get_timestamp_column_stddev(df: DataFrame, name: str) -> timedelta:
+    name_seconds = mkname(df.columns, prefix=f'{name}_as_seconds_', suffix='')
+    df_with_column_as_seconds = df.withColumn(name_seconds, df[name].astype('double'))[[name_seconds]]
+    stddev_in_seconds = get_column_stddev(df_with_column_as_seconds, name_seconds)
+    return timedelta(seconds=stddev_in_seconds)
+
+
 def get_columns_as_dict(df: DataFrame, n: int | None) -> dict:
+    """ Convert spark DataFrame into a dictionary of the form
+        {'col_name_1': [column 1 data], 'col_name_2': [column 2 data], ..., 'col_name_n': [column 3 data]}
+
+        User should exercise care to not run this function on a big dataframe to avoid OOM errors.
+
+    Parameters
+    ----------
+    df : DataFrame
+        The input DataFrame from which to extract column data.
+    n : int | None
+        The number of rows to be considered when creating the dictionary. If None, all rows are considered.
+
+    Returns
+    -------
+    dict
+        A dictionary where the keys are the column names and the values are lists of column data.
+
+    """
     if n is None:
         rows = df.collect()
     else:
@@ -32,7 +83,39 @@ def get_columns_as_dict(df: DataFrame, n: int | None) -> dict:
     return data
 
 
-def get_summary_non_boolean(df: DataFrame):
+def get_summary_spark_supported_dtypes(df: DataFrame) -> pd.DataFrame:
+    """ Process the output of pyspark.sql.DataFrame.describe() to make it more useful.
+
+        This method converts the output of pyspark.sql.DataFrame.describe() into a pandas DataFrame with better dtypes
+        instead of the pyspark's default string representation of all dtypes.
+
+        Note that pyspark.sql.DataFrame.describe() ignores many dtypes including boolean and timestamp dtypes.
+
+    Parameters
+    ----------
+    df : pyspark.sql.DataFrame
+        The input DataFrame that contains the data for which the summary is to be computed.
+
+    Returns
+    -------
+    summary : pandas.DataFrame
+        Contains the summary statistics for all supported columns of the input DataFrame.
+
+    Example
+    -------
+    df = spark.createDataFrame([(1, 'A', 10.0), (2, 'B', 20.0), (3, 'C', 30.0)], ['id', 'name', 'value'])
+    summary = get_summary_spark_supported_dtypes(df)
+    print(summary)
+
+    # Output:
+    #               id name value
+    # summary
+    # count      3    3     3
+    # mean     2.0  NaN  20.0
+    # stddev   1.0  NaN  10.0
+    # min        1    A  10.0
+    # max        3    C  30.0
+    """
     columns_as_dict = get_columns_as_dict(df.describe(), None)
     summary = pd.DataFrame.from_dict(columns_as_dict, dtype=object)
 
@@ -59,18 +142,18 @@ def get_summary_non_boolean(df: DataFrame):
                 stat_vector[i] = float(stat_vector[i])
             elif dtype == 'boolean':
                 stat_vector[i] = bool(stat_vector[i])
-            # FIXME: add datetime and other dtypes?
+            # FIXME: Find all other supported dtypes?
         summary.loc[stat_name] = stat_vector
     return summary
 
 
-def get_summary_boolean_only(df: DataFrame):
+def get_summary_boolean_columns(df: DataFrame):
     boolean_names = get_names_by_dtype(df, 'boolean')
     boolean_df = df[boolean_names].withColumns({
         name: df[name].astype('int')
         for name in boolean_names
     })
-    boolean_summary = get_summary_non_boolean(boolean_df)
+    boolean_summary = get_summary_spark_supported_dtypes(boolean_df)
     for name in boolean_summary.columns:
         if boolean_summary[name].loc['min'] == 0:
             boolean_summary[name].loc['min'] = False
@@ -82,3 +165,28 @@ def get_summary_boolean_only(df: DataFrame):
         elif boolean_summary[name].loc['max'] == 1:
             boolean_summary[name].loc['max'] = True
     return boolean_summary
+
+
+def get_summary_timestamp_columns(df: DataFrame) -> pd.DataFrame:
+    timestamp_names = get_names_by_dtype(df, 'timestamp')
+    timestamp_summary_dict = {}
+    count = df.count()
+    for name in timestamp_names:
+        timestamp_summary_dict[name] = {
+            'count': count,
+            'mean': datetime.fromtimestamp(get_column_mean(df, name)),
+            'stddev': get_timestamp_column_stddev(df, name),
+            'min': get_column_min(df, name),
+            'max': get_column_max(df, name)
+        }
+    return pd.DataFrame.from_dict(timestamp_summary_dict)
+
+
+def get_summary(df: DataFrame) -> pd.DataFrame:
+    non_boolean_summary = get_summary_spark_supported_dtypes(df)
+    boolean_summary = get_summary_boolean_columns(df)
+    timestamp_summary = get_summary_timestamp_columns(df)
+    summary = pd.merge(non_boolean_summary, boolean_summary, how='outer', left_index=True, right_index=True)
+    summary = pd.merge(summary, timestamp_summary, how='outer', left_index=True, right_index=True)
+    ordered_names = [name for name in df.columns if name in summary.columns]
+    return summary[ordered_names]
