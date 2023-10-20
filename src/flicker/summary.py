@@ -30,26 +30,45 @@ def get_column_max(df: DataFrame, name: str):
     return df.select(F.max(df[name])).collect()[0][f'max({name})']
 
 
-def get_column_mean(df: DataFrame, name: str):
+def get_column_mean(df: DataFrame, name: str) -> float | None:
     return df.select(F.mean(df[name])).collect()[0][f'avg({name})']
 
 
-def get_column_stddev(df: DataFrame, name: str):
+def get_column_stddev(df: DataFrame, name: str) -> float | None:
+    # Uses (n-1) for denominator
     return df.select(F.stddev(df[name])).collect()[0][f'stddev({name})']
 
 
-def get_timestamp_column_mean(df: DataFrame, name: str):
+def get_boolean_column_mean(df: DataFrame, name: str) -> float | None:
+    int_name = mkname(df.columns, prefix=f'{name}_as_int_', suffix='')
+    df_with_column_as_int = df.withColumn(int_name, df[name].astype('int'))[[int_name]]
+    return get_column_mean(df_with_column_as_int, int_name)
+
+
+def get_boolean_column_stddev(df: DataFrame, name: str) -> float | None:
+    int_name = mkname(df.columns, prefix=f'{name}_as_int_', suffix='')
+    df_with_column_as_int = df.withColumn(int_name, df[name].astype('int'))[[int_name]]
+    return get_column_stddev(df_with_column_as_int, int_name)
+
+
+def get_timestamp_column_mean(df: DataFrame, name: str) -> datetime | None:
     name_seconds = mkname(df.columns, prefix=f'{name}_as_seconds_', suffix='')
     df_with_column_as_seconds = df.withColumn(name_seconds, df[name].astype('double'))[[name_seconds]]
     mean_in_seconds = get_column_mean(df_with_column_as_seconds, name_seconds)
-    return datetime.fromtimestamp(mean_in_seconds)
+    if mean_in_seconds is None:
+        return None
+    else:
+        return datetime.fromtimestamp(mean_in_seconds)
 
 
-def get_timestamp_column_stddev(df: DataFrame, name: str) -> timedelta:
+def get_timestamp_column_stddev(df: DataFrame, name: str) -> timedelta | None:
     name_seconds = mkname(df.columns, prefix=f'{name}_as_seconds_', suffix='')
     df_with_column_as_seconds = df.withColumn(name_seconds, df[name].astype('double'))[[name_seconds]]
     stddev_in_seconds = get_column_stddev(df_with_column_as_seconds, name_seconds)
-    return timedelta(seconds=stddev_in_seconds)
+    if stddev_in_seconds is None:
+        return None
+    else:
+        return timedelta(seconds=stddev_in_seconds)
 
 
 def get_columns_as_dict(df: DataFrame, n: int | None) -> dict:
@@ -140,8 +159,7 @@ def get_summary_spark_supported_dtypes(df: DataFrame) -> pd.DataFrame:
                 stat_vector[i] = int(stat_vector[i])
             elif dtype == 'double':
                 stat_vector[i] = float(stat_vector[i])
-            elif dtype == 'boolean':
-                stat_vector[i] = bool(stat_vector[i])
+            # spark ignores boolean columns during `df.describe()` call
             # FIXME: Find all other supported dtypes?
         summary.loc[stat_name] = stat_vector
     return summary

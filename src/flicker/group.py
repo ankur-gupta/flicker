@@ -66,7 +66,7 @@ class FlickerGroupedData:
     def apply(self, f: Callable, schema: StructType | str) -> FlickerDataFrame:
         return FlickerDataFrame(self._grouped.applyInPandas(f, schema))
 
-    def apple_with_state(self, f: 'PandasGroupedMapFunctionWithState',
+    def apply_with_state(self, f: 'PandasGroupedMapFunctionWithState',
                          outputStructType: StructType | str, stateStructType: StructType | str,
                          outputMode: str, timeoutConf: str) -> FlickerDataFrame:
         return FlickerDataFrame(

@@ -38,9 +38,9 @@ def test_basic_usage(spark):
     assert df['a_boolean'].dtype == 'boolean'
 
     df['b_int'] = df['b'].astype(int)
-    df['b_integer'] = df['a'].astype('int')
-    assert df['b_int'].dtype == 'int'
-    assert df['b_integer'].dtype == 'int'
+    df['b_integer'] = df['a'].astype('bigint')
+    assert df['b_int'].dtype == 'bigint'
+    assert df['b_integer'].dtype == 'bigint'
 
     df['b_float'] = df['b'].astype(float)
     df['b_double'] = df['a'].astype('double')
@@ -51,6 +51,8 @@ def test_basic_usage(spark):
     df['b_boolean'] = df['a'].astype('boolean')
     assert df['b_bool'].dtype == 'boolean'
     assert df['b_boolean'].dtype == 'boolean'
+
+    # FIXME: Test datetime/timestamp
 
 
 def test_void(spark):

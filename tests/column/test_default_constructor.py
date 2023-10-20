@@ -21,7 +21,7 @@ from flicker import FlickerDataFrame, FlickerColumn
 
 
 def test_basic_usage(spark):
-    df = spark.createDataFrame([(x, x) for x in range(5)], 'a INT, b INT')
+    df = spark.createDataFrame([(x, x, True) for x in range(5)], 'a INT, b INT, c BOOLEAN')
     assert isinstance(FlickerColumn(df, df['a']), FlickerColumn)
     assert isinstance(FlickerColumn(df, df['b']), FlickerColumn)
     assert isinstance(FlickerColumn(df, df['b'] > 0), FlickerColumn)
@@ -31,7 +31,9 @@ def test_basic_usage(spark):
     assert isinstance(FlickerColumn(df, df['b'] < 0), FlickerColumn)
     assert isinstance(FlickerColumn(df, df['b'] % 10), FlickerColumn)
     assert isinstance(FlickerColumn(df, -df['b']), FlickerColumn)
-    assert isinstance(FlickerColumn(df, ~df['b']), FlickerColumn)
+    with pytest.raises(Exception):
+        isinstance(FlickerColumn(df, ~df['b']), FlickerColumn)
+    assert isinstance(FlickerColumn(df, ~df['c']), FlickerColumn)
     assert isinstance(FlickerColumn(df, df['b'].isin([5])), FlickerColumn)
     assert isinstance(FlickerColumn(df, isnan(df['b'])), FlickerColumn)
     assert isinstance(FlickerColumn(df, isnull(df['b'])), FlickerColumn)

@@ -13,12 +13,19 @@
 #    limitations under the License.
 #
 
+from datetime import datetime
+
 PYTHON_TO_SPARK_DTYPES = {
     bool: 'boolean',
-    int: 'int',
+    int: 'bigint',
     float: 'double',
-    str: 'string'
+    str: 'string',
+    datetime: 'timestamp'
 }
 
 PYSPARK_NUMERIC_DTYPES = {'double', 'float', 'int', 'bigint'}
+PYSPARK_FLOAT_DTYPES = {'double', 'float'}
+PYSPARK_INTEGER_DTYPES = {'int', 'bigint'}
 PYSPARK_BOOLEAN_DTYPES = {'boolean'}
+PYSPARK_TIMESTAMP_DTYPES = {'timestamp'}
+# FIXME: Add string type, char type, decimal type

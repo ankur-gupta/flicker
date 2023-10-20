@@ -13,18 +13,33 @@
 #    limitations under the License.
 #
 from string import ascii_lowercase
+from datetime import datetime, timedelta
+
+import pytest
+
 from flicker import FlickerDataFrame
 
 
 def test_basic_usage(spark):
-    data = [(x, f'{ascii_lowercase[x]}', True, 3.45) for x in range(5)]
-    schema = 'a INT, b STRING, c BOOLEAN, d DOUBLE'
+    t = datetime(2023, 1, 1)
+    data = [(x, f'{ascii_lowercase[x]}', True, 3.45, 1.02, t + timedelta(days=x)) for x in range(5)]
+    schema = 'a INT, b STRING, c BOOLEAN, d DOUBLE, e FLOAT, t TIMESTAMP'
     df = FlickerDataFrame(spark.createDataFrame(data, schema))
     assert df['a'].dtype == 'int'
     assert df['b'].dtype == 'string'
     assert df['c'].dtype == 'boolean'
     assert df['d'].dtype == 'double'
+    assert df['e'].dtype == 'float'
+    assert df['t'].dtype == 'timestamp'
 
-    df['e'] = None
-    assert df['e'].dtype == 'void'
-    # FIXME: Add datetime
+    df['f'] = None
+    assert df['f'].dtype == 'void'
+
+    with pytest.raises(TypeError):
+        df['a']._ensure_boolean()
+    df['c']._ensure_boolean()  # Ensure that this doesn't fail
+
+    with pytest.raises(TypeError):
+        df['a']._ensure_float()
+    df['d']._ensure_float()  # Ensure that this doesn't fail
+    df['e']._ensure_float()  # Ensure that this doesn't fail

@@ -17,14 +17,16 @@ from typing import Iterable, Callable
 from pyspark.sql import DataFrame, Column
 from pyspark.sql.functions import isnan
 import pandas as pd
-from .variables import PYTHON_TO_SPARK_DTYPES
+from .variables import PYTHON_TO_SPARK_DTYPES, PYSPARK_FLOAT_DTYPES
 from .summary import (get_column_mean, get_column_stddev, get_column_min, get_column_max, get_timestamp_column_stddev,
-                      get_timestamp_column_mean, get_summary, get_columns_as_dict)
+                      get_timestamp_column_mean, get_summary, get_columns_as_dict, get_boolean_column_mean,
+                      get_boolean_column_stddev)
 
 
 class FlickerColumn:
     _df: DataFrame
     _column: Column
+    _dtype: str
 
     def __init__(self, df: DataFrame, column: Column):
         if not isinstance(df, DataFrame):
@@ -39,15 +41,19 @@ class FlickerColumn:
                              f'Rename the columns to be unique.')
         self._df = df
         self._column = column
+        self._dtype = self._df[[self._column]].dtypes[0][1]
 
     @property
     def dtype(self):
-        return self._df[[self._column]].dtypes[0][1]
+        return self._dtype
 
     def _ensure_boolean(self):
-        dtype = self._df[[self._column]].dtypes[0][1]
-        if dtype != 'boolean':
-            raise TypeError(f'Column dtype must be dtype=boolean; you provided dtype={dtype}')
+        if self._dtype != 'boolean':
+            raise TypeError(f'Column dtype must be dtype=boolean; you provided dtype={self._dtype}')
+
+    def _ensure_float(self):
+        if self._dtype not in PYSPARK_FLOAT_DTYPES:
+            raise TypeError(f'Column dtype must be one of {PYSPARK_FLOAT_DTYPES}; you provided dtype={self._dtype}')
 
     def __repr__(self):
         return 'Flicker' + repr(self._column)
@@ -207,10 +213,15 @@ class FlickerColumn:
         if n is None:
             n = df.count()
         if use_pandas_dtypes:
-            return df.limit(n).toPandas()
+            return df.limit(n).toPandas()[df.columns[0]]
         else:
             data = get_columns_as_dict(df, n)
-            return pd.DataFrame.from_dict(data, dtype=object)[df.columns]
+            return pd.DataFrame.from_dict(data, dtype=object)[df.columns[0]]
+
+    def take(self, n: int | None = 5) -> list:
+        if n is None:
+            n = self._df.count()
+        return [list(row.asDict(recursive=True).values())[0] for row in self._df[[self._column]].take(n)]
 
     def astype(self, type_: type | str) -> FlickerColumn:
         if isinstance(type_, type):
@@ -253,49 +264,43 @@ class FlickerColumn:
             elements = elements.difference({None})
         return (not elements) or (elements == {True})
 
-    def min(self, ignore_nan: bool = True):
+    def _get_non_nan_dataframe(self, ignore_nan: bool) -> DataFrame:
         # Nulls are automatically ignored
-        if ignore_nan:
+        if ignore_nan and (self._dtype in PYSPARK_FLOAT_DTYPES):
             df = self._df[~isnan(self._column)][[self._column]]
         else:
             df = self._df[[self._column]]
+        return df
+
+    def min(self, ignore_nan: bool = True):
+        # This is not the best way because it fails often with different data types.
+        # https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
+        # return df.agg({df.columns[0]: 'max'}).collect()[0][0]
+        df = self._get_non_nan_dataframe(ignore_nan)
         return get_column_min(df, df.columns[0])
 
-        # # https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
-        # return df.agg({df.columns[0]: 'min'}).collect()[0][0]
-
     def max(self, ignore_nan: bool = True):
-        # Nulls are automatically ignored
-        if ignore_nan:
-            df = self._df[~isnan(self._column)][[self._column]]
-        else:
-            df = self._df[[self._column]]
+        # This is not the best way because it fails often with different data types.
+        # https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
+        # return df.agg({df.columns[0]: 'max'}).collect()[0][0]
+        df = self._get_non_nan_dataframe(ignore_nan)
         return get_column_max(df, df.columns[0])
 
-        # # https://stackoverflow.com/questions/33224740/best-way-to-get-the-max-value-in-a-spark-dataframe-column
-        # return df.agg({df.columns[0]: 'max'}).collect()[0][0]
-
     def mean(self, ignore_nan: bool = True):
-        # Nulls are automatically ignored
-        if ignore_nan:
-            df = self._df[~isnan(self._column)][[self._column]]
-        else:
-            df = self._df[[self._column]]
-        dtype = df.dtypes[0][1]
-        if dtype == 'timestamp':
+        df = self._get_non_nan_dataframe(ignore_nan)
+        if self._dtype == 'timestamp':
             return get_timestamp_column_mean(df, df.columns[0])
+        elif self._dtype == 'boolean':
+            return get_boolean_column_mean(df, df.columns[0])
         else:
             return get_column_mean(df, df.columns[0])
 
     def stddev(self, ignore_nan: bool = True):
-        # Nulls are automatically ignored
-        if ignore_nan:
-            df = self._df[~isnan(self._column)][[self._column]]
-        else:
-            df = self._df[[self._column]]
-        dtype = df.dtypes[0][1]
-        if dtype == 'timestamp':
+        df = self._get_non_nan_dataframe(ignore_nan)
+        if self._dtype == 'timestamp':
             return get_timestamp_column_stddev(df, df.columns[0])
+        elif self._dtype == 'boolean':
+            return get_boolean_column_stddev(df, df.columns[0])
         else:
             return get_column_stddev(df, df.columns[0])
 
@@ -322,7 +327,7 @@ class FlickerColumn:
         return FlickerDataFrame(counts)
 
     def describe(self) -> pd.DataFrame:
-        return get_summary(self._df[[self._column]])
+        return get_summary(self._df[[self._column]]).iloc[:, 0]
 
     def apply(self, udf: Callable) -> FlickerColumn:
         column = udf(self._column)

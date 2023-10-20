@@ -13,7 +13,7 @@
 #    limitations under the License.
 #
 import numpy as np
-
+from datetime import datetime, timedelta
 from flicker import FlickerDataFrame
 
 
@@ -83,6 +83,34 @@ def test_with_nans(spark):
     assert np.isnan(df['b'].max(ignore_nan=False))
     assert df['c'].max(ignore_nan=True) == 1.0
     assert np.isnan(df['c'].max(ignore_nan=False))
+
+
+def test_timestamp_no_nulls(spark):
+    t = datetime(2023, 1, 1)
+    dt = timedelta(days=1)
+    df = FlickerDataFrame.from_rows(spark, [(t - dt, 1), (t, 2), (t + dt, 3)], names=['t', 'n'])
+    assert df['t'].min() == t - dt
+    assert df['t'].max() == t + dt
+
+
+def test_timestamp_with_nulls(spark):
+    t = datetime(2023, 1, 1)
+    dt = timedelta(days=1)
+    df = FlickerDataFrame.from_rows(spark, [(t - dt, 1), (t, 2), (t + dt, 3), (None, None)], names=['t', 'n'])
+    assert df['t'].min() == t - dt
+    assert df['t'].max() == t + dt
+
+
+def test_boolean_no_nulls(spark):
+    df = FlickerDataFrame.from_rows(spark, [(True, 1), (False, 2), (True, 3)], names=['t', 'n'])
+    assert df['t'].min() is False
+    assert df['t'].max() is True
+
+
+def test_boolean_with_nulls(spark):
+    df = FlickerDataFrame.from_rows(spark, [(True, 1), (False, 2), (True, 3), (None, None)], names=['t', 'n'])
+    assert df['t'].min() is False
+    assert df['t'].max() is True
 
 
 def test_chains(spark):

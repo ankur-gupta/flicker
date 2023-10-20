@@ -195,10 +195,11 @@ class FlickerDataFrame:
         ncols : int
             The number of columns in the DataFrame.
         names : list[str] | None, optional
-            The names of the columns in the DataFrame. If not provided, column names will be generated as '0', '1', '2', etc.
+            The names of the columns in the DataFrame. If not provided, column names will be generated as
+            '0', '1', '2', ..., f'{ncols -1}'.
         fill : str, optional
             The value used for filling the DataFrame. Default is 'zero'.
-            Accepted values are: 'zero', 'one', 'rand', 'randn'.
+            Accepted values are: 'zero', 'one', 'rand', 'randn', 'rowseq', 'colseq'
 
         Returns
         -------
@@ -215,66 +216,27 @@ class FlickerDataFrame:
             data = np.random.rand(nrows, ncols)
         elif fill == 'randn':
             data = np.random.randn(nrows, ncols)
+        elif fill == 'rowseq':
+            data = np.arange(nrows * ncols).reshape(nrows, ncols, order='C')
+        elif fill == 'colseq':
+            data = np.arange(nrows * ncols).reshape(nrows, ncols, order='F')
         else:
             raise ValueError(f'fill={fill} is not supported')
         return cls(spark.createDataFrame(data=data, schema=names))
 
     @classmethod
     def from_rows(cls, spark: SparkSession, rows: Iterable[Iterable],
-                  names: list[str] | None = None) -> FlickerDataFrame:
-        """
-        Parameters
-        ----------
-        spark : SparkSession
-            The SparkSession object used to create the DataFrame.
-        rows : Iterable[Iterable]
-            An iterable of iterables representing the rows of data.
-        names : list[str] | None, optional
-            A list of column names for the DataFrame. If not provided, column names will be generated as '0', '1', '2', etc.
-
-        Returns
-        -------
-        FlickerDataFrame
-            A FlickerDataFrame object created from the given rows and column names.
-
-        Raises
-        ------
-        ValueError
-            If the rows contain different number of columns.
-
-        Examples
-        --------
-        # Example 1: Creating a FlickerDataFrame from rows
-        >>> spark = SparkSession.builder.getOrCreate()
-        >>> rows = [[1, 'Alice', 25], [2, 'Bob', 30], [3, 'Charlie', 35]]
-        >>> names = ['id', 'name', 'age']
-        >>> df = FlickerDataFrame.from_rows(spark, rows, names)
-        >>> df.show()
-        +---+-------+---+
-        | id|   name|age|
-        +---+-------+---+
-        |  1|  Alice| 25|
-        |  2|    Bob| 30|
-        |  3|Charlie| 35|
-        +---+-------+---+
-
-        # Example 2: Creating a FlickerDataFrame without specifying column names
-        >>> spark = SparkSession.builder.getOrCreate()
-        >>> rows = [[1, 'Alice', 25], [2, 'Bob', 30], [3, 'Charlie', 35]]
-        >>> df = FlickerDataFrame.from_rows(spark, rows)
-        >>> df.show()
-        +---+-------+---+
-        |  0|      1|  2|
-        +---+-------+---+
-        |  1|  Alice| 25|
-        |  2|    Bob| 30|
-        |  3|Charlie| 35|
-        +---+-------+---+
-        """
-        data = [
-            [None if is_nan_scalar(element) else element for element in row]
-            for row in rows
-        ]
+                  names: list[str] | None = None, nan_to_none: bool = True) -> FlickerDataFrame:
+        if nan_to_none:
+            data = [
+                [None if is_nan_scalar(element) else element for element in row]
+                for row in rows
+            ]
+        else:
+            data = [
+                [element for element in row]
+                for row in rows
+            ]
         if names is None:
             maybe_ncols = set([len(row) for row in data])  # we have converted to list[list]
             if len(maybe_ncols) > 1:
@@ -285,29 +247,39 @@ class FlickerDataFrame:
 
     @classmethod
     def from_columns(cls, spark: SparkSession, columns: Iterable[Iterable],
-                     names: list[str] | None = None) -> FlickerDataFrame:
+                     names: list[str] | None = None, nan_to_none: bool = True) -> FlickerDataFrame:
         ncols = get_length(columns)
         maybe_nrows = set([get_length(column) for column in columns])
         if len(maybe_nrows) > 1:
             raise ValueError(f'columns contain different number of rows: {maybe_nrows}')
         nrows = maybe_nrows.pop()
         data = [[None] * ncols for _ in range(nrows)]  # Python containers: must use "for" outer loop
-        for j, column in enumerate(columns):
-            for i, element in enumerate(column):
-                data[i][j] = None if is_nan_scalar(element) else element
+        if nan_to_none:
+            for j, column in enumerate(columns):
+                for i, element in enumerate(column):
+                    data[i][j] = None if is_nan_scalar(element) else element
+        else:
+            for j, column in enumerate(columns):
+                for i, element in enumerate(column):
+                    data[i][j] = element
         if names is None:
             names = [f'{i}' for i in range(ncols)]
         return cls(spark.createDataFrame(data=data, schema=names))
 
     @classmethod
-    def from_records(cls, spark: SparkSession, records: Iterable[dict]) -> FlickerDataFrame:
-        for record in records:
-            for name, element in record.items():
-                record[name] = None if is_nan_scalar(element) else element
+    def from_records(cls, spark: SparkSession, records: Iterable[dict], nan_to_none: bool = True) -> FlickerDataFrame:
+        if nan_to_none:
+            for record in records:
+                for name, element in record.items():
+                    record[name] = None if is_nan_scalar(element) else element
+        else:
+            for record in records:
+                for name, element in record.items():
+                    record[name] = element
         return cls(spark.createDataFrame(data=records))
 
     @classmethod
-    def from_dict(cls, spark: SparkSession, data: dict) -> FlickerDataFrame:
+    def from_dict(cls, spark: SparkSession, data: dict, nan_to_none: bool = True) -> FlickerDataFrame:
         names = list(data.keys())
         ncols = len(names)
         maybe_nrows = set([len(column) for column in data.values()])
@@ -315,16 +287,28 @@ class FlickerDataFrame:
             raise ValueError(f'columns contain different number of rows: {maybe_nrows}')
         nrows = maybe_nrows.pop()
         rows = [[None] * ncols for _ in range(nrows)]  # Python containers: must use "for" outer loop
-        for j, column in enumerate(data.values()):
-            for i, element in enumerate(column):
-                rows[i][j] = None if is_nan_scalar(element) else element
+        if nan_to_none:
+            for j, column in enumerate(data.values()):
+                for i, element in enumerate(column):
+                    rows[i][j] = None if is_nan_scalar(element) else element
+        else:
+            for j, column in enumerate(data.values()):
+                for i, element in enumerate(column):
+                    rows[i][j] = element
         return cls(spark.createDataFrame(data=rows, schema=names))
 
     def to_dict(self, n: int | None = 5) -> dict:
         return get_columns_as_dict(self._df, n)
 
     @classmethod
-    def from_pandas(cls, spark: SparkSession, df: pd.DataFrame) -> FlickerDataFrame:
+    def from_pandas(cls, spark: SparkSession, df: pd.DataFrame, nan_to_none: bool = True) -> FlickerDataFrame:
+        if nan_to_none:
+            nrows, ncols = df.shape
+            for j in range(ncols):
+                df.iloc[:, j] = df.iloc[:, j].astype(object)
+                for i in range(nrows):
+                    if is_nan_scalar(df.iloc[i, j]):
+                        df.iloc[i, j] = None
         return cls(spark.createDataFrame(data=df))
 
     def to_pandas(self) -> pd.DataFrame:

@@ -63,6 +63,24 @@ def test_randn_fill(spark):
         assert dtype == 'double'
 
 
+def test_rowseq_fill(spark):
+    df = FlickerDataFrame.from_shape(spark, 3, 2, names=list('ab'), fill='rowseq')
+    assert df.shape == (3, 2)
+    for _, dtype in df.dtypes.items():
+        assert dtype in {'int', 'bigint'}
+    assert all(df(None)['a'].values == [0, 2, 4])
+    assert all(df(None)['b'].values == [1, 3, 5])
+
+
+def test_colseq_fill(spark):
+    df = FlickerDataFrame.from_shape(spark, 3, 2, names=list('ab'), fill='colseq')
+    assert df.shape == (3, 2)
+    for _, dtype in df.dtypes.items():
+        assert dtype in {'int', 'bigint'}
+    assert all(df(None)['a'].values == [0, 1, 2])
+    assert all(df(None)['b'].values == [3, 4, 5])
+
+
 def test_unsupported_fill(spark):
     with pytest.raises(Exception):
         FlickerDataFrame.from_shape(spark, 100, 4, names=list('ab'), fill='unsupported-fill')
