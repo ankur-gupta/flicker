@@ -88,3 +88,103 @@ def test_usage_with_names(spark):
         column = df[[name]].to_pandas()[name].to_numpy()
         expected_column = np.array(columns[i])
         assert np.all(column == expected_column)
+
+
+def test_nones_have_no_effect_in_non_float_columns(spark):
+    columns = [[1, None, 3, 4], ['hello', 'spark', 'flicker', None]]
+
+    df = FlickerDataFrame.from_columns(spark, columns, names=['n', 's'], nan_to_none=True)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    assert df['n'].take(None) == columns[0]
+    assert df['s'].take(None) == columns[1]
+
+    df = FlickerDataFrame.from_columns(spark, columns, names=['n', 's'], nan_to_none=False)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    assert df['n'].take(None) == columns[0]
+    assert df['s'].take(None) == columns[1]
+
+
+def test_nans_have_some_effect_in_non_float_columns(spark):
+    columns_with_nones = [[1, None, 3, 4], ['hello', 'spark', 'flicker', None]]
+    columns_with_nans = [[1, np.nan, 3, 4], ['hello', 'spark', 'flicker', np.nan]]
+
+    df = FlickerDataFrame.from_columns(spark, columns_with_nans, names=['n', 's'], nan_to_none=True)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    assert df['n'].take(None) == columns_with_nones[0]
+    assert df['s'].take(None) == columns_with_nones[1]
+
+    with pytest.raises(Exception):
+        FlickerDataFrame.from_columns(spark, columns_with_nans, names=['n', 's'], nan_to_none=False)
+
+
+def test_nones_have_no_effect_in_float_columns(spark):
+    columns_with_nones = [[1.0, None, 3.0, 4.0], [3.0, 4.0, 5.0, None]]
+
+    df = FlickerDataFrame.from_columns(spark, columns_with_nones, names=['n', 's'], nan_to_none=True)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    assert df['n'].take(None) == columns_with_nones[0]
+    assert df['s'].take(None) == columns_with_nones[1]
+
+    df = FlickerDataFrame.from_columns(spark, columns_with_nones, names=['n', 's'], nan_to_none=False)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    assert df['n'].take(None) == columns_with_nones[0]
+    assert df['s'].take(None) == columns_with_nones[1]
+
+
+def test_nans_have_some_effect_in_float_columns(spark):
+    columns_with_nones = [[1.0, None, 3.0, 4.0], [3.0, 4.0, 5.0, None]]
+    columns_with_nans = [[1.0, np.nan, 3.0, 4.0], [3.0, 4.0, 5.0, np.nan]]
+
+    df = FlickerDataFrame.from_columns(spark, columns_with_nans, names=['n', 's'], nan_to_none=True)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    assert df['n'].take(None) == columns_with_nones[0]
+    assert df['s'].take(None) == columns_with_nones[1]
+
+    df = FlickerDataFrame.from_columns(spark, columns_with_nans, names=['n', 's'], nan_to_none=False)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    for actual_value, expected_value in zip(df['n'].take(None), columns_with_nans[0]):
+        if np.isnan(expected_value):
+            assert np.isnan(actual_value)
+        else:
+            assert actual_value == expected_value
+    for actual_value, expected_value in zip(df['s'].take(None), columns_with_nans[1]):
+        if np.isnan(expected_value):
+            assert np.isnan(actual_value)
+        else:
+            assert actual_value == expected_value
+
+
+def test_nans_and_nones_in_float_columns(spark):
+    columns_with_nans_and_nones = [[1.0, None, np.nan, 4.0], [None, 4.0, 5.0, np.nan]]
+    columns_with_all_nones = [[1.0, None, None, 4.0], [None, 4.0, 5.0, None]]
+
+    df = FlickerDataFrame.from_columns(spark, columns_with_nans_and_nones, names=['n', 's'], nan_to_none=True)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    assert df['n'].take(None) == columns_with_all_nones[0]
+    assert df['s'].take(None) == columns_with_all_nones[1]
+
+    df = FlickerDataFrame.from_columns(spark, columns_with_nans_and_nones, names=['n', 's'], nan_to_none=False)
+    assert isinstance(df, FlickerDataFrame)
+    assert df.shape == (4, 2)
+    for actual_value, expected_value in zip(df['n'].take(None), columns_with_nans_and_nones[0]):
+        if expected_value is None:
+            assert actual_value is None
+        elif np.isnan(expected_value):
+            assert np.isnan(actual_value)
+        else:
+            assert actual_value == expected_value
+    for actual_value, expected_value in zip(df['s'].take(None), columns_with_nans_and_nones[1]):
+        if expected_value is None:
+            assert actual_value is None
+        elif np.isnan(expected_value):
+            assert np.isnan(actual_value)
+        else:
+            assert actual_value == expected_value

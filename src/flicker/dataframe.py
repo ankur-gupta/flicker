@@ -268,6 +268,8 @@ class FlickerDataFrame:
 
     @classmethod
     def from_records(cls, spark: SparkSession, records: Iterable[dict], nan_to_none: bool = True) -> FlickerDataFrame:
+        # Make a two-level copy first to avoid overwriting input value.
+        records = [dict(record) for record in records]
         if nan_to_none:
             for record in records:
                 for name, element in record.items():
@@ -302,6 +304,8 @@ class FlickerDataFrame:
 
     @classmethod
     def from_pandas(cls, spark: SparkSession, df: pd.DataFrame, nan_to_none: bool = True) -> FlickerDataFrame:
+        # Make a copy to avoid overwriting input variable
+        df = df.copy(deep=True)
         if nan_to_none:
             nrows, ncols = df.shape
             for j in range(ncols):
