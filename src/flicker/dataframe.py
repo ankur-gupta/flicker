@@ -149,6 +149,25 @@ class FlickerDataFrame:
         return self._df.columns
 
     def __call__(self, n: int | None = 5, use_pandas_dtypes: bool = False) -> pd.DataFrame:
+        """ Return a selection of pyspark.sql.DataFrame as a pandas.DataFrame.
+
+        Parameters
+        ----------
+        n : int | None, optional
+            Number of rows to return. If not specified, defaults to 5.
+            If df.nrows < n, only df.nrows are returned.
+            If n=None, all rows are returned.
+
+        use_pandas_dtypes : bool, optional
+            If False (recommended and default), the resulting pandas.DataFrame will have all column dtypes as object.
+            This option preserves NaNs and None(s) as-is.
+            If True, the resulting pandas.DataFrame will have parsed dtypes. This option may be a little faster, but it
+            allows pandas to convert None(s) in numeric columns to NaNs.
+
+        Returns
+        -------
+        pd.DataFrame
+        """
         if n is None:
             n = self._df.count()
         if use_pandas_dtypes:
@@ -157,35 +176,108 @@ class FlickerDataFrame:
             data = get_columns_as_dict(self._df, n)
             return pd.DataFrame.from_dict(data, dtype=object)[self._df.columns]
 
-    def show(self, n: int | None = 5, truncate: bool = True, vertical: bool = False) -> None:
+    def show(self, n: int | None = 5, truncate: bool | int = True, vertical: bool = False) -> None:
+        """ Prints the first n rows to the console as a (possibly) giant string. This is a pass-through method to
+        pyspark.sql.DataFrame.show(*args, **kwargs).
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of rows to show. Defaults to 5.
+        truncate : bool or int, optional
+            If True, strings longer than 20 chars are truncated.
+            If truncate > 1, strings longer than `truncate` are truncated to length=`truncate` and right-aligned.
+        vertical : bool, optional
+            If True, print output rows vertically (one line per column value).
+
+        Returns
+        -------
+        None
+        """
         self._df.show(n=n, truncate=truncate, vertical=vertical)
 
     @property
     def nrows(self) -> int:
+        """ Returns the number of rows. This method may take a long time to count all the rows in the dataframe.
+        Once the number of rows is computed, it is automatically cached until the dataframe is mutated.
+        Cached number of rows is returned immediately without having to re-count all the rows.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 1000, 2, names=['col1', 'col2'], fill='zero')
+        >>> df.nrows
+        1000
+        """
         if self._nrows is None:
             self._nrows = self._df.count()
         return self._nrows
 
     @property
     def ncols(self) -> int:
+        """ Returns the number of columns. This method always returns immediately no matter the number of rows in the
+        dataframe.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='zero')
+        >>> df.ncols
+        2
+        """
         return self._ncols
 
     @property
     def shape(self) -> tuple[int, int]:
+        """ Returns the shape of the FlickerDataFrame as (nrows, ncols)
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='zero')
+        >>> df.shape
+        (3, 2)
+        """
         return self.nrows, self.ncols
 
     @property
     def names(self) -> list[str]:
+        """ Returns a list of column names in the FlickerDataFrame
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='zero')
+        >>> df.names
+        ['col1', 'col2']
+        """
         return self._df.columns
 
     @property
     def dtypes(self) -> OrderedDict:
+        """ Returns the column names and corresponding data types as an OrderedDict.
+        The order of key-value pairs in the output is the same order as that of (left-to-right) columns in the
+        dataframe.
+
+        Returns:
+            OrderedDict:
+                Keys are column names and values are dtypes.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='zero')
+        >>> df.dtypes
+        OrderedDict([('col1', 'bigint'), ('col2', 'bigint')])
+        """
         return self._dtypes
 
     @classmethod
     def from_shape(cls, spark: SparkSession, nrows: int, ncols: int, names: list[str] | None = None,
                    fill='zero') -> FlickerDataFrame:
-        """
+        """ Create a FlickerDataFrame from a given shape and fill. This method is useful for creating test data and
+        experimentation.
+
         Parameters
         ----------
         spark : SparkSession
@@ -205,6 +297,16 @@ class FlickerDataFrame:
         -------
         FlickerDataFrame
             A new instance of the FlickerDataFrame class created from the given shape and parameters.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='rowseq')
+        >>> df()
+          col1 col2
+        0    0    1
+        1    2    3
+        2    4    5
         """
         if names is None:
             names = [f'{i}' for i in range(ncols)]
@@ -227,6 +329,39 @@ class FlickerDataFrame:
     @classmethod
     def from_rows(cls, spark: SparkSession, rows: Iterable[Iterable],
                   names: list[str] | None = None, nan_to_none: bool = True) -> FlickerDataFrame:
+        """ Create a FlickerDataFrame from rows.
+        Parameters
+        ----------
+        spark : SparkSession
+            The Spark session used to create the DataFrame.
+        rows : Iterable[Iterable]
+            The rows of data to be converted into a DataFrame. For example, [('row1', 1), ('row2', 2)].
+        names : list[str] | None, optional
+            The column names of the DataFrame. If None, default column names, '0', '1', ..., 'ncols' will be used.
+        nan_to_none : bool, optional
+            Flag indicating whether to convert all NaN values to None. Default and recommended value is True.
+
+        Returns
+        -------
+        FlickerDataFrame
+            A FlickerDataFrame instance created from the input rows.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> rows = [['a', 1, 2.0], ['b', 2, 4.0]]
+        >>> names = ['col1', 'col2', 'col3']
+        >>> df = FlickerDataFrame.from_rows(spark, rows, names)
+        >>> df()
+          col1 col2 col3
+        0    a    1  2.0
+        1    b    2  4.0
+
+        Raises
+        ------
+        ValueError
+            If the rows contain different number of columns.
+        """
         if nan_to_none:
             data = [
                 [None if is_nan_scalar(element) else element for element in row]
@@ -248,6 +383,41 @@ class FlickerDataFrame:
     @classmethod
     def from_columns(cls, spark: SparkSession, columns: Iterable[Iterable],
                      names: list[str] | None = None, nan_to_none: bool = True) -> FlickerDataFrame:
+        """ Create a FlickerDataFrame from columns.
+        Parameters
+        ----------
+        spark : SparkSession
+            The SparkSession object used to create the DataFrame.
+        columns : Iterable[Iterable]
+            The columns to create the DataFrame from. Each column should be an iterable. For example:
+            [('col1', 'a'), (1, 2), ('col3', 'b')]
+        names : list[str] | None, optional
+            The column names of the DataFrame. If None, default column names, '0', '1', ..., 'ncols' will be used.
+        nan_to_none : bool, optional
+            Flag indicating whether to convert all NaN values to None. Default and recommended value is True.
+
+        Returns
+        -------
+        FlickerDataFrame
+            The created FlickerDataFrame object.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> columns = [[1, 2, 3], ['a', 'b', 'c']]
+        >>> names = ['col1', 'col2']
+        >>> df = FlickerDataFrame.from_columns(spark, columns, names)
+        >>> df()
+          col1 col2
+        0    1    a
+        1    2    b
+        2    3    c
+
+        Raises
+        ------
+        ValueError
+            If the columns contain different number of rows.
+        """
         ncols = get_length(columns)
         maybe_nrows = set([get_length(column) for column in columns])
         if len(maybe_nrows) > 1:
@@ -268,6 +438,33 @@ class FlickerDataFrame:
 
     @classmethod
     def from_records(cls, spark: SparkSession, records: Iterable[dict], nan_to_none: bool = True) -> FlickerDataFrame:
+        """ Create a FlickerDataFrame from a list of dictionaries (similar to JSON lines format)
+
+        Parameters
+        ----------
+        spark : SparkSession
+            The SparkSession object used for creating the DataFrame.
+        records : Iterable[dict]
+            An iterable of dictionaries. Each dictionary represents a row (aka record).
+        nan_to_none : bool, optional
+            Flag indicating whether to convert all NaN values to None. Default and recommended value is True.
+
+        Returns
+        -------
+        FlickerDataFrame
+            The created FlickerDataFrame object.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> records = [{'col1': 1, 'col2': 1}, {'col1': 2, 'col2': 2}, {'col1': 3, 'col2': 3}]
+        >>> df = FlickerDataFrame.from_records(spark, records)
+        >>> df()
+          col1 col2
+        0    1    1
+        1    2    2
+        2    3    3
+        """
         # Make a two-level copy first to avoid overwriting input value.
         records = [dict(record) for record in records]
         if nan_to_none:
@@ -282,6 +479,35 @@ class FlickerDataFrame:
 
     @classmethod
     def from_dict(cls, spark: SparkSession, data: dict, nan_to_none: bool = True) -> FlickerDataFrame:
+        """ Create a FlickerDataFrame object from a dictionary, in which, dict keys represent column names and
+        dict values represent column values.
+
+        Parameters
+        ----------
+        spark : SparkSession
+            The SparkSession object used to create the DataFrame.
+        data : dict
+            The dictionary containing column names as keys and column values as values. For example,
+            {'col1': [1, 2, 3], 'col2': [4, 5, 6]}
+        nan_to_none : bool, optional
+            Flag indicating whether to convert all NaN values to None. Default and recommended value is True.
+
+        Returns
+        -------
+        FlickerDataFrame
+            The created FlickerDataFrame object.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> data = {'col1': [1, 2, 3], 'col2': [4, 5, 6]}
+        >>> df = FlickerDataFrame.from_dict(spark, data)
+        >>> df()
+          col1 col2
+        0    1    4
+        1    2    5
+        2    3    6
+        """
         names = list(data.keys())
         ncols = len(names)
         maybe_nrows = set([len(column) for column in data.values()])
@@ -300,12 +526,78 @@ class FlickerDataFrame:
         return cls(spark.createDataFrame(data=rows, schema=names))
 
     def to_dict(self, n: int | None = 5) -> dict:
+        """ Converts the FlickerDataFrame into a dictionary representation, in which, dict keys represent
+        column names and dict values represent column values.
+
+        Parameters
+        ----------
+        n : int | None, optional
+            Number of rows to return. If not specified, defaults to 5.
+            If df.nrows < n, only df.nrows are returned.
+            If n=None, all rows are returned.
+
+        Returns
+        -------
+        dict
+            A dictionary representation of the FlickerDataFrame where keys are
+            column names and values are lists containing up to `n` values from each column.
+
+        Example
+        -------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='colseq')
+        >>> df()
+          col1 col2
+        0    0    3
+        1    1    4
+        2    2    5
+        >>> df.to_dict(n=2)
+        {'col1': [0, 1], 'col2': [3, 4]}
+        """
         return get_columns_as_dict(self._df, n)
 
     @classmethod
     def from_pandas(cls, spark: SparkSession, df: pd.DataFrame, nan_to_none: bool = True) -> FlickerDataFrame:
-        # Make a copy to avoid overwriting input variable
-        df = df.copy(deep=True)
+        """ Create a FlickerDataFrame from a pandas.DataFrame.
+
+        Parameters
+        ----------
+        spark : SparkSession
+            The SparkSession object used to create the DataFrame.
+        df : pd.DataFrame
+            The pandas DataFrame to convert to a FlickerDataFrame.
+        nan_to_none : bool, optional
+            Flag indicating whether to convert all NaN values to None. Default and recommended value is True.
+
+        Returns
+        -------
+        FlickerDataFrame
+            The created FlickerDataFrame object.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> pandas_df = pd.DataFrame({'col1': [1, np.nan, 3], 'col2': [4, 5, np.nan]})
+        >>> pandas_df
+           col1  col2
+        0   1.0   4.0
+        1   NaN   5.0
+        2   3.0   NaN
+        >>> df = FlickerDataFrame.from_pandas(spark, pandas_df, nan_to_none=True)
+        >>> df()
+           col1  col2
+        0   1.0   4.0
+        1  None   5.0
+        2   3.0  None
+
+        >>> df = FlickerDataFrame.from_pandas(spark, pandas_df, nan_to_none=False)
+        >>> df()
+          col1 col2
+        0  1.0  4.0
+        1  NaN  5.0
+        2  3.0  NaN
+        """
+        df = df.copy(deep=True)  # deep copy to avoid overwriting input variable
         if nan_to_none:
             nrows, ncols = df.shape
             for j in range(ncols):
@@ -316,9 +608,64 @@ class FlickerDataFrame:
         return cls(spark.createDataFrame(data=df))
 
     def to_pandas(self) -> pd.DataFrame:
+        """ Converts a FlickerDataFrame to a pandas.DataFrame.  Calling this method on a big FlickerDataFrame may
+        result in out-of-memory errors.
+
+        This method is simply a pass through to pyspark.sql.DataFrame.to_pandas(). Consider using
+        FlickerDataFrame.__call___() instead of FlickerDataFrame.to_pandas() because pyspark.sql.DataFrame.to_pandas()
+        can cause unwanted None to NaN conversions. See example below.
+
+        Returns:
+        --------
+        pd.DataFrame:
+            The converted pandas DataFrame
+
+        Example:
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> pandas_df = pd.DataFrame({'col1': [1.0, np.nan, None], 'col2': [4.0, 5.0, np.nan]}, dtype=object)
+        >>> pandas_df
+           col1 col2
+        0   1.0  4.0
+        1   NaN  5.0
+        2  None  NaN
+        >>> df = FlickerDataFrame.from_pandas(spark, pandas_df, nan_to_none=False)
+        >>> df()
+           col1 col2
+        0   1.0  4.0
+        1   NaN  5.0
+        2  None  NaN
+        >>> df.to_pandas()  # causes unwanted None to NaN conversion in df.to_pandas().iloc[2, 0]
+           col1  col2
+        0   1.0   4.0
+        1   NaN   5.0
+        2   NaN   NaN
+        """
         return self._df.toPandas()
 
     def head(self, n: int | None = 5) -> FlickerDataFrame:
+        """ Return top n rows as a FlickerDataFrame. This method differs from FlickerDataFrame.__call__(),
+        which returns a pandas.DataFrame.
+
+        Parameters
+        ----------
+        n : int | None, optional
+            Number of rows to return. If not specified, defaults to 5.
+            If df.nrows < n, only df.nrows are returned.
+            If n=None, all rows are returned.
+
+        Returns
+        -------
+        FlickerDataFrame
+            A new instance of FlickerDataFrame containing top (at most) n rows
+
+        Example:
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 10, 2, names=['col1', 'col2'], fill='zero')
+        >>> df.head(3)
+        FlickerDataFrame[col1: bigint, col2: bigint]
+        """
         if n is None:
             df = self._df
         else:
@@ -326,6 +673,32 @@ class FlickerDataFrame:
         return self.__class__(df)
 
     def take(self, n: int | None = 5, convert_to_dict: bool = True) -> list[dict | Row]:
+        """ Return top n rows as a list.
+
+        Parameters
+        ----------
+        n : int | None, optional
+            Number of rows to return. If not specified, defaults to 5.
+            If df.nrows < n, only df.nrows are returned.
+            If n=None, all rows are returned.
+        convert_to_dict : bool, optional
+            If False, output is a list of pyspark.sql.Row objects.
+            If True, output is a list of dict objects.
+
+        Returns
+        -------
+        list[dict | Row]
+            A list of at most n items. Each item is either a pyspark.sql.Row or a dict object.
+        Example:
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> rows = [(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')]
+        >>> df = FlickerDataFrame.from_rows(spark, rows, names=['col1', 'col2'])
+        >>> df.take(2, convert_to_dict=True)
+        [{'col1': 1, 'col2': 'a'}, {'col1': 2, 'col2': 'b'}]
+        >>> df.take(2, convert_to_dict=False)
+        [Row(col1=1, col2='a'), Row(col1=2, col2='b')]
+        """
         if n is None:
             n = self._df.count()
         if convert_to_dict:
@@ -334,10 +707,64 @@ class FlickerDataFrame:
             return self._df.take(n)
 
     def drop(self, names: list[str]) -> FlickerDataFrame:
+        """ Delete columns by name. This is the non-mutating form of the __del__ method.
+
+        Parameters
+        ----------
+        names : list[str]
+            A list of column names to delete from the FlickerDataFrame.
+
+        Returns
+        -------
+        FlickerDataFrame
+            A new instance of the FlickerDataFrame class with the specified columns dropped.
+
+        Example:
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 4, names=['col1', 'col2', 'col3', 'col4'], fill='zero')
+        >>> df
+        FlickerDataFrame[col1: bigint, col2: bigint, col3: bigint, col4: bigint]
+        >>> df.drop(['col2', 'col4'])
+        FlickerDataFrame[col1: bigint, col3: bigint]
+        >>> df
+        FlickerDataFrame[col1: bigint, col2: bigint, col3: bigint, col4: bigint]
+        """
         self._check_names(names)
         return self.__class__(self._df.drop(*names))
 
     def rename(self, from_to_mapper: dict[str, str]) -> FlickerDataFrame:
+        """ Renames columns in the FlickerDataFrame based on the provided mapping of the form
+        {'old_col_name1': 'new_col_name1', 'old_col_name2': 'new_col_name2', ...}. This is a non-mutating method.
+
+        Parameters
+        ----------
+        from_to_mapper : dict[str, str]
+            A dictionary containing the mapping of current column names to new column names.
+
+        Returns
+        -------
+        FlickerDataFrame
+            A new instance of FlickerDataFrame with renamed columns.
+
+        Raises
+        ------
+        TypeError
+            If the provided from_to_mapper is not a dictionary.
+        KeyError
+            If any of the keys in from_to_mapper do not match existing column names in the FlickerDataFrame.
+
+        Example:
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 4, names=['col1', 'col2', 'col3', 'col4'], fill='zero')
+        >>> df
+        FlickerDataFrame[col1: bigint, col2: bigint, col3: bigint, col4: bigint]
+        >>> df.rename({'col1': 'col_a', 'col3': 'col_c'})
+        FlickerDataFrame[col_a: bigint, col2: bigint, col_c: bigint, col4: bigint]
+        >>> df  # df is not mutated
+        FlickerDataFrame[col1: bigint, col2: bigint, col3: bigint, col4: bigint]
+        """
         self._check_names(from_to_mapper.keys())
         return self.__class__(self._df.withColumnsRenamed(from_to_mapper))
 
