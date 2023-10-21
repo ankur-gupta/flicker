@@ -776,16 +776,172 @@ class FlickerDataFrame:
         return self.__class__(self._df.withColumnsRenamed(from_to_mapper))
 
     def sort(self, names: list[str], ascending: bool = True) -> FlickerDataFrame:
+        """ Returns a new :class:`DataFrame` sorted by the specified column name(s). This non-mutating method is
+        a pass-through to ``pyspark.sql.DataFrame.sort`` but with some checks and a slightly different function
+        signature.
+
+        Parameters
+        ----------
+        names: list[str]
+            The list of column names to sort the DataFrame by
+
+        ascending: bool, optional (default=True)
+            Whether to sort the DataFrame in ascending order or not
+
+        Returns
+        -------
+        FlickerDataFrame
+
+        Raises
+        ------
+        KeyError
+            If ``names`` contains a non-existant column name
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> rows = [(10, 1), (1, 2), (100, 3)]
+        >>> df = FlickerDataFrame.from_rows(spark, rows, names=['x', 'y'])
+        >>> df()
+             x  y
+        0   10  1
+        1    1  2
+        2  100  3
+        >>> df.sort(['x'])
+        FlickerDataFrame[x: bigint, y: bigint]
+        >>> df.sort(['x'])()
+             x  y
+        0    1  2
+        1   10  1
+        2  100  3
+        >>> df  # df is not mutated
+        FlickerDataFrame[x: bigint, y: bigint]
+        """
         self._check_names(names)
         return self.__class__(self._df.sort(*names, ascending=ascending))
 
     def unique(self) -> FlickerDataFrame:
+        """ Returns a new FlickerDataFrame with unique rows. This non-mutating method is just a pass-through to
+        ``pyspark.sql.DataFrame.distinct``.
+
+        Returns
+        -------
+            FlickerDataFrame:
+                A new FlickerDataFrame with unique rows
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='zero')
+        >>> df()
+          col1 col2
+        0    0    0
+        1    0    0
+        2    0    0
+        >>> df.unique()
+        FlickerDataFrame[col1: bigint, col2: bigint]
+        >>> df.unique()()
+          col1 col2
+        0    0    0
+        >>> df.shape  # df is not mutated
+        (3, 2)
+        """
         return self.__class__(self._df.distinct())
 
     def describe(self) -> pd.DataFrame:
+        """ Returns a ``pandas.DataFrame`` with statistical summary of the FlickerDataFrame. This method supports
+        numeric (int, bigint, float, double), string, timestamp, boolean columns. Unsupported columns are ignored
+        without an error. This method returns a different and better dtyped output than
+        ``pyspark.sql.DataFrame.describe``.
+
+        The output contains count, mean, stddev, min, and max values.
+
+        Returns
+        -------
+            pandas.DataFrame:
+                A pandas DataFrame with statistical summary of the FlickerDataFrame
+
+        Examples
+        --------
+        >>> from datetime import datetime, timedelta
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> t = datetime(2023, 1, 1)
+        >>> dt = timedelta(days=1)
+        >>> rows = [('Bob', 23, 100.0, t - dt, False), ('Alice', 22, 110.0, t, True), ('Tom', 21, 120.0, t + dt, False)]
+        >>> names = ['name', 'age', 'weight', 'time', 'is_jedi']
+        >>> df = FlickerDataFrame.from_rows(spark, rows, names)
+        >>> df()
+            name age weight                 time is_jedi
+        0    Bob  23  100.0  2022-12-31 00:00:00   False
+        1  Alice  22  110.0  2023-01-01 00:00:00    True
+        2    Tom  21  120.0  2023-01-02 00:00:00   False
+        >>> df.describe()
+                 name   age weight                 time   is_jedi
+        count       3     3      3                    3         3
+        max       Tom    23  120.0  2023-01-02 00:00:00      True
+        mean      NaN  22.0  110.0  2023-01-01 00:00:00  0.333333
+        min     Alice    21  100.0  2022-12-31 00:00:00     False
+        stddev    NaN   1.0   10.0       1 day, 0:00:00   0.57735
+        >>> df.describe()['time']['stddev']  # output contains appropriately typed values instead of strings
+        datetime.timedelta(days=1)
+        """
         return get_summary(self._df)
 
     def concat(self, other: FlickerDataFrame | DataFrame, ignore_names: bool = False) -> FlickerDataFrame:
+        """ Return a new FlickerDataFrame with rows from this and other dataframe concatenated together. This is a
+        non-mutating method that calls ``pyspark.sql.DataFrame.union`` after some checks.
+        Resulting concatenated DataFrame will always contain the same column names in the same order as that in the
+        current DataFrame.
+
+        Parameters
+        ----------
+        other : FlickerDataFrame | pyspark.sql.DataFrame
+            The DataFrame to concatenate with the current DataFrame
+        ignore_names : bool, optional (default=False)
+            If ``True``, the column names of the ``other`` dataframe are ignored when concatenating. Concatenation
+            happens by column order and resulting dataframe will have column names in the same order as the current
+            dataframe.
+            If ``False``, this method checks that current and ``other`` dataframe have the same column names (even
+            if not in the same order). If this check fails, a ``KeyError`` is raised.
+
+        Returns
+        -------
+        FlickerDataFrame
+            The concatenated DataFrame
+
+        Raises
+        ------
+        KeyError
+            If the DataFrames have different sets of column names and ``ignore_names=False``
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> df_zero = FlickerDataFrame.from_shape(spark, 2, 2, names=['a', 'b'], fill='zero')
+        >>> df_one = FlickerDataFrame.from_shape(spark, 2, 2, names=['a', 'b'], fill='one')
+        >>> df_rand = FlickerDataFrame.from_shape(spark, 2, 2, names=['b', 'c'], fill='rand')
+        >>> df_zero.concat(df_one)
+        FlickerDataFrame[a: bigint, b: bigint]
+        >>> df_zero.concat(df_one, ignore_names=False)()
+           a  b
+        0  0  0
+        1  0  0
+        2  1  1
+        3  1  1
+        >>> df_zero.concat(df_one, ignore_names=True)()  # ignore_names has no effect
+           a  b
+        0  0  0
+        1  0  0
+        2  1  1
+        3  1  1
+        >>> df_zero.concat(df_rand, ignore_names=True)()
+                  a         b
+        0       0.0       0.0
+        1       0.0       0.0
+        2   0.85428  0.148739
+        3  0.031665   0.14922
+        >>> df_zero.concat(df_rand, ignore_names=False)  # KeyError
+        """
         if isinstance(other, FlickerDataFrame):
             other = other._df
         if ignore_names:
@@ -900,6 +1056,33 @@ class FlickerDataFrame:
         return self.__class__(left.join(right, on=conditions, how=how))
 
     def groupby(self, names: list[str]) -> FlickerGroupedData:
+        """ Groups the rows of the DataFrame based on the specified column names, so we can run aggregation on them.
+        Returns a ``FlickerGroupedData`` object. This method is a pass-through to ``pyspark.sql.DataFrame`` but
+        returns a  ``FlickerGroupedData`` object instead of a ``pyspark.sql.GroupedData`` object.
+
+        Parameters
+        ----------
+        names: list[str]
+            The column names based on which the DataFrame rows should be grouped
+
+        Returns
+        -------
+        FlickerGroupedData
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> rows = [('spark', 10), ('pandas', 10), ('spark', 100)]
+        >>> df = FlickerDataFrame.from_rows(spark, rows, names=['name', 'number'])
+        >>> df.groupby(['name'])
+        FlickerGroupedData[grouping expressions: [name], value: [name: string, number: bigint], type: GroupBy]
+        >>> df.groupby(['name']).count()
+        FlickerDataFrame[name: string, count: bigint]
+        >>> df.groupby(['name']).count()()
+             name count
+        0   spark     2
+        1  pandas     1
+        """
         return FlickerGroupedData(self._df, self._df.groupBy(*names))
 
 
