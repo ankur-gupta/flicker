@@ -26,12 +26,31 @@ from .summary import get_columns_as_dict, get_summary
 
 
 class FlickerDataFrame:
+    """ ``FlickerDataFrame`` is a wrapper over ``pyspark.sql.DataFrame``. ``FlickerDataFrame`` provides a modern,
+    clean, intuitive, pythonic, polars-like API over a ``pyspark`` backend.
+    """
     _df: DataFrame
     _nrows: int | None
     _ncols: int | None
     _dtypes: OrderedDict | None
 
     def __init__(self, df: DataFrame):
+        """ Construct a ``FlickerDataFrame`` from a ``pyspark.sql.DataFrame``. Construction will fail if the
+        ``pyspark.sql.DataFrame`` contains duplicate column names.
+
+        Parameters
+        ----------
+        df : pyspark.sql.DataFrame
+            The input ``pyspark.sql.DataFrame`` to initialize a FlickerDataFrame object
+
+        Raises
+        ------
+        TypeError
+            If the df parameter is not an instance of ``pyspark.sql.DataFrame``
+        ValueError
+            If the df parameter contains duplicate column names
+
+        """
         if not isinstance(df, DataFrame):
             raise TypeError(f'df must be of type pyspark.sql.DataFrame; you provided type(df)={type(df)}')
         if len(df.columns) != len(set(df.columns)):
