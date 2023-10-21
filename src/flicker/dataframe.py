@@ -953,6 +953,63 @@ class FlickerDataFrame:
 
     def merge(self, right: FlickerDataFrame | DataFrame, on: Iterable[str], how: str = 'inner',
               lprefix: str = '', lsuffix: str = '_l', rprefix: str = '', rsuffix: str = '_r') -> FlickerDataFrame:
+        """ Merge the current FlickerDataFrame with another dataframe. This non-mutating method returns the merged
+            dataframe as a FlickerDataFrame.
+
+            Note that ``FlickerDataFrame.merge`` is different from ``FlickerDataFrame.join`` in both function signature
+            and the merged/joined result.
+
+            Parameters
+            ----------
+            right: FlickerDataFrame or DataFrame
+                The right dataframe to merge with
+            on: Iterable[str]
+                Column names to 'join' on. The column names must exist in both left and right dataframes.
+                The column names provided in ``on`` are not duplicated and are not renamed using prefixes/suffixes.
+            how: str, optional (default='inner')
+                Type of join to perform. Possible values are ['inner', 'outer', 'left', 'right'].
+            lprefix: str, optional (default='')
+                Prefix to add to column names from the left dataframe that are duplicated in the merge result
+            lsuffix: str, optional (default='_l')
+                Suffix to add to column names from the left dataframe that are duplicated in the merge result
+            rprefix: str, optional (default='')
+                Prefix to add to column names from the right dataframe that are duplicated in the merge result
+            rsuffix: str, optional (default='_r')
+                Suffix to add to column names from the right dataframe that are duplicated in the merge result
+
+            Returns
+            -------
+            FlickerDataFrame
+
+            Raises
+            ------
+            TypeError
+                If `on` is not an ``Iterable[str]`` or if it is a ``dict``
+            ValueError
+                If `on` is an empty ``Iterable[str]``
+            TypeError
+                If any element in `on` is not a ``str``
+            KeyError
+                If renaming results in duplicate column names in the left dataframe
+            KeyError
+                If renaming results in duplicate column names in the right dataframe
+
+            Examples
+            --------
+            >>> spark = SparkSession.builder.getOrCreate()
+            >>> left = FlickerDataFrame.from_rows(spark, [('a', 1), ('b', 2), ('c', 3), ], ['name', 'number'])
+            >>> right = FlickerDataFrame.from_rows(spark, [('a', 4), ('d', 5), ('e', 6), ], ['name', 'number'])
+            >>> inner_merge = left.merge(right, on=['name'], how='inner')
+            >>> inner_merge()
+              name number_l number_r
+            0    a        1        4
+            >>> left_merge = left.merge(right, on=['name'], how='left')
+            >>> left_merge()
+              name number_l number_r
+            0    a        1        4
+            1    b        2     None
+            2    c        3     None
+        """
         # All names in `on` must exist in both left and right dataframes
         if isinstance(on, dict):
             raise TypeError(f'`.merge()` requires that `on` be Iterable[str] but `on` is a dict. '
@@ -999,6 +1056,69 @@ class FlickerDataFrame:
     def join(self, right: FlickerDataFrame | DataFrame,
              on: dict[str, str], how: str = 'inner',
              lprefix: str = '', lsuffix: str = '_l', rprefix: str = '', rsuffix: str = '_r') -> FlickerDataFrame:
+        """ Join the current FlickerDataFrame with another dataframe. This non-mutating method returns the joined
+            dataframe as a FlickerDataFrame.
+
+            This method preserves duplicate column names (that are joined on) by renaming them in the join result.
+            Note that ``FlickerDataFrame.join`` is different from ``FlickerDataFrame.merge`` in both function signature
+            and the merged/joined result.
+
+        Parameters
+        ----------
+        right: FlickerDataFrame | DataFrame
+            The right DataFrame to join with the left DataFrame.
+        on: dict[str, str]
+            Dictionary specifying which column names to join on. Keys represent column names from the left dataframe
+            and values represent column names from the right dataframe.
+        how: str, optional (default='inner')
+            The type of join to perform
+            - 'inner': Returns only the matching rows from both DataFrames
+            - 'left': Returns all the rows from the left DataFrame and the matching rows from the right DataFrame
+            - 'right': Returns all the rows from the right DataFrame and the matching rows from the left DataFrame
+            - 'outer': Returns all the rows from both DataFrames, including unmatched rows, with `null` values for
+                       non-matching columns
+        lprefix: str, optional (default='')
+            Prefix to add to column names from the left dataframe that are duplicated in the join result
+        lsuffix: str, optional (default='_l')
+            Suffix to add to column names from the left dataframe that are duplicated in the join result
+        rprefix: str, optional (default='')
+            Prefix to add to column names from the right dataframe that are duplicated in the join result
+        rsuffix: str, optional (default='_r')
+            Suffix to add to column names from the right dataframe that are duplicated in the join result
+
+        Returns
+        -------
+        FlickerDataFrame
+
+        Raises
+        ------
+        TypeError
+            If the `on` parameter is not a dictionary
+        ValueError
+            If the `on` parameter is an empty dictionary
+        TypeError
+            If the keys or values of the `on` parameter are not of str type
+        KeyError
+            If the left or right DataFrame contains duplicate column names after renaming
+        NotImplementedError
+            To prevent against unexpected changes in the underlying ``pyspark.sql.DataFrame.join``
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> left = FlickerDataFrame.from_rows(spark, [('a', 1), ('b', 2), ('c', 3), ], ['x', 'number'])
+        >>> right = FlickerDataFrame.from_rows(spark, [('a', 4), ('d', 5), ('e', 6), ], ['x', 'number'])
+        >>> inner_join = left.join(right, on={'x': 'x'}, how='inner')
+        >>> inner_join()  # 'x' columns from both left and right dataframes is preserved
+          x_l number_l x_r number_r
+        0   a        1   a        4
+        >>> left = FlickerDataFrame.from_rows(spark, [('a', 1), ('b', 2), ('c', 3), ], ['x1', 'number'])
+        >>> right = FlickerDataFrame.from_rows(spark, [('a', 4), ('d', 5), ('e', 6), ], ['x2', 'number'])
+        >>> inner_join = left.join(right, on={'x1': 'x2'}, how='inner')
+        >>> inner_join()  # renaming happens only when needed
+          x1 number_l x2 number_r
+        0  a        1  a        4
+        """
         # on = map of {left_name: right_name}
         if not isinstance(on, dict):
             raise TypeError(f'`.join()` requires that `on` be dict[str, str] but `on` is a {type(on)}. '
