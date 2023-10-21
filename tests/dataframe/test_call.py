@@ -12,7 +12,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
+import numpy as np
 import pandas as pd
+import pytest
+
 from flicker import FlickerDataFrame
 
 
@@ -88,3 +91,64 @@ def test_call_empty_dataframe(spark):
     assert isinstance(subset_df(), pd.DataFrame)
     assert subset_df().shape == (0, 3)
     assert set(subset_df().columns) == set(subset_df.names)
+
+
+def test_nans_and_nones_in_float_columns(spark):
+    data_with_nans_and_nones = {'x': [1.0, None, np.nan, 4.0], 'y': [None, 4.0, 5.0, np.nan]}
+    expected = pd.DataFrame.from_dict(data_with_nans_and_nones, dtype=object)
+    for name in expected.columns:
+        assert expected[name].dtype == object
+    df = FlickerDataFrame.from_dict(spark, data_with_nans_and_nones, nan_to_none=False)
+    actual = df(None)
+    assert all(expected.columns == actual.columns)
+    for name in expected.columns:
+        for expected_value, actual_value in zip(expected[name], actual[name]):
+            if expected_value is None:
+                assert actual_value is None
+            elif np.isnan(expected_value):
+                assert np.isnan(actual_value)
+            else:
+                assert actual_value == expected_value
+
+
+def test_only_nones_in_float_columns(spark):
+    data_only_nones = {'x': [1.0, None, None, 4.0], 'y': [None, 4.0, 5.0, None]}
+    expected = pd.DataFrame.from_dict(data_only_nones, dtype=object)
+    for name in expected.columns:
+        assert expected[name].dtype == object
+    df = FlickerDataFrame.from_dict(spark, data_only_nones, nan_to_none=False)
+    actual = df(None)
+    assert all(expected.columns == actual.columns)
+    for name in expected.columns:
+        for expected_value, actual_value in zip(expected[name], actual[name]):
+            if expected_value is None:
+                assert actual_value is None
+            elif np.isnan(expected_value):
+                assert np.isnan(actual_value)
+            else:
+                assert actual_value == expected_value
+
+
+def test_nones_non_float_columns(spark):
+    data_only_nones = {'n': [1, None, 3, 4], 's': ['hello', 'spark', 'flicker', None]}
+    expected = pd.DataFrame.from_dict(data_only_nones, dtype=object)
+    for name in expected.columns:
+        assert expected[name].dtype == object
+    df = FlickerDataFrame.from_dict(spark, data_only_nones, nan_to_none=False)
+    actual = df(None)
+    assert all(expected.columns == actual.columns)
+    for name in expected.columns:
+        for expected_value, actual_value in zip(expected[name], actual[name]):
+            if expected_value is None:
+                assert actual_value is None
+            else:
+                assert actual_value == expected_value
+
+
+def test_nans_in_non_float_columns(spark):
+    data_only_nans = {'n': [1, np.nan, 3, 4], 's': ['hello', 'spark', 'flicker', np.nan]}
+    expected = pd.DataFrame.from_dict(data_only_nans, dtype=object)
+    for name in expected.columns:
+        assert expected[name].dtype == object
+    with pytest.raises(Exception):
+        FlickerDataFrame.from_dict(spark, data_only_nans, nan_to_none=False)
