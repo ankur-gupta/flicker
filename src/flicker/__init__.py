@@ -17,7 +17,8 @@ from flicker.version import __version__
 from flicker.dataframe import FlickerDataFrame
 from flicker.column import FlickerColumn
 from flicker.group import FlickerGroupedData
-from flicker.variables import PYTHON_TO_SPARK_DTYPES, PYSPARK_NUMERIC_DTYPES, PYSPARK_BOOLEAN_DTYPES
+from flicker.variables import (PYTHON_TO_SPARK_DTYPES, PYSPARK_NUMERIC_DTYPES, PYSPARK_FLOAT_DTYPES,
+                               PYSPARK_INTEGER_DTYPES, PYSPARK_BOOLEAN_DTYPES, PYSPARK_TIMESTAMP_DTYPES)
 from flicker.mkname import mkname
 from flicker.utils import is_nan_scalar, get_length, get_names_by_dtype
 from flicker.recipes import delete_extra_columns, find_empty_columns
