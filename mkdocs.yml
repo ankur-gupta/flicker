@@ -61,6 +61,13 @@ plugins:
       type: timeago
   - search
   - offline
+  - mkdocstrings:  # https://mkdocstrings.github.io/python/usage/#installation
+      default_handler: python
+      handlers:  # https://mkdocstrings.github.io/python/usage/configuration/docstrings/#docstring_style
+        python:
+          options:
+            docstring_style: numpy
+            allow_section_blank_line: True
 
 # Extensions
 markdown_extensions:
@@ -100,3 +107,5 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Installation: installation.md
+  - API Reference:
+      FlickerDataFrame: api-reference/FlickerDataFrame.md
