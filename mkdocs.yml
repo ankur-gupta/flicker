@@ -61,13 +61,14 @@ plugins:
       type: timeago
   - search
   - offline
-  - mkdocstrings:  # https://mkdocstrings.github.io/python/usage/#installation
+  - mkdocstrings: # https://mkdocstrings.github.io/python/usage/#installation
       default_handler: python
-      handlers:  # https://mkdocstrings.github.io/python/usage/configuration/docstrings/#docstring_style
+      handlers: # https://mkdocstrings.github.io/python/usage/configuration/docstrings/#docstring_style
         python:
           options:
             docstring_style: numpy
             allow_section_blank_line: True
+  - mike
 
 # Extensions
 markdown_extensions:
@@ -107,15 +108,15 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started:
-      Installation: getting-started/installation.md
-      Quick Example: getting-started/quick-example.md
-      License: getting-started/license.md
-      Releases: getting-started/releases.md
-      Contributing: getting-started/contributing.md
+      - Installation: getting-started/installation.md
+      - Quick Example: getting-started/quick-example.md
+      - License: getting-started/license.md
+      - Releases: getting-started/releases.md
+      - Contributing: getting-started/contributing.md
   - API Reference:
-      FlickerDataFrame: api-reference/FlickerDataFrame.md
-      FlickerColumn: api-reference/FlickerColumn.md
-      FlickerGroupedData: api-reference/FlickerGroupedData.md
-      Recipes: api-reference/recipes.md
-      Utils: api-reference/utils.md
-      mkname: api-reference/mkname.md
+      - FlickerDataFrame: api-reference/FlickerDataFrame.md
+      - FlickerColumn: api-reference/FlickerColumn.md
+      - FlickerGroupedData: api-reference/FlickerGroupedData.md
+      - Recipes: api-reference/recipes.md
+      - Utils: api-reference/utils.md
+      - mkname: api-reference/mkname.md
