@@ -68,7 +68,8 @@ plugins:
           options:
             docstring_style: numpy
             allow_section_blank_line: True
-  - mike
+  - mike:
+      version_selector: true
 
 # Extensions
 markdown_extensions:
