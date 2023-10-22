@@ -69,7 +69,6 @@ coverage-json = "coverage json"
 coverage-xml = "coverage xml"
 coverage-html = "coverage html"
 
-
 [[tool.hatch.envs.test.matrix]]
 python = ["3.9", "3.11"]
 
@@ -96,3 +95,17 @@ include = [
 exclude = [
     "/.github",
 ]
+
+[tool.hatch.envs.docs]
+dependencies = [
+    "mkdocs-material",  # https://squidfunk.github.io/mkdocs-material/getting-started/
+    "mkdocs-git-revision-date-localized-plugin",  # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#revisioning
+    "mkdocstrings-python",  # https://mkdocstrings.github.io/python/
+    "mike"  # https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/#versioning
+]
+
+# Run as `hatch run docs:build`, `hatch run docs:serve`
+# https://hatch.pypa.io/1.1/environment/#selection
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build --clean --strict"
+serve = "mkdocs serve --dev-addr localhost:8000"

@@ -13,9 +13,10 @@ pytest
 pytest-cov
 
 # For docs
-wheel
 mkdocs-material
 mkdocs-git-revision-date-localized-plugin
+mkdocstrings-python
+mike
 
 # For development only
 ipython

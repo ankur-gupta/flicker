@@ -1,61 +1,102 @@
+# Project information
 site_name: flicker
+site_author: 2023 Flicker Contributors
 site_description: >-
-    A better API to handle PySpark dataframes.
+  Modern, clean, intuitive, pythonic Polars-like API over PySpark
+
+# Repository
 repo_name: ankur-gupta/flicker
 repo_url: https://github.com/ankur-gupta/flicker
-edit_uri: edit/master/docs/
+
+# Copyright
+copyright: Copyright &copy; 2023 Flicker Contributors
+
+# Paths
+docs_dir: mkdocs/docs
+site_dir: mkdocs/site
+
+# Configuration
 theme:
-    name: material
-    language: en
-    features:
-        - tabs
-    palette:
-        scheme: preference
-        primary: deep orange
-        accent: orange
-    icon:
-        logo: material/fire
-    favicon: assets/images/favicon.svg
-extra_css:
-    - stylesheets/extra.css
+  name: material
+  custom_dir: mkdocs/overrides
+  logo: assets/logo-white.svg
+  favicon: assets/favicon.svg
+  icon:
+    repo: fontawesome/brands/git-alt
+  features:
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - media: "(prefers-color-scheme: light)"  # Palette toggle for light mode
+      scheme: default
+      primary: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"  # Palette toggle for dark mode
+      scheme: slate
+      primary: black
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+# Versioning
+extra:
+  version:
+    provider: mike
+
+# Plugins
 plugins:
-    - search:
-        lang: en
-    - git-revision-date-localized:
-        type: timeago
-        fallback_to_build_date: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      fallback_to_build_date: true
+      type: timeago
+  - search
+  - offline
+
+# Extensions
 markdown_extensions:
-    - toc:
-        permalink: true
-    - admonition
-    - pymdownx.details
-    - pymdownx.superfences
-    - attr_list
-    - pymdownx.highlight:
-        use_pygments: true
-        linenums: true
-        linenums_style: pymdownx.inline
-    - pymdownx.inlinehilite
-    - pymdownx.snippets
-    - pymdownx.tabbed
-    - footnotes
-    - pymdownx.betterem:
-        smart_enable: all
-    - pymdownx.smartsymbols
-    - pymdownx.emoji:
-        emoji_index: !!python/name:materialx.emoji.twemoji
-        emoji_generator: !!python/name:materialx.emoji.to_svg
-    - def_list
-    - pymdownx.tasklist:
-        custom_checkbox: true
-    - meta
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Page tree
 nav:
-    - Overview: index.md
-    - Quick Example: quick-example.md
-    - Design: design.md
-    - Releases: releases.md
-    - License: license.md
-    - Getting Started:
-        - Installation: getting-started/installation.md
-    - Tutorial:
-          - Data Analysis: tutorial/data-analysis.md
+  - Home: index.md
+  - Installation: installation.md
