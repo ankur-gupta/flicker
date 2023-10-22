@@ -400,7 +400,7 @@ class FlickerDataFrame:
         ----------
         spark: SparkSession
         rows: Iterable[Iterable]
-            The rows of data to be converted into a DataFrame. For example, [('row1', 1), ('row2', 2)].
+            The rows of data to be converted into a DataFrame. For example, ``[('row1', 1), ('row2', 2)]``.
         names: list[str] | None, optional
             The column names of the DataFrame. If None, column names will be generated as
             '0', '1', '2', ..., f'{ncols -1}'.
@@ -1165,6 +1165,8 @@ class FlickerDataFrame:
         >>> inner_join()  # 'x' columns from both left and right dataframes is preserved
           x_l number_l x_r number_r
         0   a        1   a        4
+
+        >>> spark = SparkSession.builder.getOrCreate()
         >>> left = FlickerDataFrame.from_rows(spark, [('a', 1), ('b', 2), ('c', 3), ], ['x1', 'number'])
         >>> right = FlickerDataFrame.from_rows(spark, [('a', 4), ('d', 5), ('e', 6), ], ['x2', 'number'])
         >>> inner_join = left.join(right, on={'x1': 'x2'}, how='inner')
