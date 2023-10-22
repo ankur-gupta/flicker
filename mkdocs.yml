@@ -66,6 +66,7 @@ plugins:
       default_handler: python
       handlers: # https://mkdocstrings.github.io/python/usage/configuration/docstrings/#docstring_style
         python:
+          paths: [src]  # search packages in the src folder
           options:
             docstring_style: numpy
             allow_section_blank_line: True
