@@ -106,7 +106,11 @@ markdown_extensions:
 # Page tree
 nav:
   - Home: index.md
-  - Installation: installation.md
+  - Getting Started:
+      Installation: getting-started/installation.md
+      Quick Example: getting-started/quick-example.md
+      License: getting-started/license.md
+      Releases: getting-started/releases.md
   - API Reference:
       FlickerDataFrame: api-reference/FlickerDataFrame.md
       FlickerColumn: api-reference/FlickerColumn.md
