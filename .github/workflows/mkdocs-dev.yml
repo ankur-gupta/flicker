@@ -1,4 +1,4 @@
-name: ci 
+name: mkdocs-dev 
 on:
   push:
     branches:
@@ -35,13 +35,13 @@ jobs:
           hatch version
           export VERSION=`hatch version`
           echo $VERSION
-      - name: Fetch gh-pages
+      - name: Add CNAME
         run: |
           git branch
           git checkout gh-pages
           git status
-      - name: Add CNAME
-        run: |
           rm -rf CNAME
           echo "flicker.perfectlyrandom.org" >> CNAME
           cat CNAME
+          git commit -m "Adding CNAME"
+          git status
