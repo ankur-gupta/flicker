@@ -1,0 +1,43 @@
+name: ci 
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
+      - uses: actions/cache@v3
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+      - run: |
+          python -m pip install --upgrade pip
+          pip install hatch mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocstrings-python mike
+      - name: Check existing doc versions
+        run: |
+          mike list
+      - name: Get package version
+        run: |
+          hatch version
+          export VERSION=`hatch version`
+          echo $VERSION
+      - name: Fetch gh-pages
+        run: |
+          git checkout gh-pages
+          git fetch origin gh-pages --depth=1
+          git status
+      - name: Add CNAME
+        run: |
+          rm -rf CNAME
+          echo "flicker.perfectlyrandom.org" >> CNAME
+          cat CNAME
