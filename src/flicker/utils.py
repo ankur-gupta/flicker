@@ -104,7 +104,7 @@ def get_names_by_dtype(df: DataFrame, dtype: str) -> list[str]:
     Parameters
     ----------
     df: pyspark.sql.DataFrame
-        The input DataFrame
+        The input ``pyspark.sql.DataFrame``
     dtype: str
         The data type to filter the column names. Example: ``'bigint'``.
 

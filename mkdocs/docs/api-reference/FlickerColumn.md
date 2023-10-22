@@ -9,3 +9,4 @@
         separate_signature: True
         show_signature_annotations: False
         unwrap_annotated: True
+        show_if_no_docstring: True

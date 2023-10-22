@@ -5,6 +5,7 @@
         show_source: False
         show_root_heading: False
         group_by_category: True
+        show_category_heading: False
         merge_init_into_class: True
         docstring_section_style: table
         separate_signature: True
