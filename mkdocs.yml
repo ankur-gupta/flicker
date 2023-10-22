@@ -109,3 +109,6 @@ nav:
   - Installation: installation.md
   - API Reference:
       FlickerDataFrame: api-reference/FlickerDataFrame.md
+      FlickerColumn: api-reference/FlickerColumn.md
+      FlickerGroupedData: api-reference/FlickerGroupedData.md
+      mkname: api-reference/mkname.md

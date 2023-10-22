@@ -26,15 +26,15 @@ def mkname(names: Iterable[str] = (), prefix: str = '', suffix: str = '',
 
     Parameters
     ----------
-    names : Iterable[str], optional
+    names: Iterable[str], optional
         Existing names to check for uniqueness. Defaults to an empty iterable.
-    prefix : str, optional
+    prefix: str, optional
         Prefix to prepend to the generated name. Defaults to an empty string.
-    suffix : str, optional
+    suffix: str, optional
         Suffix to append to the generated name. Defaults to an empty string.
-    max_tries : int, optional
+    max_tries: int, optional
         Maximum number of attempts to generate a unique name. Defaults to 100.
-    n_random_chars : int, optional
+    n_random_chars: int, optional
         Number of random characters to generate for the name. Defaults to 4.
 
     Returns

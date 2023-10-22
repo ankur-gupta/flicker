@@ -40,8 +40,8 @@ class FlickerDataFrame:
 
         Parameters
         ----------
-        df : pyspark.sql.DataFrame
-            The input ``pyspark.sql.DataFrame`` to initialize a FlickerDataFrame object
+        df: ``pyspark.sql.DataFrame``
+            The input ``pyspark.sql.DataFrame`` to initialize a ``FlickerDataFrame`` object
 
         Raises
         ------
@@ -50,6 +50,17 @@ class FlickerDataFrame:
         ValueError
             If the df parameter contains duplicate column names
 
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> rows = [('spark', 1), ('pandas', 3), ('polars', 2)]
+        >>> spark_df = spark.createDataFrame(rows, schema=['package', 'rank'])
+        >>> df = FlickerDataFrame(spark_df)
+        >>> df()
+          package rank
+        0   spark    1
+        1  pandas    3
+        2  polars    2
         """
         if not isinstance(df, DataFrame):
             raise TypeError(f'df must be of type pyspark.sql.DataFrame; you provided type(df)={type(df)}')
@@ -92,16 +103,17 @@ class FlickerDataFrame:
         else:
             self._mutate(self._df.withColumn(name, lit(value)))
 
-    def __getitem__(self, item: tuple | slice | str | list | Column | FlickerColumn):
-        """
+    def __getitem__(self,
+                    item: tuple | slice | str | list | Column | FlickerColumn) -> FlickerColumn | FlickerDataFrame:
+        """ Index into the dataframe in various ways
         Parameters
         ----------
-        item : tuple | slice | str | list | Column | FlickerColumn
-            The index value to retrieve from the FlickerDataFrame object.
+        item: tuple | slice | str | list | Column | FlickerColumn
+            The index value to retrieve from the FlickerDataFrame object
 
         Returns
         -------
-        FlickerColumn or FlickerDataFrame
+        FlickerColumn | FlickerDataFrame
             If the index value is a string, returns a FlickerColumn object containing the column specified by the string.
             If the index value is a Column object, returns a new FlickerDataFrame object with only the specified column.
             If the index value is a FlickerColumn object, returns a new FlickerDataFrame object with only the column of the
@@ -235,6 +247,11 @@ class FlickerDataFrame:
         Once the number of rows is computed, it is automatically cached until the dataframe is mutated.
         Cached number of rows is returned immediately without having to re-count all the rows.
 
+        Returns
+        -------
+        int
+            number of rows
+
         Examples
         --------
         >>> spark = SparkSession.builder.getOrCreate()
@@ -251,6 +268,11 @@ class FlickerDataFrame:
         """ Returns the number of columns. This method always returns immediately no matter the number of rows in the
         dataframe.
 
+        Returns
+        -------
+        int
+            number of columns
+
         Examples
         --------
         >>> spark = SparkSession.builder.getOrCreate()
@@ -264,6 +286,11 @@ class FlickerDataFrame:
     def shape(self) -> tuple[int, int]:
         """ Returns the shape of the FlickerDataFrame as (nrows, ncols)
 
+        Returns
+        -------
+        tuple[int, int]
+            shape as (nrows, ncols)
+
         Examples
         --------
         >>> spark = SparkSession.builder.getOrCreate()
@@ -276,6 +303,11 @@ class FlickerDataFrame:
     @property
     def names(self) -> list[str]:
         """ Returns a list of column names in the FlickerDataFrame
+
+        Returns
+        -------
+        list[str]
+            list of column names in order of occurrence
 
         Examples
         --------
@@ -292,9 +324,10 @@ class FlickerDataFrame:
         The order of key-value pairs in the output is the same order as that of (left-to-right) columns in the
         dataframe.
 
-        Returns:
-            OrderedDict:
-                Keys are column names and values are dtypes.
+        Returns
+        -------
+        OrderedDict
+            Keys are column names and values are dtypes
 
         Examples
         --------
@@ -313,16 +346,16 @@ class FlickerDataFrame:
 
         Parameters
         ----------
-        spark : SparkSession
+        spark: SparkSession
             The Spark session used for creating the DataFrame.
-        nrows : int
+        nrows: int
             The number of rows in the DataFrame.
-        ncols : int
+        ncols: int
             The number of columns in the DataFrame.
-        names : list[str] | None, optional
+        names: list[str] | None, optional
             The names of the columns in the DataFrame. If not provided, column names will be generated as
             '0', '1', '2', ..., f'{ncols -1}'.
-        fill : str, optional
+        fill: str, optional
             The value used for filling the DataFrame. Default is 'zero'.
             Accepted values are: 'zero', 'one', 'rand', 'randn', 'rowseq', 'colseq'
 
@@ -569,8 +602,8 @@ class FlickerDataFrame:
             A dictionary representation of the ``FlickerDataFrame`` where keys are
             column names and values are lists containing up to ``n`` values from each column.
 
-        Example
-        -------
+        Examples
+        --------
         >>> spark = SparkSession.builder.getOrCreate()
         >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='colseq')
         >>> df()
@@ -642,7 +675,8 @@ class FlickerDataFrame:
 
         Returns
         --------
-        pd.DataFrame
+        pandas.DataFrame
+            pandas DataFrame
 
         Examples
         --------
@@ -845,8 +879,8 @@ class FlickerDataFrame:
 
         Returns
         -------
-            FlickerDataFrame:
-                A new FlickerDataFrame with unique rows
+        FlickerDataFrame
+            A new FlickerDataFrame with unique rows
 
         Examples
         --------
@@ -877,8 +911,8 @@ class FlickerDataFrame:
 
         Returns
         -------
-            pandas.DataFrame:
-                A pandas DataFrame with statistical summary of the FlickerDataFrame
+        pandas.DataFrame
+            A pandas DataFrame with statistical summary of the FlickerDataFrame
 
         Examples
         --------
@@ -973,61 +1007,61 @@ class FlickerDataFrame:
     def merge(self, right: FlickerDataFrame | DataFrame, on: Iterable[str], how: str = 'inner',
               lprefix: str = '', lsuffix: str = '_l', rprefix: str = '', rsuffix: str = '_r') -> FlickerDataFrame:
         """ Merge the current FlickerDataFrame with another dataframe. This non-mutating method returns the merged
-            dataframe as a FlickerDataFrame.
+        dataframe as a FlickerDataFrame.
 
-            Note that ``FlickerDataFrame.merge`` is different from ``FlickerDataFrame.join`` in both function signature
-            and the merged/joined result.
+        Note that ``FlickerDataFrame.merge`` is different from ``FlickerDataFrame.join`` in both function signature
+        and the merged/joined result.
 
-            Parameters
-            ----------
-            right: FlickerDataFrame or DataFrame
-                The right dataframe to merge with
-            on: Iterable[str]
-                Column names to 'join' on. The column names must exist in both left and right dataframes.
-                The column names provided in ``on`` are not duplicated and are not renamed using prefixes/suffixes.
-            how: str, optional (default='inner')
-                Type of join to perform. Possible values are ['inner', 'outer', 'left', 'right'].
-            lprefix: str, optional (default='')
-                Prefix to add to column names from the left dataframe that are duplicated in the merge result
-            lsuffix: str, optional (default='_l')
-                Suffix to add to column names from the left dataframe that are duplicated in the merge result
-            rprefix: str, optional (default='')
-                Prefix to add to column names from the right dataframe that are duplicated in the merge result
-            rsuffix: str, optional (default='_r')
-                Suffix to add to column names from the right dataframe that are duplicated in the merge result
+        Parameters
+        ----------
+        right: FlickerDataFrame or DataFrame
+            The right dataframe to merge with
+        on: Iterable[str]
+            Column names to 'join' on. The column names must exist in both left and right dataframes.
+            The column names provided in ``on`` are not duplicated and are not renamed using prefixes/suffixes.
+        how: str, optional (default='inner')
+            Type of join to perform. Possible values are ['inner', 'outer', 'left', 'right'].
+        lprefix: str, optional (default='')
+            Prefix to add to column names from the left dataframe that are duplicated in the merge result
+        lsuffix: str, optional (default='_l')
+            Suffix to add to column names from the left dataframe that are duplicated in the merge result
+        rprefix: str, optional (default='')
+            Prefix to add to column names from the right dataframe that are duplicated in the merge result
+        rsuffix: str, optional (default='_r')
+            Suffix to add to column names from the right dataframe that are duplicated in the merge result
 
-            Returns
-            -------
-            FlickerDataFrame
+        Returns
+        -------
+        FlickerDataFrame
 
-            Raises
-            ------
-            TypeError
-                If `on` is not an ``Iterable[str]`` or if it is a ``dict``
-            ValueError
-                If `on` is an empty ``Iterable[str]``
-            TypeError
-                If any element in `on` is not a ``str``
-            KeyError
-                If renaming results in duplicate column names in the left dataframe
-            KeyError
-                If renaming results in duplicate column names in the right dataframe
+        Raises
+        ------
+        TypeError
+            If `on` is not an ``Iterable[str]`` or if it is a ``dict``
+        ValueError
+            If `on` is an empty ``Iterable[str]``
+        TypeError
+            If any element in `on` is not a ``str``
+        KeyError
+            If renaming results in duplicate column names in the left dataframe
+        KeyError
+            If renaming results in duplicate column names in the right dataframe
 
-            Examples
-            --------
-            >>> spark = SparkSession.builder.getOrCreate()
-            >>> left = FlickerDataFrame.from_rows(spark, [('a', 1), ('b', 2), ('c', 3), ], ['name', 'number'])
-            >>> right = FlickerDataFrame.from_rows(spark, [('a', 4), ('d', 5), ('e', 6), ], ['name', 'number'])
-            >>> inner_merge = left.merge(right, on=['name'], how='inner')
-            >>> inner_merge()
-              name number_l number_r
-            0    a        1        4
-            >>> left_merge = left.merge(right, on=['name'], how='left')
-            >>> left_merge()
-              name number_l number_r
-            0    a        1        4
-            1    b        2     None
-            2    c        3     None
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> left = FlickerDataFrame.from_rows(spark, [('a', 1), ('b', 2), ('c', 3), ], ['name', 'number'])
+        >>> right = FlickerDataFrame.from_rows(spark, [('a', 4), ('d', 5), ('e', 6), ], ['name', 'number'])
+        >>> inner_merge = left.merge(right, on=['name'], how='inner')
+        >>> inner_merge()
+          name number_l number_r
+        0    a        1        4
+        >>> left_merge = left.merge(right, on=['name'], how='left')
+        >>> left_merge()
+          name number_l number_r
+        0    a        1        4
+        1    b        2     None
+        2    c        3     None
         """
         # All names in `on` must exist in both left and right dataframes
         if isinstance(on, dict):
@@ -1076,11 +1110,11 @@ class FlickerDataFrame:
              on: dict[str, str], how: str = 'inner',
              lprefix: str = '', lsuffix: str = '_l', rprefix: str = '', rsuffix: str = '_r') -> FlickerDataFrame:
         """ Join the current FlickerDataFrame with another dataframe. This non-mutating method returns the joined
-            dataframe as a FlickerDataFrame.
+        dataframe as a FlickerDataFrame.
 
-            This method preserves duplicate column names (that are joined on) by renaming them in the join result.
-            Note that ``FlickerDataFrame.join`` is different from ``FlickerDataFrame.merge`` in both function signature
-            and the merged/joined result.
+        This method preserves duplicate column names (that are joined on) by renaming them in the join result.
+        Note that ``FlickerDataFrame.join`` is different from ``FlickerDataFrame.merge`` in both function signature
+        and the merged/joined result.
 
         Parameters
         ----------
