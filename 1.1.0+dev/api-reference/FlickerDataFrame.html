@@ -1,0 +1,4427 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Modern, clean, intuitive, pythonic Polars-like API over PySpark">
+      
+      
+        <meta name="author" content="2023 Flicker Contributors">
+      
+      
+      
+        <link rel="prev" href="../getting-started/contributing.html">
+      
+      
+        <link rel="next" href="FlickerColumn.html">
+      
+      
+      <link rel="icon" href="../assets/favicon.svg">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.6">
+    
+    
+      
+        <title>FlickerDataFrame - flicker</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.35e1ed30.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../css/timeago.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#flicker.dataframe.FlickerDataFrame" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest stable version.
+  <a href="../..">
+    <strong>Click here to go to latest stable version.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="flicker" class="md-header__button md-logo" aria-label="flicker" data-md-component="logo">
+      
+  <img src="../assets/logo-white.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            flicker
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              FlickerDataFrame
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="deep-orange" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ankur-gupta/flicker" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ankur-gupta/flicker
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/installation.html" class="md-tabs__link">
+          
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="FlickerDataFrame.html" class="md-tabs__link">
+          
+  
+    
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="flicker" class="md-nav__button md-logo" aria-label="flicker" data-md-component="logo">
+      
+  <img src="../assets/logo-white.svg" alt="logo">
+
+    </a>
+    flicker
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ankur-gupta/flicker" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ankur-gupta/flicker
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/installation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quick-example.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Example
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/license.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/releases.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Releases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/contributing.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    FlickerDataFrame
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="FlickerDataFrame.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    FlickerDataFrame
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame" class="md-nav__link">
+    FlickerDataFrame
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.dtypes" class="md-nav__link">
+    dtypes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.names" class="md-nav__link">
+    names
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.ncols" class="md-nav__link">
+    ncols
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.nrows" class="md-nav__link">
+    nrows
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.shape" class="md-nav__link">
+    shape
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.__call__" class="md-nav__link">
+    __call__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.__getitem__" class="md-nav__link">
+    __getitem__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.concat" class="md-nav__link">
+    concat()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.describe" class="md-nav__link">
+    describe()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.drop" class="md-nav__link">
+    drop()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_columns" class="md-nav__link">
+    from_columns()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_dict" class="md-nav__link">
+    from_dict()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_pandas" class="md-nav__link">
+    from_pandas()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_records" class="md-nav__link">
+    from_records()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_rows" class="md-nav__link">
+    from_rows()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_shape" class="md-nav__link">
+    from_shape()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.groupby" class="md-nav__link">
+    groupby()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.head" class="md-nav__link">
+    head()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.join" class="md-nav__link">
+    join()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.merge" class="md-nav__link">
+    merge()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.rename" class="md-nav__link">
+    rename()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.show" class="md-nav__link">
+    show()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.sort" class="md-nav__link">
+    sort()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.take" class="md-nav__link">
+    take()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.to_dict" class="md-nav__link">
+    to_dict()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.to_pandas" class="md-nav__link">
+    to_pandas()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.unique" class="md-nav__link">
+    unique()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="FlickerColumn.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FlickerColumn
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="FlickerGroupedData.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FlickerGroupedData
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="recipes.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Recipes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="utils.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="mkname.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    mkname
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame" class="md-nav__link">
+    FlickerDataFrame
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.dtypes" class="md-nav__link">
+    dtypes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.names" class="md-nav__link">
+    names
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.ncols" class="md-nav__link">
+    ncols
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.nrows" class="md-nav__link">
+    nrows
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.shape" class="md-nav__link">
+    shape
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.__call__" class="md-nav__link">
+    __call__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.__getitem__" class="md-nav__link">
+    __getitem__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.concat" class="md-nav__link">
+    concat()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.describe" class="md-nav__link">
+    describe()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.drop" class="md-nav__link">
+    drop()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_columns" class="md-nav__link">
+    from_columns()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_dict" class="md-nav__link">
+    from_dict()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_pandas" class="md-nav__link">
+    from_pandas()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_records" class="md-nav__link">
+    from_records()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_rows" class="md-nav__link">
+    from_rows()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.from_shape" class="md-nav__link">
+    from_shape()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.groupby" class="md-nav__link">
+    groupby()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.head" class="md-nav__link">
+    head()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.join" class="md-nav__link">
+    join()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.merge" class="md-nav__link">
+    merge()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.rename" class="md-nav__link">
+    rename()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.show" class="md-nav__link">
+    show()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.sort" class="md-nav__link">
+    sort()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.take" class="md-nav__link">
+    take()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.to_dict" class="md-nav__link">
+    to_dict()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.to_pandas" class="md-nav__link">
+    to_pandas()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flicker.dataframe.FlickerDataFrame.unique" class="md-nav__link">
+    unique()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>FlickerDataFrame</h1>
+
+<div class="doc doc-object doc-class">
+
+
+
+<a id="flicker.dataframe.FlickerDataFrame"></a>
+  <div class="doc doc-contents first">
+
+  
+      <p><code>FlickerDataFrame</code> is a wrapper over <code>pyspark.sql.DataFrame</code>. <code>FlickerDataFrame</code> provides a modern,
+clean, intuitive, pythonic, polars-like API over a <code>pyspark</code> backend.</p>
+  
+      <p>Construct a <code>FlickerDataFrame</code> from a <code>pyspark.sql.DataFrame</code>. Construction will fail if the
+<code>pyspark.sql.DataFrame</code> contains duplicate column names.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>df</code></td>
+          <td>
+                <code><span title="pyspark.sql.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The input <code>pyspark.sql.DataFrame</code> to initialize a <code>FlickerDataFrame</code> object</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>TypeError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the df parameter is not an instance of <code>pyspark.sql.DataFrame</code></p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the df parameter contains duplicate column names</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;spark&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pandas&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;polars&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spark_df</span> <span class="o">=</span> <span class="n">spark</span><span class="o">.</span><span class="n">createDataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;package&#39;</span><span class="p">,</span> <span class="s1">&#39;rank&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="p">(</span><span class="n">spark_df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  package rank</span>
+<span class="go">0   spark    1</span>
+<span class="go">1  pandas    3</span>
+<span class="go">2  polars    2</span>
+</code></pre></div>
+
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.dtypes" class="doc doc-heading">
+          <span class="doc doc-object-name doc-attribute-name">dtypes</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.dtypes" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">dtypes</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the column names and corresponding data types as an OrderedDict.
+The order of key-value pairs in the output is the same order as that of (left-to-right) columns in the
+dataframe.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="collections.OrderedDict">OrderedDict</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Keys are column names and values are dtypes</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="go">OrderedDict([(&#39;col1&#39;, &#39;bigint&#39;), (&#39;col2&#39;, &#39;bigint&#39;)])</span>
+</code></pre></div>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.names" class="doc doc-heading">
+          <span class="doc doc-object-name doc-attribute-name">names</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.names" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">names</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns a list of column names in the FlickerDataFrame</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>list of column names in order of occurrence</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">names</span>
+<span class="go">[&#39;col1&#39;, &#39;col2&#39;]</span>
+</code></pre></div>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.ncols" class="doc doc-heading">
+          <span class="doc doc-object-name doc-attribute-name">ncols</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.ncols" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">ncols</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the number of columns. This method always returns immediately no matter the number of rows in the
+dataframe.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>number of columns</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">ncols</span>
+<span class="go">2</span>
+</code></pre></div>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.nrows" class="doc doc-heading">
+          <span class="doc doc-object-name doc-attribute-name">nrows</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.nrows" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">nrows</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the number of rows. This method may take a long time to count all the rows in the dataframe.
+Once the number of rows is computed, it is automatically cached until the dataframe is mutated.
+Cached number of rows is returned immediately without having to re-count all the rows.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>number of rows</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">nrows</span>
+<span class="go">1000</span>
+</code></pre></div>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.shape" class="doc doc-heading">
+          <span class="doc doc-object-name doc-attribute-name">shape</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.shape" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">shape</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns the shape of the FlickerDataFrame as (nrows, ncols)</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>tuple[int, int]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>shape as (nrows, ncols)</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(3, 2)</span>
+</code></pre></div>
+  </div>
+
+</div>
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.__call__" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">__call__</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.__call__" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="fm">__call__</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">use_pandas_dtypes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Return a selection of <code>pyspark.sql.DataFrame</code> as a <code>pandas.DataFrame</code>.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>n</code></td>
+          <td>
+                <code>int | None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Number of rows to return. If not specified, defaults to 5.
+If df.nrows &lt; n, only df.nrows are returned.
+If n=None, all rows are returned.</p>
+            </div>
+          </td>
+          <td>
+                <code>5</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>use_pandas_dtypes</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If False (recommended and default), the resulting pandas.DataFrame will have all column dtypes as object.
+This option preserves NaNs and None(s) as-is.
+If True, the resulting pandas.DataFrame will have parsed dtypes. This option may be a little faster, but it
+allows pandas to convert None(s) in numeric columns to NaNs.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>pandas DataFrame</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;spark&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pandas&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;polars&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;package&#39;</span><span class="p">,</span> <span class="s1">&#39;rank&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span> <span class="c1"># call the FlickerDataFrame to quickly see a snippet</span>
+<span class="go">  package rank</span>
+<span class="go">0   spark    1</span>
+<span class="go">1  pandas    3</span>
+<span class="go">2  polars    2</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.__getitem__" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">__getitem__</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.__getitem__" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="fm">__getitem__</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Index into the dataframe in various ways</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>item</code></td>
+          <td>
+                <code>tuple | slice | str | list | <span title="pyspark.sql.Column">Column</span> | <a class="autorefs autorefs-internal" title="flicker.column.FlickerColumn" href="FlickerColumn.html#flicker.dataframe.FlickerColumn">FlickerColumn</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The index value to retrieve from the FlickerDataFrame object</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.column.FlickerColumn" href="FlickerColumn.html#flicker.dataframe.FlickerColumn">FlickerColumn</a> | <a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the index value is a string, returns a FlickerColumn object containing the column specified by the string.
+If the index value is a Column object, returns a new FlickerDataFrame object with only the specified column.
+If the index value is a FlickerColumn object, returns a new FlickerDataFrame object with only the column of the
+FlickerColumn object.
+If the index value is a slice object, returns a new FlickerDataFrame object with the columns specified by the slice.
+If the index value is a tuple of two slices, returns a new FlickerDataFrame object with the columns specified by the
+second slice, limited by the stop value of the first slice.
+If the index value is an iterable, returns a new FlickerDataFrame object with the columns specified by the elements
+of the iterable.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>KeyError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the index value is not a supported index type.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.concat" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">concat</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.concat" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">concat</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ignore_names</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Return a new FlickerDataFrame with rows from this and other dataframe concatenated together. This is a
+non-mutating method that calls <code>pyspark.sql.DataFrame.union</code> after some checks.
+Resulting concatenated DataFrame will always contain the same column names in the same order as that in the
+current DataFrame.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>other</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a> | <span title="pyspark.sql.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The DataFrame to concatenate with the current DataFrame</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>ignore_names</code></td>
+          <td>
+                <code>(bool, optional(default=False))</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>True</code>, the column names of the <code>other</code> dataframe are ignored when concatenating. Concatenation
+happens by column order and resulting dataframe will have column names in the same order as the current
+dataframe.
+If <code>False</code>, this method checks that current and <code>other</code> dataframe have the same column names (even
+if not in the same order). If this check fails, a <code>KeyError</code> is raised.</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The concatenated DataFrame</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>KeyError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the DataFrames have different sets of column names and <code>ignore_names=False</code></p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_zero</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_one</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;one&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_rand</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;rand&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_zero</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_one</span><span class="p">)</span>
+<span class="go">FlickerDataFrame[a: bigint, b: bigint]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_zero</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_one</span><span class="p">,</span> <span class="n">ignore_names</span><span class="o">=</span><span class="kc">False</span><span class="p">)()</span>
+<span class="go">   a  b</span>
+<span class="go">0  0  0</span>
+<span class="go">1  0  0</span>
+<span class="go">2  1  1</span>
+<span class="go">3  1  1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_zero</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_one</span><span class="p">,</span> <span class="n">ignore_names</span><span class="o">=</span><span class="kc">True</span><span class="p">)()</span>  <span class="c1"># ignore_names has no effect</span>
+<span class="go">   a  b</span>
+<span class="go">0  0  0</span>
+<span class="go">1  0  0</span>
+<span class="go">2  1  1</span>
+<span class="go">3  1  1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_zero</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_rand</span><span class="p">,</span> <span class="n">ignore_names</span><span class="o">=</span><span class="kc">True</span><span class="p">)()</span>
+<span class="go">          a         b</span>
+<span class="go">0       0.0       0.0</span>
+<span class="go">1       0.0       0.0</span>
+<span class="go">2   0.85428  0.148739</span>
+<span class="go">3  0.031665   0.14922</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df_zero</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_rand</span><span class="p">,</span> <span class="n">ignore_names</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># KeyError</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.describe" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">describe</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.describe" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">describe</span><span class="p">()</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns a <code>pandas.DataFrame</code> with statistical summary of the FlickerDataFrame. This method supports
+numeric (int, bigint, float, double), string, timestamp, boolean columns. Unsupported columns are ignored
+without an error. This method returns a different and better dtyped output than
+<code>pyspark.sql.DataFrame.describe</code>.</p>
+<p>The output contains count, mean, stddev, min, and max values.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A pandas DataFrame with statistical summary of the FlickerDataFrame</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dt</span> <span class="o">=</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;Bob&#39;</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">t</span> <span class="o">-</span> <span class="n">dt</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Alice&#39;</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mf">110.0</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Tom&#39;</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mf">120.0</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="n">dt</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;is_jedi&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">    name age weight                 time is_jedi</span>
+<span class="go">0    Bob  23  100.0  2022-12-31 00:00:00   False</span>
+<span class="go">1  Alice  22  110.0  2023-01-01 00:00:00    True</span>
+<span class="go">2    Tom  21  120.0  2023-01-02 00:00:00   False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+<span class="go">         name   age weight                 time   is_jedi</span>
+<span class="go">count       3     3      3                    3         3</span>
+<span class="go">max       Tom    23  120.0  2023-01-02 00:00:00      True</span>
+<span class="go">mean      NaN  22.0  110.0  2023-01-01 00:00:00  0.333333</span>
+<span class="go">min     Alice    21  100.0  2022-12-31 00:00:00     False</span>
+<span class="go">stddev    NaN   1.0   10.0       1 day, 0:00:00   0.57735</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()[</span><span class="s1">&#39;time&#39;</span><span class="p">][</span><span class="s1">&#39;stddev&#39;</span><span class="p">]</span>  <span class="c1"># output contains appropriately typed values instead of strings</span>
+<span class="go">datetime.timedelta(days=1)</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.drop" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">drop</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.drop" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">drop</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Delete columns by name. This is the non-mutating form of the <code>__del__</code> method.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>names</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A list of column names to delete from the FlickerDataFrame.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A new instance of the FlickerDataFrame class with the specified columns deleted</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">,</span> <span class="s1">&#39;col3&#39;</span><span class="p">,</span> <span class="s1">&#39;col4&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">FlickerDataFrame[col1: bigint, col2: bigint, col3: bigint, col4: bigint]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;col2&#39;</span><span class="p">,</span> <span class="s1">&#39;col4&#39;</span><span class="p">])</span>
+<span class="go">FlickerDataFrame[col1: bigint, col3: bigint]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">FlickerDataFrame[col1: bigint, col2: bigint, col3: bigint, col4: bigint]</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.from_columns" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">from_columns</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.from_columns" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">from_columns</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nan_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Create a <code>FlickerDataFrame</code> from columns</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>spark</code></td>
+          <td>
+                <code><span title="pyspark.sql.SparkSession">SparkSession</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>columns</code></td>
+          <td>
+                <code><span title="typing.Iterable">Iterable</span>[<span title="typing.Iterable">Iterable</span>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The columns to create the DataFrame from. Each column should be an iterable. For example:
+<code>[('col1', 'a'), (1, 2), ('col3', 'b')]</code></p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>names</code></td>
+          <td>
+                <code>list[str] | None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The column names of the DataFrame. If None, column names will be generated as
+'0', '1', '2', ..., f'{ncols -1}'.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nan_to_none</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Flag indicating whether to convert all NaN values to None. Default and recommended value is True.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">columns</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  col1 col2</span>
+<span class="go">0    1    a</span>
+<span class="go">1    2    b</span>
+<span class="go">2    3    c</span>
+</code></pre></div>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the columns contain different number of rows</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.from_dict" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">from_dict</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.from_dict" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">from_dict</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">nan_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Create a <code>FlickerDataFrame</code> object from a dictionary, in which, dict keys represent column names and
+dict values represent column values.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>spark</code></td>
+          <td>
+                <code><span title="pyspark.sql.SparkSession">SparkSession</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>data</code></td>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The dictionary containing column names as keys and column values as values. For example,
+<code>{'col1': [1, 2, 3], 'col2': [4, 5, 6]}</code></p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nan_to_none</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Flag indicating whether to convert all NaN values to None. Default and recommended value is True.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;col1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;col2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  col1 col2</span>
+<span class="go">0    1    4</span>
+<span class="go">1    2    5</span>
+<span class="go">2    3    6</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.from_pandas" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">from_pandas</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.from_pandas" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">from_pandas</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">nan_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Create a <code>FlickerDataFrame</code> from a <code>pandas.DataFrame</code></p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>spark</code></td>
+          <td>
+                <code><span title="pyspark.sql.SparkSession">SparkSession</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>df</code></td>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The pandas DataFrame to convert to a FlickerDataFrame.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nan_to_none</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Flag indicating whether to convert all NaN values to None. Default and recommended value is True.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pandas_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;col1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="s1">&#39;col2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pandas_df</span>
+<span class="go">   col1  col2</span>
+<span class="go">0   1.0   4.0</span>
+<span class="go">1   NaN   5.0</span>
+<span class="go">2   3.0   NaN</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">pandas_df</span><span class="p">,</span> <span class="n">nan_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">   col1  col2</span>
+<span class="go">0   1.0   4.0</span>
+<span class="go">1  None   5.0</span>
+<span class="go">2   3.0  None</span>
+</code></pre></div>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">pandas_df</span><span class="p">,</span> <span class="n">nan_to_none</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  col1 col2</span>
+<span class="go">0  1.0  4.0</span>
+<span class="go">1  NaN  5.0</span>
+<span class="go">2  3.0  NaN</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.from_records" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">from_records</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.from_records" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">from_records</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">records</span><span class="p">,</span> <span class="n">nan_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Create a <code>FlickerDataFrame</code> from a list of dictionaries (similar to JSON lines format)</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>spark</code></td>
+          <td>
+                <code><span title="pyspark.sql.SparkSession">SparkSession</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>records</code></td>
+          <td>
+                <code><span title="typing.Iterable">Iterable</span>[dict]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>An iterable of dictionaries. Each dictionary represents a row (aka record).</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nan_to_none</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Flag indicating whether to convert all NaN values to None. Default and recommended value is True.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">records</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;col1&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;col1&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;col1&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">records</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  col1 col2</span>
+<span class="go">0    1    1</span>
+<span class="go">1    2    2</span>
+<span class="go">2    3    3</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.from_rows" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">from_rows</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.from_rows" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nan_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Create a FlickerDataFrame from rows.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>spark</code></td>
+          <td>
+                <code><span title="pyspark.sql.SparkSession">SparkSession</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rows</code></td>
+          <td>
+                <code><span title="typing.Iterable">Iterable</span>[<span title="typing.Iterable">Iterable</span>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The rows of data to be converted into a DataFrame. For example, <code>[('row1', 1), ('row2', 2)]</code>.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>names</code></td>
+          <td>
+                <code>list[str] | None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The column names of the DataFrame. If None, column names will be generated as
+'0', '1', '2', ..., f'{ncols -1}'.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nan_to_none</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Flag indicating whether to convert all NaN values to None. Default and recommended value is True.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">,</span> <span class="s1">&#39;col3&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  col1 col2 col3</span>
+<span class="go">0    a    1  2.0</span>
+<span class="go">1    b    2  4.0</span>
+</code></pre></div>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the rows contain different number of columns</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.from_shape" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">from_shape</span>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
+  </span>
+
+<a href="#flicker.dataframe.FlickerDataFrame.from_shape" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Create a FlickerDataFrame from a given shape and fill. This method is useful for creating test data and
+experimentation.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>spark</code></td>
+          <td>
+                <code><span title="pyspark.sql.SparkSession">SparkSession</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Spark session used for creating the DataFrame.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>nrows</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of rows in the DataFrame.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>ncols</code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of columns in the DataFrame.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>names</code></td>
+          <td>
+                <code>list[str] | None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The names of the columns in the DataFrame. If not provided, column names will be generated as
+'0', '1', '2', ..., f'{ncols -1}'.</p>
+            </div>
+          </td>
+          <td>
+                <code>None</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>fill</code></td>
+          <td>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The value used for filling the DataFrame. Default is 'zero'.
+Accepted values are: 'zero', 'one', 'rand', 'randn', 'rowseq', 'colseq'</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;zero&#39;</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A new instance of the FlickerDataFrame class created from the given shape and parameters.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;rowseq&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  col1 col2</span>
+<span class="go">0    0    1</span>
+<span class="go">1    2    3</span>
+<span class="go">2    4    5</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.groupby" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">groupby</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.groupby" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">groupby</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Groups the rows of the DataFrame based on the specified column names, so we can run aggregation on them.
+Returns a <code>FlickerGroupedData</code> object. This method is a pass-through to <code>pyspark.sql.DataFrame</code> but
+returns a  <code>FlickerGroupedData</code> object instead of a <code>pyspark.sql.GroupedData</code> object.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>names</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The column names based on which the DataFrame rows should be grouped</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.group.FlickerGroupedData" href="FlickerGroupedData.html#flicker.dataframe.FlickerGroupedData">FlickerGroupedData</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;spark&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;pandas&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;spark&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;number&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+<span class="go">FlickerGroupedData[grouping expressions: [name], value: [name: string, number: bigint], type: GroupBy]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;name&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">FlickerDataFrame[name: string, count: bigint]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;name&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()()</span>
+<span class="go">     name count</span>
+<span class="go">0   spark     2</span>
+<span class="go">1  pandas     1</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.head" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">head</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.head" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">head</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Return top <code>n</code> rows as a <code>FlickerDataFrame</code>. This method differs from <code>FlickerDataFrame.__call__()</code>,
+which returns a <code>pandas.DataFrame</code>.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>n</code></td>
+          <td>
+                <code>int | None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Number of rows to return. If not specified, defaults to 5.
+If <code>df.nrows &lt; n</code>, only df.nrows are returned.
+If <code>n=None</code>, all rows are returned.</p>
+            </div>
+          </td>
+          <td>
+                <code>5</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A new instance of FlickerDataFrame containing top (at most) <code>n</code> rows</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">FlickerDataFrame[col1: bigint, col2: bigint]</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.join" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">join</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.join" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">join</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">on</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">lprefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">lsuffix</span><span class="o">=</span><span class="s1">&#39;_l&#39;</span><span class="p">,</span> <span class="n">rprefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">rsuffix</span><span class="o">=</span><span class="s1">&#39;_r&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Join the current FlickerDataFrame with another dataframe. This non-mutating method returns the joined
+dataframe as a FlickerDataFrame.</p>
+<p>This method preserves duplicate column names (that are joined on) by renaming them in the join result.
+Note that <code>FlickerDataFrame.join</code> is different from <code>FlickerDataFrame.merge</code> in both function signature
+and the merged/joined result.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>right</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a> | <span title="pyspark.sql.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The right DataFrame to join with the left DataFrame.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>on</code></td>
+          <td>
+                <code>dict[str, str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary specifying which column names to join on. Keys represent column names from the left dataframe
+and values represent column names from the right dataframe.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>how</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The type of join to perform
+- 'inner': Returns only the matching rows from both DataFrames
+- 'left': Returns all the rows from the left DataFrame and the matching rows from the right DataFrame
+- 'right': Returns all the rows from the right DataFrame and the matching rows from the left DataFrame
+- 'outer': Returns all the rows from both DataFrames, including unmatched rows, with <code>null</code> values for
+           non-matching columns</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;inner&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>lprefix</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Prefix to add to column names from the left dataframe that are duplicated in the join result</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>lsuffix</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Suffix to add to column names from the left dataframe that are duplicated in the join result</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;_l&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rprefix</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Prefix to add to column names from the right dataframe that are duplicated in the join result</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rsuffix</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Suffix to add to column names from the right dataframe that are duplicated in the join result</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;_r&#39;</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>TypeError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the <code>on</code> parameter is not a dictionary</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the <code>on</code> parameter is an empty dictionary</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>TypeError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the keys or values of the <code>on</code> parameter are not of str type</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>KeyError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the left or right DataFrame contains duplicate column names after renaming</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>NotImplementedError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>To prevent against unexpected changes in the underlying <code>pyspark.sql.DataFrame.join</code></p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">left</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">],</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;number&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">right</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">],</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;number&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inner_join</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span><span class="p">},</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inner_join</span><span class="p">()</span>  <span class="c1"># &#39;x&#39; columns from both left and right dataframes is preserved</span>
+<span class="go">  x_l number_l x_r number_r</span>
+<span class="go">0   a        1   a        4</span>
+</code></pre></div>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">left</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">],</span> <span class="p">[</span><span class="s1">&#39;x1&#39;</span><span class="p">,</span> <span class="s1">&#39;number&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">right</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">],</span> <span class="p">[</span><span class="s1">&#39;x2&#39;</span><span class="p">,</span> <span class="s1">&#39;number&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inner_join</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;x1&#39;</span><span class="p">:</span> <span class="s1">&#39;x2&#39;</span><span class="p">},</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inner_join</span><span class="p">()</span>  <span class="c1"># renaming happens only when needed</span>
+<span class="go">  x1 number_l x2 number_r</span>
+<span class="go">0  a        1  a        4</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.merge" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">merge</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.merge" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">on</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">lprefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">lsuffix</span><span class="o">=</span><span class="s1">&#39;_l&#39;</span><span class="p">,</span> <span class="n">rprefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">rsuffix</span><span class="o">=</span><span class="s1">&#39;_r&#39;</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Merge the current FlickerDataFrame with another dataframe. This non-mutating method returns the merged
+dataframe as a FlickerDataFrame.</p>
+<p>Note that <code>FlickerDataFrame.merge</code> is different from <code>FlickerDataFrame.join</code> in both function signature
+and the merged/joined result.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>right</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a> | <span title="pyspark.sql.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The right dataframe to merge with</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>on</code></td>
+          <td>
+                <code><span title="typing.Iterable">Iterable</span>[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Column names to 'join' on. The column names must exist in both left and right dataframes.
+The column names provided in <code>on</code> are not duplicated and are not renamed using prefixes/suffixes.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>how</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Type of join to perform. Possible values are <code>{'inner', 'outer', 'left', 'right'}</code>.</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;inner&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>lprefix</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Prefix to add to column names from the left dataframe that are duplicated in the merge result</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>lsuffix</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Suffix to add to column names from the left dataframe that are duplicated in the merge result</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;_l&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rprefix</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Prefix to add to column names from the right dataframe that are duplicated in the merge result</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;&#39;</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rsuffix</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Suffix to add to column names from the right dataframe that are duplicated in the merge result</p>
+            </div>
+          </td>
+          <td>
+                <code>&#39;_r&#39;</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>TypeError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>on</code> is not an <code>Iterable[str]</code> or if it is a <code>dict</code></p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>ValueError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>on</code> is an empty <code>Iterable[str]</code></p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>TypeError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If any element in <code>on</code> is not a <code>str</code></p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>KeyError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If renaming results in duplicate column names in the left dataframe</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>KeyError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If renaming results in duplicate column names in the right dataframe</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">left</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">],</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;number&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">right</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="p">],</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;number&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inner_merge</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inner_merge</span><span class="p">()</span>
+<span class="go">  name number_l number_r</span>
+<span class="go">0    a        1        4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">left_merge</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">right</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">left_merge</span><span class="p">()</span>
+<span class="go">  name number_l number_r</span>
+<span class="go">0    a        1        4</span>
+<span class="go">1    b        2     None</span>
+<span class="go">2    c        3     None</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.rename" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">rename</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.rename" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">rename</span><span class="p">(</span><span class="n">from_to_mapper</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Renames columns in the FlickerDataFrame based on the provided mapping of the form
+<code>{'old_col_name1': 'new_col_name1', 'old_col_name2': 'new_col_name2', ...}</code>.
+This is a non-mutating method.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>from_to_mapper</code></td>
+          <td>
+                <code>dict[str, str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A dictionary containing the mapping of current column names to new column names</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A new instance of <code>FlickerDataFrame</code> with renamed columns</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>TypeError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If the provided <code>from_to_mapper</code> is not a dictionary</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+                <code>KeyError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If any of the keys in <code>from_to_mapper</code> do not match existing column names in the <code>FlickerDataFrame</code></p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">,</span> <span class="s1">&#39;col3&#39;</span><span class="p">,</span> <span class="s1">&#39;col4&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
+<span class="go">FlickerDataFrame[col1: bigint, col2: bigint, col3: bigint, col4: bigint]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s1">&#39;col1&#39;</span><span class="p">:</span> <span class="s1">&#39;col_a&#39;</span><span class="p">,</span> <span class="s1">&#39;col3&#39;</span><span class="p">:</span> <span class="s1">&#39;col_c&#39;</span><span class="p">})</span>
+<span class="go">FlickerDataFrame[col_a: bigint, col2: bigint, col_c: bigint, col4: bigint]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>  <span class="c1"># df is not mutated</span>
+<span class="go">FlickerDataFrame[col1: bigint, col2: bigint, col3: bigint, col4: bigint]</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.show" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">show</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.show" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">show</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">vertical</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Prints the first <code>n</code> rows to the console as a (possibly) giant string. This is a pass-through method
+to <code>pyspark.sql.DataFrame.show()</code>.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>n</code></td>
+          <td>
+                <code>int | None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Number of rows to show. Defaults to 5.</p>
+            </div>
+          </td>
+          <td>
+                <code>5</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>truncate</code></td>
+          <td>
+                <code>bool | int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If True, strings longer than 20 chars are truncated.
+If <code>truncate &gt; 1</code>, strings longer than <code>truncate</code> are truncated to <code>length=truncate</code> and
+made right-aligned.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>vertical</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If True, print output rows vertically (one line per column value).</p>
+            </div>
+          </td>
+          <td>
+                <code>False</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="go">+----+----+</span>
+<span class="go">|col1|col2|</span>
+<span class="go">+----+----+</span>
+<span class="go">|   0|   0|</span>
+<span class="go">|   0|   0|</span>
+<span class="go">|   0|   0|</span>
+<span class="go">+----+----+</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.sort" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">sort</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.sort" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">sort</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns a new :class:<code>DataFrame</code> sorted by the specified column name(s). This non-mutating method is
+a pass-through to <code>pyspark.sql.DataFrame.sort</code> but with some checks and a slightly different function
+signature.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>names</code></td>
+          <td>
+                <code>list[str]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The list of column names to sort the DataFrame by</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+      <p>ascending: bool, optional (default=True)
+    Whether to sort the DataFrame in ascending order or not</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Raises:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>KeyError</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>names</code> contains a non-existant column name</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">     x  y</span>
+<span class="go">0   10  1</span>
+<span class="go">1    1  2</span>
+<span class="go">2  100  3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
+<span class="go">FlickerDataFrame[x: bigint, y: bigint]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">sort</span><span class="p">([</span><span class="s1">&#39;x&#39;</span><span class="p">])()</span>
+<span class="go">     x  y</span>
+<span class="go">0    1  2</span>
+<span class="go">1   10  1</span>
+<span class="go">2  100  3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>  <span class="c1"># df is not mutated</span>
+<span class="go">FlickerDataFrame[x: bigint, y: bigint]</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.take" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">take</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.take" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">take</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">convert_to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Return top <code>n</code> rows as a list.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>n</code></td>
+          <td>
+                <code>int | None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Number of rows to return. If not specified, defaults to 5.
+If <code>df.nrows &lt; n</code>, only df.nrows are returned.
+If <code>n=None</code>, all rows are returned.</p>
+            </div>
+          </td>
+          <td>
+                <code>5</code>
+          </td>
+        </tr>
+        <tr>
+          <td><code>convert_to_dict</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If False, output is a list of <code>pyspark.sql.Row</code> objects.
+If True, output is a list of <code>dict</code> objects.</p>
+            </div>
+          </td>
+          <td>
+                <code>True</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>list[dict | <span title="pyspark.sql.Row">Row</span>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A list of at most n items. Each item is either a pyspark.sql.Row or a dict object.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rows</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_rows</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">convert_to_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">[{&#39;col1&#39;: 1, &#39;col2&#39;: &#39;a&#39;}, {&#39;col1&#39;: 2, &#39;col2&#39;: &#39;b&#39;}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">convert_to_dict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">[Row(col1=1, col2=&#39;a&#39;), Row(col1=2, col2=&#39;b&#39;)]</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.to_dict" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">to_dict</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.to_dict" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">to_dict</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Converts the <code>FlickerDataFrame</code> into a dictionary representation, in which, dict keys represent
+column names and dict values represent column values.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>n</code></td>
+          <td>
+                <code>int | None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Number of rows to return. If not specified, defaults to 5.
+If <code>df.nrows &lt; n</code>, only df.nrows are returned.
+If <code>n=None</code>, all rows are returned.</p>
+            </div>
+          </td>
+          <td>
+                <code>5</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A dictionary representation of the <code>FlickerDataFrame</code> where keys are
+column names and values are lists containing up to <code>n</code> values from each column.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;colseq&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  col1 col2</span>
+<span class="go">0    0    3</span>
+<span class="go">1    1    4</span>
+<span class="go">2    2    5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">{&#39;col1&#39;: [0, 1], &#39;col2&#39;: [3, 4]}</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.to_pandas" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">to_pandas</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.to_pandas" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">to_pandas</span><span class="p">()</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Converts a <code>FlickerDataFrame</code> to a <code>pandas.DataFrame</code>. Calling this method on a big
+<code>FlickerDataFrame</code> may result in out-of-memory errors.</p>
+<p>This method is simply a pass through to <code>pyspark.sql.DataFrame.to_pandas()</code>. Consider using
+<code>FlickerDataFrame.__call___()</code> instead of <code>FlickerDataFrame.to_pandas()</code> because
+<code>pyspark.sql.DataFrame.to_pandas()</code> can cause unwanted None to NaN conversions. See example below.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><span title="pandas.DataFrame">DataFrame</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>pandas DataFrame</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pandas_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;col1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="s1">&#39;col2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]},</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pandas_df</span>
+<span class="go">   col1 col2</span>
+<span class="go">0   1.0  4.0</span>
+<span class="go">1   NaN  5.0</span>
+<span class="go">2  None  NaN</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_pandas</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="n">pandas_df</span><span class="p">,</span> <span class="n">nan_to_none</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">   col1 col2</span>
+<span class="go">0   1.0  4.0</span>
+<span class="go">1   NaN  5.0</span>
+<span class="go">2  None  NaN</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">to_pandas</span><span class="p">()</span>  <span class="c1"># causes unwanted None to NaN conversion in df.to_pandas().iloc[2, 0]</span>
+<span class="go">   col1  col2</span>
+<span class="go">0   1.0   4.0</span>
+<span class="go">1   NaN   5.0</span>
+<span class="go">2   NaN   NaN</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="flicker.dataframe.FlickerDataFrame.unique" class="doc doc-heading">
+          <span class="doc doc-object-name doc-function-name">unique</span>
+
+
+<a href="#flicker.dataframe.FlickerDataFrame.unique" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span class="n">unique</span><span class="p">()</span>
+</code></pre></div>
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns a new FlickerDataFrame with unique rows. This non-mutating method is just a pass-through to
+<code>pyspark.sql.DataFrame.distinct</code>.</p>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="flicker.dataframe.FlickerDataFrame" href="#flicker.dataframe.FlickerDataFrame">FlickerDataFrame</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A new FlickerDataFrame with unique rows</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+<p><strong>Examples:</strong></p>
+    <div class="highlight"><pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="n">spark</span> <span class="o">=</span> <span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">getOrCreate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">FlickerDataFrame</span><span class="o">.</span><span class="n">from_shape</span><span class="p">(</span><span class="n">spark</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;col1&#39;</span><span class="p">,</span> <span class="s1">&#39;col2&#39;</span><span class="p">],</span> <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;zero&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="p">()</span>
+<span class="go">  col1 col2</span>
+<span class="go">0    0    0</span>
+<span class="go">1    0    0</span>
+<span class="go">2    0    0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+<span class="go">FlickerDataFrame[col1: bigint, col2: bigint]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">unique</span><span class="p">()()</span>
+<span class="go">  col1 col2</span>
+<span class="go">0    0    0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># df is not mutated</span>
+<span class="go">(3, 2)</span>
+</code></pre></div>
+
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-10-22T05:15:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-10-22</span>
+      
+        <br>
+        Created:
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-10-22T05:15:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-10-22</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023 Flicker Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+        <script src="../js/timeago.min.js"></script>
+      
+        <script src="../js/timeago_mkdocs_material.js"></script>
+      
+    
+  </body>
+</html>
