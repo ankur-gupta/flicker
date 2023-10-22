@@ -1031,7 +1031,7 @@ class FlickerDataFrame:
             Column names to 'join' on. The column names must exist in both left and right dataframes.
             The column names provided in ``on`` are not duplicated and are not renamed using prefixes/suffixes.
         how: str, optional (default='inner')
-            Type of join to perform. Possible values are ['inner', 'outer', 'left', 'right'].
+            Type of join to perform. Possible values are ``{'inner', 'outer', 'left', 'right'}``.
         lprefix: str, optional (default='')
             Prefix to add to column names from the left dataframe that are duplicated in the merge result
         lsuffix: str, optional (default='_l')

@@ -1,4 +1,0 @@
-/* From https://stackoverflow.com/questions/38926144/css-disable-font-ligatures-in-all-browsers */
-* {
-    font-variant-ligatures: none;
-}

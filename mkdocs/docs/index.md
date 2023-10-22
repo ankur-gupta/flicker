@@ -1,4 +1,4 @@
-# Overview
+# Introduction
 Flicker is a pure-python package that aims to provide a pythonic API to
 PySpark dataframes.
 
@@ -62,7 +62,7 @@ complexities of distributed data processing. Instead, Flicker provides a
 better API to use PySpark as a backend.
 
 ## What's next?
-Check out the [Quick Example](quick-example.md) to see how Flicker compares
+Check out the [Quick Example](../mkdocs/docs/getting-started/quick-example.md) to see how Flicker compares
 with PySpark. See installation instructions in
 [Getting Started](getting-started/installation/).
 

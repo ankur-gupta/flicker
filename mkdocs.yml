@@ -111,6 +111,7 @@ nav:
       Quick Example: getting-started/quick-example.md
       License: getting-started/license.md
       Releases: getting-started/releases.md
+      Contributing: getting-started/contributing.md
   - API Reference:
       FlickerDataFrame: api-reference/FlickerDataFrame.md
       FlickerColumn: api-reference/FlickerColumn.md
