@@ -180,7 +180,7 @@ class FlickerDataFrame:
         return self._df.columns
 
     def __call__(self, n: int | None = 5, use_pandas_dtypes: bool = False) -> pd.DataFrame:
-        """ Return a selection of pyspark.sql.DataFrame as a pandas.DataFrame.
+        """ Return a selection of ``pyspark.sql.DataFrame`` as a ``pandas.DataFrame``.
 
         Parameters
         ----------
@@ -188,7 +188,6 @@ class FlickerDataFrame:
             Number of rows to return. If not specified, defaults to 5.
             If df.nrows < n, only df.nrows are returned.
             If n=None, all rows are returned.
-
         use_pandas_dtypes : bool, optional
             If False (recommended and default), the resulting pandas.DataFrame will have all column dtypes as object.
             This option preserves NaNs and None(s) as-is.
@@ -197,7 +196,19 @@ class FlickerDataFrame:
 
         Returns
         -------
-        pd.DataFrame
+        pandas.DataFrame
+            pandas DataFrame
+
+        Examples
+        -------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> rows = [('spark', 1), ('pandas', 3), ('polars', 2)]
+        >>> df = FlickerDataFrame.from_rows(spark, rows, names=['package', 'rank'])
+        >>> df() # call the FlickerDataFrame to quickly see a snippet
+          package rank
+        0   spark    1
+        1  pandas    3
+        2  polars    2
         """
         if n is None:
             n = self._df.count()
