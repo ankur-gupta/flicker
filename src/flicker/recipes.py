@@ -21,18 +21,18 @@ from .dataframe import FlickerDataFrame
 @contextmanager
 def delete_extra_columns(df: FlickerDataFrame):
     """ This context manager exists to provide a commonly needed functionality.
-        Unlike pandas which lets you compute a temporary quantity in a
-        separate Series or a numpy array, pyspark requires you to create a new
-        column even for temporary quantities.
+    Unlike pandas which lets you compute a temporary quantity in a
+    separate Series or a numpy array, pyspark requires you to create a new
+    column even for temporary quantities.
 
-        This context manager makes sure that any new columns that you create
-        within the context manager will get deleted (in-place) afterwards
-        even if your code encounters an Exception. Any columns that you start
-        with will not be deleted (unless of course you deliberately delete
-        them yourself).
+    This context manager makes sure that any new columns that you create
+    within the context manager will get deleted (in-place) afterwards
+    even if your code encounters an Exception. Any columns that you start
+    with will not be deleted (unless of course you deliberately delete
+    them yourself).
 
-        Note that this context manager will not prevent you from overwriting
-        any column (new or otherwise).
+    Note that this context manager will not prevent you from overwriting
+    any column (new or otherwise).
 
     Parameters
     ----------
@@ -51,14 +51,15 @@ def delete_extra_columns(df: FlickerDataFrame):
 
     Examples
     --------
+    >>> spark = SparkSession.builder.getOrCreate()
     >>> from flicker import delete_extra_columns
     >>> df = FlickerDataFrame.from_shape(spark, 3, 2, ['a', 'b'])
     >>> df
     FlickerDataFrame[a: double, b: double]
     >>> with delete_extra_columns(df) as names_to_keep:
-            print(names_to_keep)
-            df['c'] = 1
-            print(df.names)
+    ...     print(names_to_keep)
+    ...     df['c'] = 1
+    ...     print(df.names)
     ['a', 'b']
     ['a', 'b', 'c']
     >>> print(df.names)
@@ -74,6 +75,40 @@ def delete_extra_columns(df: FlickerDataFrame):
 
 
 def find_empty_columns(df: FlickerDataFrame, verbose: bool = True) -> list[str]:
+    """ A very opinionated function that returns the names of 'empty' columns in a ``FlickerDataFrame``.
+
+    A column is considered empty if all of its values are None or have length 0. Note that a column with all NaNs is
+    not considered empty.
+
+    Parameters
+    ----------
+    df: FlickerDataFrame
+        The DataFrame object to check for empty columns
+    verbose: bool, optional
+        Flag indicating whether to print progress information while checking
+        the columns. Default is True.
+
+    Returns
+    -------
+    list[str]
+        A list of names of empty columns found in the DataFrame
+
+    Raises
+    ------
+    TypeError
+        If the provided ``df`` parameter is not of type ``FlickerDataFrame``
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['col1', 'col2'], fill='rowseq')
+    >>> df['col3'] = None
+    >>> df['col4'] = np.nan
+    >>> empty_cols = find_empty_columns(df)
+    >>> print(empty_cols)
+    ['col3']
+    """
     if not isinstance(df, FlickerDataFrame):
         raise TypeError(f'df must be FlickerDataFrame; you provided {type(df)}')
 

@@ -21,8 +21,7 @@ import random
 
 def mkname(names: Iterable[str] = (), prefix: str = '', suffix: str = '',
            max_tries: int = 100, n_random_chars: int = 4) -> str:
-    """
-    Generate a unique name by combining a given prefix and suffix with a randomly generated string.
+    """ Generate a unique name by combining a given prefix and suffix with a randomly generated string.
 
     Parameters
     ----------
@@ -47,8 +46,15 @@ def mkname(names: Iterable[str] = (), prefix: str = '', suffix: str = '',
     ValueError
         If the maximum number of attempts is exceeded and a unique name cannot be generated.
 
+    Examples
+    --------
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> df = FlickerDataFrame.from_shape(spark, 2, 4, names=['name', 'age', 'weight_lbs', 'height'])
+    >>> mkname(df.names, prefix='age_')
+    'age_bzrl'
     """
     names = set(names)
+    # FIXME: Check that candidate exists before adding random characters
     for i in range(max_tries):
         stub = ''.join(random.choices(ascii_lowercase, k=n_random_chars))
         candidate = f'{prefix}{stub}{suffix}'

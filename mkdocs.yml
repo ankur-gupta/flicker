@@ -111,4 +111,6 @@ nav:
       FlickerDataFrame: api-reference/FlickerDataFrame.md
       FlickerColumn: api-reference/FlickerColumn.md
       FlickerGroupedData: api-reference/FlickerGroupedData.md
+      Recipes: api-reference/recipes.md
+      Utils: api-reference/utils.md
       mkname: api-reference/mkname.md

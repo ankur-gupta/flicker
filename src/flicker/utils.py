@@ -20,6 +20,29 @@ from pyspark.sql import DataFrame
 
 
 def is_nan_scalar(x: Any) -> bool:
+    """ Check if the given value is a scalar NaN (Not a Number).
+
+    Parameters
+    ----------
+    x: Any
+        The value to be checked.
+
+    Returns
+    -------
+    bool
+        True if the value is a scalar NaN, False otherwise.
+
+    Examples
+    --------
+    >>> is_nan_scalar(5)
+    False
+
+    >>> is_nan_scalar(float('nan'))
+    True
+
+    >>> is_nan_scalar('hello')
+    False
+    """
     result = False
     try:
         result = bool(np.isnan(x))
@@ -29,41 +52,41 @@ def is_nan_scalar(x: Any) -> bool:
 
 
 def get_length(iterable: Iterable | Sized) -> int:
-    """
+    """ Get the length of an ``Iterable`` object.
+
+    This method attempts to use the ``len()`` function. If ``len()`` is not available, this method attempts to count
+    the number of items in ``iterable`` by iterating over the iterable. This iteration over ``iterable`` can be a
+    problem for single-use ``Iterator``s.
+
+
     Parameters
     ----------
-    iterable : Iterable | Sized
-        The iterable object for which the length is to be determined.
+    iterable: Iterable | Sized
+        The iterable object for which the length is to be determined
 
     Returns
     -------
     int
-        The length of the iterable object.
+        The length of the iterable object
 
     Raises
     ------
     TypeError
         If the length of the iterable object cannot be determined.
 
-    Notes
-    -----
-    This method uses the `len()` function to determine the length of the iterable object. If the `len()` function
-    throws a TypeError, the method attempts to calculate the length by iterating over the iterable and counting the
-    elements. If any other TypeError occurs during this process, it is raised as an exception.
-
     Examples
     --------
-    >>> lst = [1, 2, 3, 4, 5]
-    >>> get_length(lst)
+    >>> get_length([1, 2, 3, 4, 5])
     5
 
-    >>> s = 'Hello, World!'
-    >>> get_length(s)
+    >>> get_length('Hello, World!')
     13
 
-    >>> d = {'a': 1, 'b': 2, 'c': 3}
-    >>> get_length(d)
+    >>> get_length({'a': 1, 'b': 2, 'c': 3})
     3
+
+    >>> get_length(range(4))
+    4
     """
     try:
         length = len(iterable)
@@ -76,21 +99,27 @@ def get_length(iterable: Iterable | Sized) -> int:
 
 
 def get_names_by_dtype(df: DataFrame, dtype: str) -> list[str]:
-    """ Get the list of column names with the specified data type.
+    """ Get the list of column names that match the specified data type.
 
     Parameters
     ----------
-    df : pyspark.sql.DataFrame
-        The input DataFrame.
-
-    dtype : str
-        The data type to filter the column names.
+    df: pyspark.sql.DataFrame
+        The input DataFrame
+    dtype: str
+        The data type to filter the column names. Example: ``'bigint'``.
 
     Returns
     -------
     list[str]
-        A list of column names with the specified data type.
+        A list of column names that match the specified data type
 
+    Examples
+    --------
+    >>> spark = SparkSession.builder.getOrCreate()
+    >>> rows = [(1, 3.4, 1), (3, 4.5, 2)]
+    >>> df = spark.createDataFrame(rows, schema=['col1', 'col2', 'col3'])
+    >>> get_names_by_dtype(df, 'bigint')
+    ['col1', 'col3']
     """
     return [
         name for name, dtype_ in df.dtypes
