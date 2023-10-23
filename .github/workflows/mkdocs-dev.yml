@@ -36,11 +36,13 @@ jobs:
           mike list
           export VERSION=`hatch version`
           mike deploy "$VERSION+dev"
+          mike list
       - name: Add CNAME
         run: |
           git checkout gh-pages
+          git reset --hard
           rm -rf CNAME && echo "flicker.perfectlyrandom.org" >> CNAME
-          (git status --porcelain | grep -q .) && git add CNAME && git commit -m "Adding CNAME (by GitHub Actions)"
+          (git status --porcelain | grep "CNAME") && git add CNAME && git commit -m "Adding CNAME (by GitHub Actions)"
           git status
       - name: Push to gh-pages
         run: git push
