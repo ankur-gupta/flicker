@@ -35,11 +35,9 @@ jobs:
           hatch version
           export VERSION=`hatch version`
           echo $VERSION
-      - name: Add git user
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 
       - run: |
-          # https://github.com/actions/checkout#Push-a-commit-using-the-built-in-token
-          git config user.name github-actions
+          git config user.name github-actions  # https://github.com/actions/checkout#Push-a-commit-using-the-built-in-token
           git config user.email github-actions@github.com
       - name: Add CNAME
         run: |
