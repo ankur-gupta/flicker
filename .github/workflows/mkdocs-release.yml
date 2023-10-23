@@ -1,0 +1,49 @@
+name: mkdocs-release 
+on:
+  release:
+    types: [published]
+permissions:
+  contents: write
+jobs:
+  mkdocs-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV 
+      - uses: actions/cache@v3
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+      - run: |
+          python -m pip install --upgrade pip
+          pip install hatch mkdocs-material mkdocs-git-revision-date-localized-plugin mkdocstrings-python mike
+      - name: Fetch gh-pages
+        run: |
+          git fetch origin gh-pages --depth=1
+          git status
+      - uses: actions/checkout@v4 
+      - run: |
+          git config user.name github-actions  # https://github.com/actions/checkout#Push-a-commit-using-the-built-in-token
+          git config user.email github-actions@github.com
+      - name: Deploy release version and delete corresponding development version
+        run: |
+          mike list
+          export VERSION=`hatch version`
+          mike deploy "$VERSION" && mike alias -u "$VERSION" stable
+          mike list
+          (mike list | grep "$VERSION+dev") && mike delete "$VERSION+dev"
+          mike list
+      - name: Add CNAME
+        run: |
+          git checkout gh-pages
+          git reset --hard
+          rm -rf CNAME && echo "flicker.perfectlyrandom.org" >> CNAME
+          (git status --porcelain | grep "CNAME") && git add CNAME && git commit -m "Adding CNAME (by GitHub Actions)"
+          git status
+      - name: Push to gh-pages
+        run: git push --set-upstream origin gh-pages
