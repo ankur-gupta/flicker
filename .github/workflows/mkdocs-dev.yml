@@ -35,6 +35,7 @@ jobs:
           hatch version
           export VERSION=`hatch version`
           echo $VERSION
+      - name: Add git user
       - uses: actions/checkout@v4
       - run: |
           # https://github.com/actions/checkout#Push-a-commit-using-the-built-in-token
@@ -43,7 +44,11 @@ jobs:
       - name: Add CNAME
         run: |
           git checkout gh-pages
-          git checkout main CNAME
-          git commit -m "Adding CNAME (by GitHub Actions)"
+          rm -rf CNAME && echo "flicker.perfectlyrandom.org" >> CNAME
+          (git status --porcelain | grep -q .) && git add CNAME && git commit -m "Adding CNAME (by GitHub Actions)"
           git status
-          git push
+      - name: Deploy development version
+        run: |
+          mike deploy "$VERSION+dev"
+      - name: Push to gh-pages
+        run: git push
