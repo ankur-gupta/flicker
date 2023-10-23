@@ -45,4 +45,4 @@ jobs:
           (git status --porcelain | grep "CNAME") && git add CNAME && git commit -m "Adding CNAME (by GitHub Actions)"
           git status
       - name: Push to gh-pages
-        run: git push
+        run: git push --set-upstream origin gh-pages
