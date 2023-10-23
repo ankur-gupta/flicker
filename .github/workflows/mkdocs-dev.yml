@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 jobs:
-  deploy:
+  mkdocs-dev:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,11 +42,8 @@ jobs:
           git config user.email github-actions@github.com
       - name: Add CNAME
         run: |
-          git branch
           git checkout gh-pages
-          git status
-          rm -rf CNAME
-          echo "flicker.perfectlyrandom.org" >> CNAME
-          cat CNAME
+          git checkout main CNAME
           git commit -m "Adding CNAME (by GitHub Actions)"
           git status
+          git push
