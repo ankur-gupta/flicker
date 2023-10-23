@@ -27,26 +27,20 @@ jobs:
         run: |
           git fetch origin gh-pages --depth=1
           git status
-      - name: Check existing doc versions
-        run: |
-          mike list
-      - name: Get package version
-        run: |
-          hatch version
-          export VERSION=`hatch version`
-          echo $VERSION
       - uses: actions/checkout@v4 
       - run: |
           git config user.name github-actions  # https://github.com/actions/checkout#Push-a-commit-using-the-built-in-token
           git config user.email github-actions@github.com
+      - name: Deploy development version
+        run: |
+          mike list
+          export VERSION=`hatch version`
+          mike deploy "$VERSION+dev"
       - name: Add CNAME
         run: |
           git checkout gh-pages
           rm -rf CNAME && echo "flicker.perfectlyrandom.org" >> CNAME
           (git status --porcelain | grep -q .) && git add CNAME && git commit -m "Adding CNAME (by GitHub Actions)"
           git status
-      - name: Deploy development version
-        run: |
-          mike deploy "$VERSION+dev"
       - name: Push to gh-pages
         run: git push
