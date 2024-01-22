@@ -1,5 +1,6 @@
 # Basic requirements
 pyspark>=3.4.1
+setuptools  # needed for python 3.12+; installed by default on python 3.11-
 numpy
 pandas
 pyarrow>=4.0.0  # for pandas_udf
