@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.11"]
+        python-version: ["3.9", "3.11", "3.12"]
 
     steps:
     # This step comes from GitHub Actions' Python Packaging 
@@ -37,6 +37,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install hatch
+        python_version=${{ matrix.python-version }}
+        echo -e "[[tool.hatch.envs.test.matrix]]\npython = [\"${python_version}\"]" > tmp.toml
+        sed -e '/\[\[tool\.hatch\.envs\.test\.matrix\]\]/,/^python = \[/d' pyproject.toml > tmp.toml
+        mv tmp.toml pyproject.toml
     # `not-random` is defined in pyproject.toml and generates .coverage file
     - name: Test
       run: |

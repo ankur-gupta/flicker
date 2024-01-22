@@ -70,7 +70,7 @@ coverage-xml = "coverage xml"
 coverage-html = "coverage html"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["3.9", "3.11"]
+python = ["3.9", "3.11", "3.12"]
 
 [tool.coverage.run]
 omit = [
