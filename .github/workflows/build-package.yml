@@ -4,6 +4,7 @@
 name: build-package
 
 on:
+  workflow_dispatch:  # Allow manual trigger button
   push:
     branches: [ "main" ]
   pull_request:
