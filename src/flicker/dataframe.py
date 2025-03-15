@@ -668,13 +668,9 @@ class FlickerDataFrame:
         """
         df = df.copy(deep=True)  # deep copy to avoid overwriting input variable
         if nan_to_none:
-            nrows, ncols = df.shape
-            for j in range(ncols):
-                df.iloc[:, j] = df.iloc[:, j].astype(object)
-                for i in range(nrows):
-                    if is_nan_scalar(df.iloc[i, j]):
-                        df.iloc[i, j] = None
-        return cls(spark.createDataFrame(data=df))
+            df = df.astype(object)  # Needed so replacement of NaN (float) to None is replaced
+            df[df.isna()] = None  # This only has effect when dtype is `object` not int/float
+        return cls(spark.createDataFrame(data=df))  # This will parse and assign spark dtypes anyways
 
     def to_pandas(self) -> pd.DataFrame:
         """Converts a ``FlickerDataFrame`` to a ``pandas.DataFrame``. Calling this method on a big

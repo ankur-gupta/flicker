@@ -165,23 +165,23 @@ def get_summary_spark_supported_dtypes(df: DataFrame) -> pd.DataFrame:
     return summary
 
 
-def get_summary_boolean_columns(df: DataFrame):
+def get_summary_boolean_columns(df: DataFrame) -> pd.DataFrame:
     boolean_names = get_names_by_dtype(df, 'boolean')
     boolean_df = df[boolean_names].withColumns({
-        name: df[name].astype('int')
+        name: df[name].astype('int')  # Convert to int so we can use the built-in summary function
         for name in boolean_names
     })
     boolean_summary = get_summary_spark_supported_dtypes(boolean_df)
     for name in boolean_summary.columns:
-        if boolean_summary[name].loc['min'] == 0:
-            boolean_summary[name].loc['min'] = False
-        elif boolean_summary[name].loc['min'] == 1:
-            boolean_summary[name].loc['min'] = True
+        if boolean_summary.loc['min', name] == 0:
+            boolean_summary.loc['min', name] = False
+        elif boolean_summary.loc['min', name] == 1:
+            boolean_summary.loc['min', name] = True
 
-        if boolean_summary[name].loc['max'] == 0:
-            boolean_summary[name].loc['max'] = False
-        elif boolean_summary[name].loc['max'] == 1:
-            boolean_summary[name].loc['max'] = True
+        if boolean_summary.loc['max', name] == 0:
+            boolean_summary.loc['max', name] = False
+        elif boolean_summary.loc['max', name] == 1:
+            boolean_summary.loc['max', name] = True
     return boolean_summary
 
 
