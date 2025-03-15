@@ -15,6 +15,7 @@
 from __future__ import annotations
 from typing import Iterable, Callable
 from pyspark.sql import DataFrame, Column
+from pyspark.sql.types import DataType
 from pyspark.sql.functions import isnan
 import pandas as pd
 from .variables import PYTHON_TO_SPARK_DTYPES, PYSPARK_FLOAT_DTYPES
@@ -223,7 +224,26 @@ class FlickerColumn:
             n = self._df.count()
         return [list(row.asDict(recursive=True).values())[0] for row in self._df[[self._column]].take(n)]
 
-    def astype(self, type_: type | str) -> FlickerColumn:
+    def astype(self, type_: type | str | DataType) -> FlickerColumn:
+        """
+        Cast the column to a particular dtype.
+
+        Parameters
+        ----------
+        type_ : type or str or pyspark.sql.types.DataType
+            The target data type for the column.
+            If `type_` is a `str`, then it must be the string-valued name of a spark dtype such as
+            "int", "bigint", "float", "double", "string", "timestamp", "boolean", "tinyint" (ByteType) or more.
+            If `type_` is a python `type`, then it can be one of the keys of `flicker.PYTHON_TO_SPARK_DTYPES`.
+            If `type_` is `pyspark.sql.types.DataType`, then it can be any of the types in `pyspark.sql.types.*`.
+
+        See https://spark.apache.org/docs/latest/sql-ref-datatypes.html.
+
+        Returns
+        -------
+        FlickerColumn
+            A new FlickerColumn instance with the column cast to the specified data type.
+        """
         if isinstance(type_, type):
             if type_ not in PYTHON_TO_SPARK_DTYPES:
                 raise ValueError(f'Unsupported value {type_}')

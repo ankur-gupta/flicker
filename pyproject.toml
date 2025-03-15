@@ -28,7 +28,10 @@ authors = [
 description = "Provides FlickerDataFrame, a wrapper over Pyspark DataFrame to provide a pandas-like API"
 readme = "README.md"
 requires-python = ">=3.9"
-license = { file = "LICENSE" }
+license = "Apache-2.0"
+license-files = [
+    "LICENSE"
+]
 keywords = ["spark", "pyspark", "pandas", "dataframe", "wrapper", "API"]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -38,7 +41,7 @@ classifiers = [
 ]
 dependencies = [
     "pyspark>=3.4.1",
-    "setuptools",  # needed for python 3.12+; installed by default on python 3.11-
+    "setuptools", # needed for python 3.12+; installed by default on python 3.11-
     "pandas",
     "numpy",
     "pyarrow>=4.0.0"
@@ -66,12 +69,13 @@ with-coverage = "pytest --cov-config=pyproject.toml --cov=flicker --cov=tests"
 no-coverage = "with-coverage --no-cov"
 not-slow = "with-coverage -m \"not slow\""
 not-random = "with-coverage -m \"not random\""
+new = "with-coverage -m \"new\""
 coverage-json = "coverage json"
 coverage-xml = "coverage xml"
 coverage-html = "coverage html"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["3.9", "3.11", "3.12"]
+python = ["3.9", "3.11", "3.12", "3.13"]
 
 [tool.coverage.run]
 omit = [
@@ -84,8 +88,9 @@ omit = [
 # From https://docs.pytest.org/en/latest/how-to/mark.html and PEP 621
 [tool.pytest.ini_options]
 markers = [
-    "slow: marks tests as slow",  # deselect with `pytest -m "not sleepy" ...`
-    "random: tests using randomness; may not always pass"
+    "slow: marks tests as slow", # deselect with `pytest -m "not sleepy" ...`
+    "random: tests using randomness; may not always pass",
+    "new: use `@pytest.mark.new` decorrator to selectively mark new tests that you can run quickly"
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -99,9 +104,9 @@ exclude = [
 
 [tool.hatch.envs.docs]
 dependencies = [
-    "mkdocs-material",  # https://squidfunk.github.io/mkdocs-material/getting-started/
-    "mkdocs-git-revision-date-localized-plugin",  # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#revisioning
-    "mkdocstrings-python",  # https://mkdocstrings.github.io/python/
+    "mkdocs-material", # https://squidfunk.github.io/mkdocs-material/getting-started/
+    "mkdocs-git-revision-date-localized-plugin", # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#revisioning
+    "mkdocstrings-python", # https://mkdocstrings.github.io/python/
     "mike"  # https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/#versioning
 ]
 
