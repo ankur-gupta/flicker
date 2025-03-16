@@ -18,6 +18,7 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+from pyspark import RDD
 from pyspark.sql import DataFrame, SparkSession, Row, Column
 from pyspark.sql.types import StructType
 from pyspark.sql.functions import lit
@@ -354,6 +355,49 @@ class FlickerDataFrame:
         OrderedDict([('col1', 'bigint'), ('col2', 'bigint')])
         """
         return self._dtypes
+
+    @classmethod
+    def from_schema(cls, spark: SparkSession, schema: StructType | str | None = None,
+                    data: RDD | Iterable | DataFrame | np.ndarray = ()) -> FlickerDataFrame:
+        """
+        Creates a FlickerDataFrame object from a schema and optionally some data.
+
+        This method can be very useful to create an empty dataframe with a given schema.
+        The best way to obtain a schema from another dataframe is `df.schema`.
+        The input schema can also be empty in which case
+
+        Parameters
+        ----------
+        spark: SparkSession
+            The Spark session used for creating the DataFrame.
+        schema : pyspark.sql.types.StructType or str or None
+            The schema for the DataFrame.
+            Can be specified as a Spark `StructType` object, a string representation of the schema, or None. If None,
+            an empty `StructType` schema is used by default.
+        data : RDD, Iterable, DataFrame, or np.ndarray
+            The data to populate the DataFrame. Can be an RDD, an iterable collection,
+            an existing Spark DataFrame, or a NumPy array.
+
+        Returns
+        -------
+        FlickerDataFrame
+            A new instance of FlickerDataFrame created with the provided schema and data.
+
+        Examples
+        --------
+        >>> spark = SparkSession.builder.getOrCreate()
+        >>> FlickerDataFrame.from_schema(spark)  # Create a dataframe with no rows and no columns
+        FlickerDataFrame[]
+        >>> FlickerDataFrame.from_schema(spark, schema='a string, b int')  # Create a dataframe with zero rows
+        FlickerDataFrame[a: string, b: int]
+        >>> df = FlickerDataFrame.from_shape(spark, 3, 2, names=['a', 'b'])
+        FlickerDataFrame[a: bigint, b: bigint]
+        >>> FlickerDataFrame.from_schema(spark, schema=df.schema)  # Create a dataframe with the same schema as df
+        FlickerDataFrame[a: bigint, b: bigint]
+        """
+        if not schema:
+            schema = StructType()
+        return cls(spark.createDataFrame(data=data, schema=schema))
 
     @classmethod
     def from_shape(cls, spark: SparkSession, nrows: int, ncols: int, names: list[str] | None = None,
