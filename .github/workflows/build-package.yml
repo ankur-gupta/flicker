@@ -17,17 +17,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
     # This step comes from GitHub Actions' Python Packaging 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Cache Python dependencies
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip  # Path to the directory containing the Python dependencies
         key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}-python-${{ matrix.python-version }}  # Cache key
@@ -55,7 +55,7 @@ jobs:
         pwd
         pip install dist/flicker-*.whl
     - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3.1.4
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         env_vars: OS,PYTHON
