@@ -1,16 +1,12 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: PyPI
 on:
-  workflow_dispatch:  # Allow manual trigger button (in case this workflow spuriously fails)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy (must be an existing tag)'
+        required: true
   release:
-    types: [published]
+    types: [ published ]
 
 permissions:
   contents: read
@@ -19,32 +15,49 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
-    - name: Cache Python dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip  # Path to the directory containing the Python dependencies
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}-python-${{ matrix.python-version }}  # Cache key
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install hatch twine
-    - name: Build package
-      run: |
-        hatch clean
-        hatch build
-    - name: Publish to Test PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.TEST_PYPI_PASSWORD }}
-        repository_url: https://test.pypi.org/legacy/
-    - name: Publish to Prod PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        user: __token__
-        password: ${{ secrets.PROD_PYPI_PASSWORD }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}  # Use the manually entered tag or the release tag
+
+      - name: Verify tag
+        run: |
+          TAG=${{ github.event.inputs.tag || github.ref_name }}
+          if ! git rev-parse "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Error: Tag $TAG does not exist in the repository."
+            exit 1
+          fi
+        shell: bash
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}-python-${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatch twine
+
+      - name: Build package
+        run: |
+          hatch clean
+          hatch build
+
+      - name: Publish to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_PASSWORD }}
+          repository_url: https://test.pypi.org/legacy/
+
+      - name: Publish to Prod PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PROD_PYPI_PASSWORD }}
