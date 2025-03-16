@@ -1,0 +1,11 @@
+# https://docs.codecov.com/docs/common-recipe-list
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 5%  # allow some drop in project-level coverage
+    patch:  # https://docs.codecov.com/docs/commit-status#patch-status
+      default:
+        target: auto
+        threshold: 5%  # allow some drop in PR-level coverage
