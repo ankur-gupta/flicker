@@ -7,6 +7,10 @@ on:
   workflow_dispatch:  # Allow manual trigger button
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '.github/workflows/mkdocs-dev.yml'
+      - '.github/workflows/mkdocs-release.yml'
+      - '.github/workflows/pypi.yml'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
