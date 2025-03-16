@@ -19,6 +19,7 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from pyspark.sql import DataFrame, SparkSession, Row, Column
+from pyspark.sql.types import StructType
 from pyspark.sql.functions import lit
 
 from .utils import get_length, is_nan_scalar
@@ -310,6 +311,11 @@ class FlickerDataFrame:
         (3, 2)
         """
         return self.nrows, self.ncols
+
+    @property
+    def schema(self) -> StructType:
+        """Returns the dataframe schema as an object of type `pyspark.sql.types.StructType`."""
+        return self._df.schema
 
     @property
     def names(self) -> list[str]:
