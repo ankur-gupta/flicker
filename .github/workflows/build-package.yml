@@ -9,6 +9,10 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - '.github/workflows/mkdocs-dev.yml'
+      - '.github/workflows/mkdocs-release.yml'
+      - '.github/workflows/pypi.yml'
 
 jobs:
   build:
