@@ -32,6 +32,11 @@ def test_duplicated_names_failure(spark):
         FlickerDataFrame.from_shape(spark, 3, 5, names=list('aabcd'))
 
 
+def test_unequal_names_and_ncols(spark):
+    with pytest.raises(Exception):
+        FlickerDataFrame.from_shape(spark, 3, 5, names=list('ab'))
+
+
 def test_zero_fill(spark):
     df = FlickerDataFrame.from_shape(spark, 2, 4, names=list('abcd'), fill='zero')
     assert df.shape == (2, 4)

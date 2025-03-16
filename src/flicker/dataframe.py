@@ -393,6 +393,9 @@ class FlickerDataFrame:
         """
         if names is None:
             names = [f'{i}' for i in range(ncols)]
+        elif len(names) != ncols:
+            raise ValueError(f'number of names (={len(names)}) and number of columns (={ncols}) do not match')
+
         if fill == 'zero':
             data = np.zeros((nrows, ncols), dtype=int)
         elif fill == 'one':
