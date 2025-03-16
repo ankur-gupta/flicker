@@ -8,6 +8,7 @@
 
 name: PyPI
 on:
+  workflow_dispatch:  # Allow manual trigger button (in case this workflow spuriously fails)
   release:
     types: [published]
 
