@@ -22,6 +22,7 @@ from flicker.variables import (PYTHON_TO_SPARK_DTYPES, PYSPARK_NUMERIC_DTYPES, P
 from flicker.mkname import mkname
 from flicker.utils import is_nan_scalar, get_length, get_names_by_dtype
 from flicker.recipes import delete_extra_columns, find_empty_columns
+from flicker.reshape import concat
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 

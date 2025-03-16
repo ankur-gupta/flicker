@@ -969,11 +969,6 @@ class FlickerDataFrame:
         FlickerDataFrame
             The concatenated DataFrame
 
-        Raises
-        ------
-        KeyError
-            If the DataFrames have different sets of column names and ``ignore_names=False``
-
         Examples
         --------
         >>> spark = SparkSession.builder.getOrCreate()
@@ -1004,6 +999,8 @@ class FlickerDataFrame:
         """
         if isinstance(other, FlickerDataFrame):
             other = other._df
+        if len(self._df.columns) != len(other.columns):
+            raise ValueError(f'Dataframes have different number of columns. Cannot concat at all.')
         if ignore_names:
             return self.__class__(self._df.union(other))
         else:

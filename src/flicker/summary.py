@@ -166,6 +166,8 @@ def get_summary_spark_supported_dtypes(df: DataFrame) -> pd.DataFrame:
 
 
 def get_summary_boolean_columns(df: DataFrame) -> pd.DataFrame:
+    if len(set(df.columns)) != len(df.columns):
+        raise KeyError(f'duplicate dataframe column names are not supported')
     boolean_names = get_names_by_dtype(df, 'boolean')
     boolean_df = df[boolean_names].withColumns({
         name: df[name].astype('int')  # Convert to int so we can use the built-in summary function
